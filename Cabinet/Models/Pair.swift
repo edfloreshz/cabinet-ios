@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Pair: Identifiable, Hashable {
-    var id: UUID
+@Model
+final class Pair {
+    @Attribute(.unique) var id: UUID
     var key: String
     var value: String
     var isFavorite: Bool

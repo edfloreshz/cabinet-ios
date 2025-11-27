@@ -7,33 +7,46 @@
 
 import SwiftUI
 import Observation
+import SwiftData
 
 struct ContentView: View {
-    @State private var model = ItemStoreViewModel()
+    @Environment(\.modelContext) private var modelContext
     @State private var showingAdd = false
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
+    @State private var searchText: String = ""
+    @Query private var pairs: [Pair]
+
+    init() {
+        // Configure default query (no filter). We'll rebind in body using .searchable and manual filtering/sorting for simplicity.
+        _pairs = Query()
+    }
 
     var body: some View {
+        let filtered = filteredAndSortedPairs
         NavigationStack {
             Group {
-                if model.filteredPairs.isEmpty {
-                    EmptyView(searching: !model.searchText.isEmpty) {
+                if filtered.isEmpty {
+                    EmptyView(searching: !searchText.isEmpty) {
                         showingAdd = true
                     }
                 } else {
                     List {
-                        ForEach(model.filteredPairs) { pair in
+                        ForEach(filtered) { pair in
                             HStack(spacing: 8) {
                                 ItemRowView(pair: pair)
                                 Menu {
                                     Button { editingPair = pair } label: {
                                         Label("Edit", systemImage: "pencil")
                                     }
-                                    Button { model.toggleFavorite(pair) } label: {
+                                    Button { 
+                                        pair.isFavorite.toggle()
+                                    } label: {
                                         Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
                                     }
-                                    Button(role: .destructive) { model.delete(pair) } label: {
+                                    Button(role: .destructive) { 
+                                        modelContext.delete(pair)
+                                    } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
                                 } label: {
@@ -51,7 +64,7 @@ struct ContentView: View {
                             }
                             .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                 Button {
-                                    model.toggleFavorite(pair)
+                                    pair.isFavorite.toggle()
                                 } label: {
                                     Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
                                 }
@@ -59,15 +72,15 @@ struct ContentView: View {
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
-                                    model.delete(pair)
+                                    modelContext.delete(pair)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
                         }
-                        .onDelete(perform: model.delete)
+                        .onDelete(perform: delete(at:))
                     }
-                    .animation(.default, value: model.filteredPairs)
+                    .animation(.default, value: pairs)
                 }
             }
             .navigationTitle("Cabinet")
@@ -85,11 +98,12 @@ struct ContentView: View {
                     .keyboardShortcut(.init("n"), modifiers: [.command])
                 }
             }
-            .searchable(text: $model.searchText, placement: .automatic, prompt: "Search keys or values")
+            .searchable(text: $searchText, placement: .automatic, prompt: "Search keys or values")
             .sheet(isPresented: $showingAdd) {
                 NavigationStack {
                     EditItemView(title: "New Item", key: "", value: "") { key, value in
-                        model.addPair(key: key, value: value)
+                        let item = Pair(key: key, value: value)
+                        modelContext.insert(item)
                     }
                 }
                 .presentationDetents([.medium, .large])
@@ -97,7 +111,8 @@ struct ContentView: View {
             .sheet(item: $editingPair) { pair in
                 NavigationStack {
                     EditItemView(title: "Edit Item", key: pair.key, value: pair.value) { key, value in
-                        model.updatePair(pair, key: key, value: value)
+                        pair.key = key
+                        pair.value = value
                     }
                 }
                 .presentationDetents([.medium, .large])
@@ -134,6 +149,36 @@ struct ContentView: View {
                 showCopyToast = false
             }
         }
+    }
+    
+    private var filteredAndSortedPairs: [Pair] {
+        let base = pairs
+        let filtered: [Pair]
+        if searchText.isEmpty {
+            filtered = base
+        } else {
+            let term = searchText.lowercased()
+            filtered = base.filter { $0.key.lowercased().contains(term) || $0.value.lowercased().contains(term) }
+        }
+        return filtered.sorted { lhs, rhs in
+            if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite && !rhs.isFavorite }
+            return lhs.key.localizedCaseInsensitiveCompare(rhs.key) == .orderedAscending
+        }
+    }
+    
+    private func delete(at offsets: IndexSet) {
+        let items = offsets.compactMap { index in
+            filteredAndSortedPairs[safe: index]
+        }
+        for item in items {
+            modelContext.delete(item)
+        }
+    }
+}
+
+private extension Array {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }
 
