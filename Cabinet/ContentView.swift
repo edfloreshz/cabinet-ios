@@ -5,9 +5,9 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
-import SwiftUI
 import Observation
 import SwiftData
+import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -36,28 +36,34 @@ struct ContentView: View {
                             HStack(spacing: 8) {
                                 ItemRowView(pair: pair)
                                 Menu {
-                                    Button { editingPair = pair } label: {
-                                        Label("Edit", systemImage: "pencil")
+                                    Button {
+                                        editingPair = pair
+                                    } label: {
+                                        Label("Edit", systemImage: "pencil").tint(.black)
                                     }
                                     Button { 
                                         pair.isFavorite.toggle()
                                     } label: {
-                                        Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
+                                        Label(pair.isFavorite ? "Unpin" : "Pin",
+                                              systemImage: pair.isFavorite ? "star.slash" : "star")
+                                        .tint(.black)
                                     }
-                                    Button(role: .destructive) { 
+                                    Button(role: .destructive) {
                                         modelContext.delete(pair)
                                     } label: {
-                                        Label("Delete", systemImage: "trash")
+                                        Label("Delete", systemImage: "trash").tint(.red)
                                     }
                                 } label: {
                                     Image(systemName: "ellipsis.circle")
                                         .imageScale(.large)
                                         .foregroundStyle(.primary)
-                                        .tint(Color.orange)
                                         .accessibilityLabel("More for \(pair.key)")
                                 }
                                 .buttonStyle(.borderless)
                             }
+                            .listRowBackground(
+                                pair.isFavorite ? Color.yellow.opacity(0.1) : nil
+                            )
                             .onTapGesture {
                                 copyToPasteboard(pair.value)
                                 showCopiedToast()
@@ -66,7 +72,9 @@ struct ContentView: View {
                                 Button {
                                     pair.isFavorite.toggle()
                                 } label: {
-                                    Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
+                                    Label(
+                                        pair.isFavorite ? "Unpin" : "Pin",
+                                        systemImage: pair.isFavorite ? "star.slash" : "star")
                                 }
                                 .tint(.yellow)
                             }
@@ -110,7 +118,8 @@ struct ContentView: View {
             }
             .sheet(item: $editingPair) { pair in
                 NavigationStack {
-                    EditItemView(title: "Edit Item", key: pair.key, value: pair.value) { key, value in
+                    EditItemView(title: "Edit Item", key: pair.key, value: pair.value) {
+                        key, value in
                         pair.key = key
                         pair.value = value
                     }
@@ -129,17 +138,17 @@ struct ContentView: View {
             }
         }
     }
-    
+
     private func copyToPasteboard(_ string: String) {
         #if canImport(UIKit)
-        UIPasteboard.general.string = string
+            UIPasteboard.general.string = string
         #elseif canImport(AppKit)
-        let pb = NSPasteboard.general
-        pb.clearContents()
-        pb.setString(string, forType: .string)
+            let pb = NSPasteboard.general
+            pb.clearContents()
+            pb.setString(string, forType: .string)
         #endif
     }
-    
+
     private func showCopiedToast() {
         withAnimation(.spring(duration: 0.25)) {
             showCopyToast = true
@@ -150,7 +159,7 @@ struct ContentView: View {
             }
         }
     }
-    
+
     private var filteredAndSortedPairs: [Pair] {
         let base = pairs
         let filtered: [Pair]
@@ -158,14 +167,16 @@ struct ContentView: View {
             filtered = base
         } else {
             let term = searchText.lowercased()
-            filtered = base.filter { $0.key.lowercased().contains(term) || $0.value.lowercased().contains(term) }
+            filtered = base.filter {
+                $0.key.lowercased().contains(term) || $0.value.lowercased().contains(term)
+            }
         }
         return filtered.sorted { lhs, rhs in
             if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite && !rhs.isFavorite }
             return lhs.key.localizedCaseInsensitiveCompare(rhs.key) == .orderedAscending
         }
     }
-    
+
     private func delete(at offsets: IndexSet) {
         let items = offsets.compactMap { index in
             filteredAndSortedPairs[safe: index]
@@ -176,8 +187,8 @@ struct ContentView: View {
     }
 }
 
-private extension Array {
-    subscript(safe index: Index) -> Element? {
+extension Array {
+    fileprivate subscript(safe index: Index) -> Element? {
         indices.contains(index) ? self[index] : nil
     }
 }

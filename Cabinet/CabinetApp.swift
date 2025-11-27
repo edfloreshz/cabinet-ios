@@ -13,7 +13,8 @@ struct CabinetApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .tint(.orange)
+                .modelContainer(for: Pair.self)
         }
-        .modelContainer(for: Pair.self)
     }
 }

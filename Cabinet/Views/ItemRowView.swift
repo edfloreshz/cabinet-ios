@@ -22,12 +22,6 @@ struct ItemRowView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-            if pair.isFavorite {
-                Image(systemName: "star.fill")
-                    .foregroundStyle(.yellow)
-                    .imageScale(.small)
-                    .accessibilityHidden(true)
-            }
             Spacer(minLength: 8)
         }
         .contentShape(Rectangle())
