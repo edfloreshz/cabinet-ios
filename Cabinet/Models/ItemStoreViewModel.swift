@@ -9,18 +9,18 @@ import Foundation
 import Observation
 
 @Observable
-final class KVStoreViewModel {
-    var pairs: [KVPair] = [
-        KVPair(key: "Username", value: "eflores", isFavorite: true),
-        KVPair(key: "API Token", value: "••••••••"),
-        KVPair(key: "Environment", value: "Production")
+final class ItemStoreViewModel {
+    var pairs: [Pair] = [
+        Pair(key: "Username", value: "eflores", isFavorite: true),
+        Pair(key: "API Token", value: "••••••••"),
+        Pair(key: "Environment", value: "Production")
     ]
 
     var searchText: String = ""
 
-    var filteredPairs: [KVPair] {
+    var filteredPairs: [Pair] {
         let base = pairs
-        let filtered: [KVPair]
+        let filtered: [Pair]
         if searchText.isEmpty {
             filtered = base
         } else {
@@ -38,16 +38,16 @@ final class KVStoreViewModel {
         let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedKey.isEmpty else { return }
-        pairs.append(KVPair(key: trimmedKey, value: trimmedValue))
+        pairs.append(Pair(key: trimmedKey, value: trimmedValue))
     }
 
-    func updatePair(_ pair: KVPair, key: String, value: String) {
+    func updatePair(_ pair: Pair, key: String, value: String) {
         guard let idx = pairs.firstIndex(where: { $0.id == pair.id }) else { return }
         pairs[idx].key = key
         pairs[idx].value = value
     }
 
-    func delete(_ pair: KVPair) {
+    func delete(_ pair: Pair) {
         pairs.removeAll { $0.id == pair.id }
     }
 
@@ -62,7 +62,7 @@ final class KVStoreViewModel {
         }
     }
 
-    func toggleFavorite(_ pair: KVPair) {
+    func toggleFavorite(_ pair: Pair) {
         guard let idx = pairs.firstIndex(where: { $0.id == pair.id }) else { return }
         pairs[idx].isFavorite.toggle()
     }

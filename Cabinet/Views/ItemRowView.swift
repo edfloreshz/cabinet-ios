@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct KVRow: View {
-    let pair: KVPair
+struct ItemRowView: View {
+    let pair: Pair
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {

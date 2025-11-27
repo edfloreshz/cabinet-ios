@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EmptyStateView: View {
+struct EmptyView: View {
     var searching: Bool
     var onAdd: () -> Void
 
@@ -23,7 +23,7 @@ struct EmptyStateView: View {
                 .foregroundStyle(.secondary)
             if !searching {
                 Button(action: onAdd) {
-                    Label("Add Pair", systemImage: "plus")
+                    Label("Add Item", systemImage: "plus")
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut("n", modifiers: [.command])

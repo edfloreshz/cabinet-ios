@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct KVPair: Identifiable, Hashable {
+struct Pair: Identifiable, Hashable {
     var id: UUID
     var key: String
     var value: String

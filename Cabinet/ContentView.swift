@@ -9,23 +9,23 @@ import SwiftUI
 import Observation
 
 struct ContentView: View {
-    @State private var model = KVStoreViewModel()
+    @State private var model = ItemStoreViewModel()
     @State private var showingAdd = false
-    @State private var editingPair: KVPair? = nil
+    @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
 
     var body: some View {
         NavigationStack {
             Group {
                 if model.filteredPairs.isEmpty {
-                    EmptyStateView(searching: !model.searchText.isEmpty) {
+                    EmptyView(searching: !model.searchText.isEmpty) {
                         showingAdd = true
                     }
                 } else {
                     List {
                         ForEach(model.filteredPairs) { pair in
                             HStack(spacing: 8) {
-                                KVRow(pair: pair)
+                                ItemRowView(pair: pair)
                                 Menu {
                                     Button { editingPair = pair } label: {
                                         Label("Edit", systemImage: "pencil")
@@ -38,13 +38,13 @@ struct ContentView: View {
                                     }
                                 } label: {
                                     Image(systemName: "ellipsis.circle")
-                                        .imageScale(.medium)
-                                        .foregroundStyle(.secondary)
+                                        .imageScale(.large)
+                                        .foregroundStyle(.primary)
+                                        .tint(Color.orange)
                                         .accessibilityLabel("More for \(pair.key)")
                                 }
                                 .buttonStyle(.borderless)
                             }
-                            .contentShape(Rectangle())
                             .onTapGesture {
                                 copyToPasteboard(pair.value)
                                 showCopiedToast()
@@ -88,7 +88,7 @@ struct ContentView: View {
             .searchable(text: $model.searchText, placement: .automatic, prompt: "Search keys or values")
             .sheet(isPresented: $showingAdd) {
                 NavigationStack {
-                    EditKVView(title: "New Pair", key: "", value: "") { key, value in
+                    EditItemView(title: "New Item", key: "", value: "") { key, value in
                         model.addPair(key: key, value: value)
                     }
                 }
@@ -96,7 +96,7 @@ struct ContentView: View {
             }
             .sheet(item: $editingPair) { pair in
                 NavigationStack {
-                    EditKVView(title: "Edit Pair", key: pair.key, value: pair.value) { key, value in
+                    EditItemView(title: "Edit Item", key: pair.key, value: pair.value) { key, value in
                         model.updatePair(pair, key: key, value: value)
                     }
                 }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EditKVView: View {
+struct EditItemView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
