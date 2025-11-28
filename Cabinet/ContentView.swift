@@ -15,12 +15,7 @@ struct ContentView: View {
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
     @State private var searchText: String = ""
-    @Query private var pairs: [Pair]
-
-    init() {
-        // Configure default query (no filter). We'll rebind in body using .searchable and manual filtering/sorting for simplicity.
-        _pairs = Query()
-    }
+    @Query(sort: \Pair.key, order: .reverse) private var pairs: [Pair]
 
     var body: some View {
         let filtered = filteredAndSortedPairs
@@ -194,5 +189,5 @@ extension Array {
 }
 
 #Preview {
-    ContentView()
+    ContentView().modelContainer(SampleData.shared.modelContainer)
 }
