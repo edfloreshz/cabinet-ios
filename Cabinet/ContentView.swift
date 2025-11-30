@@ -84,8 +84,17 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Cabinet")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                #if os(macOS)
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showingAdd = true
+                    } label: {
+                        Label("Add", systemImage: "plus")
+                    }
+                    .keyboardShortcut(.init("n"), modifiers: [.command])
+                }
+                #else
                 ToolbarItem(placement: .topBarLeading) {
                     EditButton()
                 }
@@ -97,6 +106,7 @@ struct ContentView: View {
                     }
                     .keyboardShortcut(.init("n"), modifiers: [.command])
                 }
+                #endif
             }
             .searchable(text: $searchText, placement: .automatic, prompt: "Search keys or values")
             .sheet(isPresented: $showingAdd) {
@@ -106,7 +116,9 @@ struct ContentView: View {
                         modelContext.insert(item)
                     }
                 }
+                #if os(iOS) || os(visionOS)
                 .presentationDetents([.medium, .large])
+                #endif
             }
             .sheet(item: $editingPair) { pair in
                 NavigationStack {
@@ -116,7 +128,9 @@ struct ContentView: View {
                         pair.value = value
                     }
                 }
+                #if os(iOS) || os(visionOS)
                 .presentationDetents([.medium, .large])
+                #endif
             }
             .overlay(alignment: .bottom) {
                 if showCopyToast {
