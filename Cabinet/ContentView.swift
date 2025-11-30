@@ -114,9 +114,8 @@ struct ContentView: View {
                 .searchable(text: $searchText, placement: .automatic, prompt: "Search keys or values")
                 .sheet(isPresented: $showingAdd) {
                     NavigationStack {
-                        EditItemView(title: "New Item", key: "", value: "") { key, value in
-                            let item = Pair(key: key, value: value)
-                            modelContext.insert(item)
+                        EditItemView(title: "New Item", pair: Pair(key: "", value: "")) { newPair in
+                            modelContext.insert(newPair)
                         }
                     }
                     #if os(iOS) || os(visionOS)
@@ -125,10 +124,11 @@ struct ContentView: View {
                 }
                 .sheet(item: $editingPair) { pair in
                     NavigationStack {
-                        EditItemView(title: "Edit Item", key: pair.key, value: pair.value) {
-                            key, value in
-                            pair.key = key
-                            pair.value = value
+                        EditItemView(title: "Edit Item", pair: pair) {
+                            editedPair in
+                            pair.key = editedPair.key
+                            pair.value = editedPair.value
+                            pair.isHidden = editedPair.isHidden
                         }
                     }
                     #if os(iOS) || os(visionOS)

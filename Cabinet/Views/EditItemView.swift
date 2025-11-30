@@ -11,9 +11,8 @@ struct EditItemView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
-    @State var key: String
-    @State var value: String
-    var onSave: (String, String) -> Void
+    @State var pair: Pair
+    var onSave: (Pair) -> Void
 
     var body: some View {
 #if os(macOS)
@@ -22,22 +21,30 @@ struct EditItemView: View {
                 Text("Name")
                     .frame(width: 80, alignment: .trailing)
                     .foregroundStyle(.secondary)
-                TextField("Name", text: $key)
+                TextField("Name", text: $pair.key)
                     .textFieldStyle(.roundedBorder)
                     .frame(minWidth: 260)
             }
-            VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("Value")
                     .frame(width: 80, alignment: .trailing)
                     .foregroundStyle(.secondary)
-                TextEditor(text: $value)
-                    .font(.body)
-                    .padding(6)
-                    .frame(minHeight: 160)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .strokeBorder(.quaternary)
-                    )
+                ZStack(alignment: .trailing) {
+                    if pair.isHidden {
+                        SecureField("Value", text: $pair.value)
+                            .textFieldStyle(.roundedBorder)
+                    } else {
+                        TextField("Value", text: $pair.value)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    Button(action: { pair.isHidden.toggle() }) {
+                        Image(systemName: pair.isHidden ? "eye.slash" : "eye")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.trailing, 6)
+                }
+                .frame(minWidth: 260)
             }
             Spacer(minLength: 0)
         }
@@ -51,28 +58,38 @@ struct EditItemView: View {
             }
             ToolbarItem(placement: .primaryAction) {
                 Button("Save") {
-                    onSave(key, value)
+                    onSave(pair)
                     dismiss()
                 }
                 .keyboardShortcut(.return, modifiers: [.command])
                 .keyboardShortcut(.defaultAction)
-                .disabled(key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(pair.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
 #else
         Form {
             Section("Name") {
-                TextField("Name", text: $key)
+                TextField("Name", text: $pair.key)
 #if os(iOS) || os(visionOS)
                     .textInputAutocapitalization(.none)
                     .autocorrectionDisabled()
 #endif
             }
             Section("Value") {
-                TextEditor(text: $value)
-                    .frame(minHeight: 120)
-                    .font(.body)
-                    .scrollContentBackground(.hidden)
+                HStack(spacing: 8) {
+                    ZStack(alignment: .trailing) {
+                        if pair.isHidden {
+                            SecureField("Value", text: $pair.value)
+                        } else {
+                            TextField("Value", text: $pair.value)
+                        }
+                        Button(action: { pair.isHidden.toggle() }) {
+                            Image(systemName: pair.isHidden ? "eye.slash" : "eye")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
         }
         .navigationTitle(title)
@@ -82,10 +99,10 @@ struct EditItemView: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
-                    onSave(key, value)
+                    onSave(pair)
                     dismiss()
                 }
-                .disabled(key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(pair.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
 #endif
