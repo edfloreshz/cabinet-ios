@@ -7,9 +7,11 @@
 
 import SwiftData
 import SwiftUI
+import LocalAuthentication
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var isUnlocked = false
     @State private var showingAdd = false
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
@@ -19,129 +21,187 @@ struct ContentView: View {
     var body: some View {
         let filtered = filteredAndSortedPairs
         NavigationStack {
-            Group {
-                if filtered.isEmpty {
-                    EmptyView(searching: !searchText.isEmpty) {
-                        showingAdd = true
-                    }
-                } else {
-                    List {
-                        ForEach(filtered) { pair in
-                            HStack(spacing: 8) {
-                                ItemRowView(pair: pair)
-                                Menu {
-                                    Button {
-                                        editingPair = pair
+            if isUnlocked {
+                Group {
+                    if filtered.isEmpty {
+                        EmptyView(searching: !searchText.isEmpty) {
+                            showingAdd = true
+                        }
+                    } else {
+                        List {
+                            ForEach(filtered) { pair in
+                                HStack(spacing: 8) {
+                                    ItemRowView(pair: pair)
+                                    Menu {
+                                        Button {
+                                            editingPair = pair
+                                        } label: {
+                                            Label("Edit", systemImage: "pencil").tint(.black)
+                                        }
+                                        Button {
+                                            pair.isFavorite.toggle()
+                                        } label: {
+                                            Label(pair.isFavorite ? "Unpin" : "Pin",
+                                                  systemImage: pair.isFavorite ? "star.slash" : "star")
+                                            .tint(.black)
+                                        }
+                                        ShareLink("Share", item: pair.value).tint(.black)
+                                        Button(role: .destructive) {
+                                            modelContext.delete(pair)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash").tint(.red)
+                                        }
                                     } label: {
-                                        Label("Edit", systemImage: "pencil").tint(.black)
+                                        Image(systemName: "ellipsis.circle")
+                                            .imageScale(.large)
+                                            .foregroundStyle(.primary)
+                                            .accessibilityLabel("More for \(pair.key)")
                                     }
+                                    .buttonStyle(.borderless)
+                                }
+                                .onTapGesture {
+                                    copyToPasteboard(pair.value)
+                                    showCopiedToast()
+                                }
+                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                     Button {
                                         pair.isFavorite.toggle()
                                     } label: {
-                                        Label(pair.isFavorite ? "Unpin" : "Pin",
-                                              systemImage: pair.isFavorite ? "star.slash" : "star")
-                                        .tint(.black)
+                                        Label(
+                                            pair.isFavorite ? "Unpin" : "Pin",
+                                            systemImage: pair.isFavorite ? "star.slash" : "star")
                                     }
-                                    ShareLink("Share", item: pair.value).tint(.black)
+                                    .tint(.yellow)
+                                }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                     Button(role: .destructive) {
                                         modelContext.delete(pair)
                                     } label: {
-                                        Label("Delete", systemImage: "trash").tint(.red)
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis.circle")
-                                        .imageScale(.large)
-                                        .foregroundStyle(.primary)
-                                        .accessibilityLabel("More for \(pair.key)")
+                                        Label("Delete", systemImage: "trash")
+                                    }.tint(.red)
                                 }
-                                .buttonStyle(.borderless)
                             }
-                            .onTapGesture {
-                                copyToPasteboard(pair.value)
-                                showCopiedToast()
-                            }
-                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                Button {
-                                    pair.isFavorite.toggle()
-                                } label: {
-                                    Label(
-                                        pair.isFavorite ? "Unpin" : "Pin",
-                                        systemImage: pair.isFavorite ? "star.slash" : "star")
-                                }
-                                .tint(.yellow)
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    modelContext.delete(pair)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }.tint(.red)
-                            }
+                            .onDelete(perform: delete(at:))
                         }
-                        .onDelete(perform: delete(at:))
+                        .animation(.default, value: pairs)
                     }
-                    .animation(.default, value: pairs)
                 }
-            }
-            .navigationTitle("Cabinet")
-            .toolbar {
-                #if os(macOS)
-                ToolbarItem(placement: .primaryAction) {
+                .navigationTitle("Cabinet")
+                .toolbar {
+                    #if os(macOS)
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showingAdd = true
+                        } label: {
+                            Label("Add", systemImage: "plus")
+                        }
+                        .keyboardShortcut(.init("n"), modifiers: [.command])
+                    }
+                    #else
+                    ToolbarItem(placement: .topBarLeading) {
+                        EditButton()
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingAdd = true
+                        } label: {
+                            Label("Add", systemImage: "plus")
+                        }
+                        .keyboardShortcut(.init("n"), modifiers: [.command])
+                    }
+                    #endif
+                }
+                .searchable(text: $searchText, placement: .automatic, prompt: "Search keys or values")
+                .sheet(isPresented: $showingAdd) {
+                    NavigationStack {
+                        EditItemView(title: "New Item", key: "", value: "") { key, value in
+                            let item = Pair(key: key, value: value)
+                            modelContext.insert(item)
+                        }
+                    }
+                    #if os(iOS) || os(visionOS)
+                    .presentationDetents([.medium, .large])
+                    #endif
+                }
+                .sheet(item: $editingPair) { pair in
+                    NavigationStack {
+                        EditItemView(title: "Edit Item", key: pair.key, value: pair.value) {
+                            key, value in
+                            pair.key = key
+                            pair.value = value
+                        }
+                    }
+                    #if os(iOS) || os(visionOS)
+                    .presentationDetents([.medium, .large])
+                    #endif
+                }
+                .overlay(alignment: .bottom) {
+                    if showCopyToast {
+                        Label("Copied", systemImage: "doc.on.doc")
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(.thinMaterial, in: Capsule())
+                            .padding(.bottom, 20)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            } else {
+                VStack(spacing: 16) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 48, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
+
+                    Text("Locked")
+                        .font(.title2).bold()
+
+                    Text("Unlock with Face ID / Touch ID to access your items.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
                     Button {
-                        showingAdd = true
+                        authenticate()
                     } label: {
-                        Label("Add", systemImage: "plus")
+                        Label("Unlock", systemImage: "faceid")
+                            .font(.headline)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
                     }
-                    .keyboardShortcut(.init("n"), modifiers: [.command])
+                    .buttonStyle(.borderedProminent)
+
+                    Text("You can also unlock using your device passcode.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 4)
                 }
-                #else
-                ToolbarItem(placement: .topBarLeading) {
-                    EditButton()
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingAdd = true
-                    } label: {
-                        Label("Add", systemImage: "plus")
-                    }
-                    .keyboardShortcut(.init("n"), modifiers: [.command])
-                }
-                #endif
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+                .background(Color.clear)
             }
-            .searchable(text: $searchText, placement: .automatic, prompt: "Search keys or values")
-            .sheet(isPresented: $showingAdd) {
-                NavigationStack {
-                    EditItemView(title: "New Item", key: "", value: "") { key, value in
-                        let item = Pair(key: key, value: value)
-                        modelContext.insert(item)
-                    }
-                }
-                #if os(iOS) || os(visionOS)
-                .presentationDetents([.medium, .large])
-                #endif
-            }
-            .sheet(item: $editingPair) { pair in
-                NavigationStack {
-                    EditItemView(title: "Edit Item", key: pair.key, value: pair.value) {
-                        key, value in
-                        pair.key = key
-                        pair.value = value
-                    }
-                }
-                #if os(iOS) || os(visionOS)
-                .presentationDetents([.medium, .large])
-                #endif
-            }
-            .overlay(alignment: .bottom) {
-                if showCopyToast {
-                    Label("Copied", systemImage: "doc.on.doc")
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(.thinMaterial, in: Capsule())
-                        .padding(.bottom, 20)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+        }.onAppear(perform: authenticate)
+    }
+    
+    private func authenticate() {
+        let context = LAContext()
+        var error: NSError?
+
+        // check whether biometric authentication is possible
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            // it's possible, so go ahead and use it
+            let reason = "We need to unlock your data."
+
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                if success {
+                    isUnlocked = true
+                } else {
+                    // there was a problem
                 }
             }
+        } else {
+            // no biometrics
         }
     }
 
@@ -202,3 +262,4 @@ extension Array {
 #Preview {
     ContentView().modelContainer(SampleData.shared.modelContainer)
 }
+
