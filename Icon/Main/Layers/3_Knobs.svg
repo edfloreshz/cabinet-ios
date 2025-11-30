@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 192 2151" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-2038,-1058)">
+        <g id="_3_Knob" serif:id="3_Knob">
+            <g transform="matrix(1.39782,0,0,1.39782,-752.036,-436.466)">
+                <circle cx="2064.75" cy="1137.99" r="68.586" style="fill:white;"/>
+            </g>
+            <g transform="matrix(1.39782,0,0,1.39782,-752.036,542.667)">
+                <circle cx="2064.75" cy="1137.99" r="68.586" style="fill:white;"/>
+            </g>
+            <g transform="matrix(1.39782,0,0,1.39782,-752.036,1521.79)">
+                <circle cx="2064.75" cy="1137.99" r="68.586" style="fill:white;"/>
+            </g>
+        </g>
+    </g>
+</svg>

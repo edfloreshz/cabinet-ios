@@ -1,0 +1,78 @@
+{
+  "fill" : "automatic",
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "fill" : {
+            "solid" : "display-p3:0.76116,0.78128,1.00000,1.00000"
+          },
+          "image-name" : "3_Knobs.svg",
+          "name" : "3_Knobs",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "solid" : "display-p3:0.58198,0.62820,1.00000,1.00000"
+          },
+          "image-name" : "2_Drawers.svg",
+          "name" : "2_Drawers",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:0.58198,0.62820,1.00000,1.00000",
+              "display-p3:0.41909,0.47411,1.00000,1.00000"
+            ],
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 0
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.7
+              }
+            }
+          },
+          "image-name" : "1_Cabinet.svg",
+          "name" : "1_Cabinet",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
