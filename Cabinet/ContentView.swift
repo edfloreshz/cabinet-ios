@@ -5,7 +5,6 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
-import Observation
 import SwiftData
 import SwiftUI
 
@@ -15,7 +14,7 @@ struct ContentView: View {
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
     @State private var searchText: String = ""
-    @Query(sort: \Pair.key, order: .reverse) private var pairs: [Pair]
+    @Query private var pairs: [Pair]
 
     var body: some View {
         let filtered = filteredAndSortedPairs
@@ -36,13 +35,14 @@ struct ContentView: View {
                                     } label: {
                                         Label("Edit", systemImage: "pencil").tint(.black)
                                     }
-                                    Button { 
+                                    Button {
                                         pair.isFavorite.toggle()
                                     } label: {
                                         Label(pair.isFavorite ? "Unpin" : "Pin",
                                               systemImage: pair.isFavorite ? "star.slash" : "star")
                                         .tint(.black)
                                     }
+                                    ShareLink("Share", item: pair.value).tint(.black)
                                     Button(role: .destructive) {
                                         modelContext.delete(pair)
                                     } label: {
@@ -56,9 +56,6 @@ struct ContentView: View {
                                 }
                                 .buttonStyle(.borderless)
                             }
-                            .listRowBackground(
-                                pair.isFavorite ? Color.yellow.opacity(0.1) : nil
-                            )
                             .onTapGesture {
                                 copyToPasteboard(pair.value)
                                 showCopiedToast()
@@ -78,7 +75,7 @@ struct ContentView: View {
                                     modelContext.delete(pair)
                                 } label: {
                                     Label("Delete", systemImage: "trash")
-                                }
+                                }.tint(.red)
                             }
                         }
                         .onDelete(perform: delete(at:))
