@@ -8,6 +8,7 @@
 import SwiftData
 import SwiftUI
 import LocalAuthentication
+import os
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -17,6 +18,7 @@ struct ContentView: View {
     @State private var showCopyToast = false
     @State private var searchText: String = ""
     @Query private var pairs: [Pair]
+    private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
 
     var body: some View {
         let filtered = filteredAndSortedPairs
@@ -146,40 +148,7 @@ struct ContentView: View {
                     }
                 }
             } else {
-                VStack(spacing: 16) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 48, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .accessibilityHidden(true)
-
-                    Text("Locked")
-                        .font(.title2).bold()
-
-                    Text("Unlock with Face ID / Touch ID to access your items.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-
-                    Button {
-                        authenticate()
-                    } label: {
-                        Label("Unlock", systemImage: "faceid")
-                            .font(.headline)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Text("You can also unlock using your device passcode.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 4)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding()
-                .background(Color.clear)
+                LockedView(authenticate: authenticate)
             }
         }.onAppear(perform: authenticate)
     }
@@ -188,20 +157,16 @@ struct ContentView: View {
         let context = LAContext()
         var error: NSError?
 
-        // check whether biometric authentication is possible
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            // it's possible, so go ahead and use it
-            let reason = "We need to unlock your data."
-
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "We need to unlock your data.") { success, authenticationError in
                 if success {
                     isUnlocked = true
                 } else {
-                    // there was a problem
+                    logger.error("We were unable to unlock the device.")
                 }
             }
         } else {
-            // no biometrics
+            logger.error("There are no biometrics available.")
         }
     }
 
