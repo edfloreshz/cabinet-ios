@@ -34,30 +34,36 @@ struct ContentView: View {
                             ForEach(filtered) { pair in
                                 HStack(spacing: 8) {
                                     ItemRowView(pair: pair)
+                                    Button(action: { pair.isHidden ? revealValue(pair: pair) :pair.isHidden.toggle() }) {
+                                        Image(systemName: pair.isHidden ? "eye.slash" : "eye")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.plain)
                                     Menu {
-                                        Button {
-                                            editingPair = pair
-                                        } label: {
-                                            Label("Edit", systemImage: "pencil").tint(.black)
+                                        ControlGroup {
+                                            Button {
+                                                editingPair = pair
+                                            } label: {
+                                                Label("Edit", systemImage: "pencil")
+                                            }
+                                            Button {
+                                                pair.isFavorite.toggle()
+                                            } label: {
+                                                Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
+                                            }
+                                            Button(role: .destructive) {
+                                                modelContext.delete(pair)
+                                            } label: {
+                                                Label("Delete", systemImage: "trash")
+                                            }
                                         }
-                                        Button {
-                                            pair.isFavorite.toggle()
-                                        } label: {
-                                            Label(pair.isFavorite ? "Unpin" : "Pin",
-                                                  systemImage: pair.isFavorite ? "star.slash" : "star")
-                                            .tint(.black)
-                                        }
-                                        ShareLink("Share", item: pair.value).tint(.black)
-                                        Button(role: .destructive) {
-                                            modelContext.delete(pair)
-                                        } label: {
-                                            Label("Delete", systemImage: "trash").tint(.red)
-                                        }
+                                        ShareLink("Share", item: pair.value).tint(.primary)
                                     } label: {
                                         Image(systemName: "ellipsis.circle")
                                             .imageScale(.large)
                                             .foregroundStyle(.primary)
                                             .accessibilityLabel("More for \(pair.key)")
+                                            .tint(.indigo)
                                     }
                                     .buttonStyle(.borderless)
                                 }
@@ -101,7 +107,7 @@ struct ContentView: View {
                     }
                     #else
                     ToolbarItem(placement: .topBarLeading) {
-                        EditButton()
+                        EditButton().tint(.indigo)
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
@@ -109,6 +115,7 @@ struct ContentView: View {
                         } label: {
                             Label("Add", systemImage: "plus")
                         }
+                        .tint(.indigo)
                         .keyboardShortcut(.init("n"), modifiers: [.command])
                     }
                     #endif
@@ -120,6 +127,7 @@ struct ContentView: View {
                             modelContext.insert(newPair)
                         }
                     }
+                    .tint(.indigo)
                     #if os(iOS) || os(visionOS)
                     .presentationDetents([.medium, .large])
                     #endif
@@ -133,6 +141,7 @@ struct ContentView: View {
                             pair.isHidden = editedPair.isHidden
                         }
                     }
+                    .tint(.indigo)
                     #if os(iOS) || os(visionOS)
                     .presentationDetents([.medium, .large])
                     #endif
@@ -151,6 +160,23 @@ struct ContentView: View {
                 LockedView(authenticate: authenticate)
             }
         }.onAppear(perform: authenticate)
+    }
+    
+    private func revealValue(pair: Pair) {
+        let context = LAContext()
+        var error: NSError?
+
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "We need to unlock your data.") { success, authenticationError in
+                if success {
+                    pair.isHidden.toggle()
+                } else {
+                    logger.error("We were unable to unlock the device.")
+                }
+            }
+        } else {
+            logger.error("There are no biometrics available.")
+        }
     }
     
     private func authenticate() {

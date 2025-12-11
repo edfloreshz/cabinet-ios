@@ -29,11 +29,6 @@ struct ItemRowView: View {
                     .foregroundStyle(.yellow)
                     .accessibilityHidden(true)
             }
-            Button(action: { pair.isHidden.toggle() }) {
-                Image(systemName: pair.isHidden ? "eye.slash" : "eye")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
         }
         .contentShape(Rectangle())
     }
