@@ -47,3 +47,7 @@ struct LockedView : View {
         .background(Color.clear)
     }
 }
+
+#Preview {
+    LockedView(authenticate: {})
+}

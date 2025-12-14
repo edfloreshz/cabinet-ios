@@ -33,3 +33,7 @@ struct ItemRowView: View {
         .contentShape(Rectangle())
     }
 }
+
+#Preview {
+    ItemRowView(pair: Pair.sampleData.first!)
+}

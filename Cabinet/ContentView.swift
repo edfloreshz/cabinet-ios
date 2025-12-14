@@ -12,7 +12,11 @@ import os
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    #if DEBUG
+    @State private var isUnlocked = true
+    #else
     @State private var isUnlocked = false
+    #endif
     @State private var showingAdd = false
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false

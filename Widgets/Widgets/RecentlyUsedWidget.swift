@@ -36,44 +36,22 @@ struct RecentlyUsedProvider: TimelineProvider {
     }
 }
 
-struct RecentlyUsedEntry: TimelineEntry {
-    let date: Date
-    let recents: [Pair]
-}
-
-
 struct RecentlyUsedWidgetEntryView : View {
+    @Environment(\.widgetFamily) var family
     var entry: RecentlyUsedProvider.Entry
 
     var body: some View {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Recently Used")
-                    .font(.headline)
-                    .lineLimit(1)
-
-                if entry.recents.isEmpty {
-                    Text("No recent items")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    ForEach(entry.recents.prefix(3), id: \.key) { pair in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(pair.key)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                            Text(pair.value)
-                                .font(.caption)
-                                .lineLimit(1)
-                        }
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            .containerBackground(for: .widget) {
-                Color.clear
-            }
+        switch family {
+        case .systemSmall:
+            RecentlyUsedSmallWidget(entry: entry)
+        case .systemMedium:
+            RecentlyUsedMediumWidget(entry: entry)
+        case .systemLarge:
+            RecentlyUsedLargeWidget(entry: entry)
+        default:
+            RecentlyUsedSmallWidget(entry: entry)
         }
+    }
 }
 
 struct RecentlyUsedWidget: Widget {
@@ -93,11 +71,11 @@ struct RecentlyUsedWidget: Widget {
         }
         .configurationDisplayName("Recently Used")
         .description("See recently used items.")
-        .supportedFamilies(RecentlyUsedWidget.supportedFamilies)
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
     }
 }
 
-#Preview(as: .systemSmall) {
+#Preview(as: .systemMedium) {
     RecentlyUsedWidget()
 } timeline: {
     RecentlyUsedEntry(date: .now, recents: Pair.recentlyUsedOne)

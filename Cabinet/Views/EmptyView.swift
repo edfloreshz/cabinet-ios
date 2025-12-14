@@ -35,3 +35,6 @@ struct EmptyView: View {
     }
 }
 
+#Preview {
+    EmptyView(searching: false, onAdd: {})
+}
