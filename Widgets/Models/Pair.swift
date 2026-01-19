@@ -24,6 +24,13 @@ final class Pair {
         self.isHidden = isHidden
     }
     
+    static let sampleData = [
+        Pair(key: "Bank Account", value: "12390520234", isHidden: true),
+        Pair(key: "License Plate", value: "ABC-123-XYZ", isFavorite: true),
+        Pair(key: "Computer Name", value: "Steam Machine"),
+        Pair(key: "Credit Card", value: "4532 1234 5678 9010", isHidden: true),
+    ]
+    
     static let recentlyUsedOne = [
         Pair(key: "RFC", value: "DHRF990011Y3D", isFavorite: true),
         Pair(key: "Phone", value: "+52 662 123 4567"),

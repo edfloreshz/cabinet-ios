@@ -7,6 +7,7 @@
 
 import SwiftData
 import SwiftUI
+import WidgetKit
 import LocalAuthentication
 import os
 
@@ -38,7 +39,10 @@ struct ContentView: View {
                             ForEach(filtered) { pair in
                                 HStack(spacing: 8) {
                                     ItemRowView(pair: pair)
-                                    Button(action: { pair.isHidden ? revealValue(pair: pair) :pair.isHidden.toggle() }) {
+                                    Button(action: {
+                                        pair.isHidden ? revealValue(pair: pair) : pair.isHidden.toggle()
+                                        WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
+                                    }) {
                                         Image(systemName: pair.isHidden ? "eye.slash" : "eye")
                                             .foregroundStyle(.secondary)
                                     }
@@ -52,11 +56,13 @@ struct ContentView: View {
                                             }
                                             Button {
                                                 pair.isFavorite.toggle()
+                                                WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                                             } label: {
                                                 Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
                                             }
                                             Button(role: .destructive) {
                                                 modelContext.delete(pair)
+                                                WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                                             } label: {
                                                 Label("Delete", systemImage: "trash")
                                             }
@@ -74,10 +80,12 @@ struct ContentView: View {
                                 .onTapGesture {
                                     copyToPasteboard(pair.value)
                                     showCopiedToast()
+                                    WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                                 }
                                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                     Button {
                                         pair.isFavorite.toggle()
+                                        WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                                     } label: {
                                         Label(
                                             pair.isFavorite ? "Unpin" : "Pin",
@@ -88,6 +96,7 @@ struct ContentView: View {
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                     Button(role: .destructive) {
                                         modelContext.delete(pair)
+                                        WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }.tint(.red)
@@ -129,6 +138,7 @@ struct ContentView: View {
                     NavigationStack {
                         EditItemView(title: "New Item", pair: Pair(key: "", value: "")) { newPair in
                             modelContext.insert(newPair)
+                            WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                         }
                     }
                     .tint(.indigo)
@@ -143,6 +153,7 @@ struct ContentView: View {
                             pair.key = editedPair.key
                             pair.value = editedPair.value
                             pair.isHidden = editedPair.isHidden
+                            WidgetCenter.shared.reloadTimelines(ofKind: "Widgets")
                         }
                     }
                     .tint(.indigo)
