@@ -34,6 +34,8 @@ struct LockedView : View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
             }
+			.glassEffect()
+			.tint(.indigo)
             .buttonStyle(.borderedProminent)
 
             Text("You can also unlock using your device passcode.")
@@ -46,4 +48,8 @@ struct LockedView : View {
         .padding()
         .background(Color.clear)
     }
+}
+
+#Preview {
+	LockedView(authenticate: {})
 }

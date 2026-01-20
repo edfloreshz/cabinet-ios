@@ -21,68 +21,23 @@ struct ContentView: View {
     private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
 
     var body: some View {
-        let filtered = filteredAndSortedPairs
         NavigationStack {
             if isUnlocked {
                 Group {
-                    if filtered.isEmpty {
+                    if filteredAndSortedPairs.isEmpty {
                         EmptyView(searching: !searchText.isEmpty) {
                             showingAdd = true
                         }
                     } else {
 						List {
-							ForEach(filtered) { pair in
-                                HStack(spacing: 8) {
-                                    ItemRowView(pair: pair)
-                                    Button(action: { pair.isHidden ? revealValue(pair: pair) :pair.isHidden.toggle() }) {
-                                        Image(systemName: pair.isHidden ? "eye.slash" : "eye")
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    .buttonStyle(.plain)
-                                    Menu {
-									#if os(macOS)
-										Button {
-											editingPair = pair
-										} label: {
-											Label("Edit", systemImage: "pencil.circle.fill")
-										}
-										Button {
-											pair.isFavorite.toggle()
-										} label: {
-											Label(pair.isFavorite ? "Unpin" : "Pin",
-												  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
-										}
-										Button(role: .destructive) {
-											modelContext.delete(pair)
-										} label: {
-											Label("Delete", systemImage: "trash.fill")
-										}
-									#else
-										ControlGroup {
-											Button {
-												editingPair = pair
-											} label: {
-												Label("Edit", systemImage: "pencil.circle.fill")
-											}
-											Button {
-												pair.isFavorite.toggle()
-											} label: {
-												Label(pair.isFavorite ? "Unpin" : "Pin",
-													  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
-											}
-											Button(role: .destructive) {
-												modelContext.delete(pair)
-											} label: {
-												Label("Delete", systemImage: "trash.fill")
-											}.tint(.red)
-										}
-									#endif
-										ShareLink("Share", item: pair.value)
-                                    } label: {
-                                        Image(systemName: "ellipsis.circle")
-                                            .accessibilityLabel("More for \(pair.key)")
-									}
-                                }
+							ForEach(filteredAndSortedPairs) { pair in
+                                ItemRowView(
+                                    pair: pair,
+                                    onRevealOrToggleHidden: { pair.isHidden ? revealValue(pair: pair) : pair.isHidden.toggle() },
+                                    onEdit: { editingPair = pair },
+                                    onToggleFavorite: { pair.isFavorite.toggle() },
+                                    onDelete: { modelContext.delete(pair) }
+                                )
                                 .onTapGesture {
                                     copyToPasteboard(pair.value)
                                     showCopiedToast()

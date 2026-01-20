@@ -108,3 +108,7 @@ struct EditItemView: View {
 #endif
     }
 }
+
+#Preview {
+	EditItemView(title: "Edit", pair: Pair.sampleData[0], onSave: { _ in })
+}

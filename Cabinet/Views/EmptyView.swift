@@ -22,11 +22,16 @@ struct EmptyView: View {
             Text(searching ? "Try a different search term." : "Add your first key–value pair.")
                 .foregroundStyle(.secondary)
             if !searching {
-                Button(action: onAdd) {
-                    Label("Add Item", systemImage: "plus")
-                }
-                .buttonStyle(.borderedProminent)
-                .keyboardShortcut("n", modifiers: [.command])
+				Button(action: onAdd) {
+					Label("Add Item", systemImage: "plus")
+						.font(.headline)
+						.padding(.horizontal, 20)
+						.padding(.vertical, 10)
+				}
+				.glassEffect()
+				.tint(.indigo)
+				.buttonStyle(.borderedProminent)
+				.keyboardShortcut("n", modifiers: [.command])
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -35,3 +40,6 @@ struct EmptyView: View {
     }
 }
 
+#Preview {
+	EmptyView(searching: false, onAdd: {})
+}
