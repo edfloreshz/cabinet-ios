@@ -47,24 +47,22 @@ struct ItemRowView: View {
                     Label(pair.isFavorite ? "Unpin" : "Pin",
                           systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
                 }
-                Button(role: .destructive) { onDelete() } label: {
-                    Label("Delete", systemImage: "trash.fill")
-                }
+				ShareLink("Share", item: pair.value)
 #else
                 ControlGroup {
                     Button { onEdit() } label: {
-                        Label("Edit", systemImage: "pencil.circle.fill")
+                        Label("Edit", systemImage: "pencil")
                     }
                     Button { onToggleFavorite() } label: {
                         Label(pair.isFavorite ? "Unpin" : "Pin",
                               systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
                     }
-                    Button(role: .destructive) { onDelete() } label: {
-                        Label("Delete", systemImage: "trash.fill")
-                    }.tint(.red)
+					ShareLink("Share", item: pair.value)
                 }
+				Button(role: .destructive) { onDelete() } label: {
+					Label("Delete", systemImage: "trash.fill")
+				}
 #endif
-				ShareLink("Share", item: pair.value)
             } label: {
                 Image(systemName: "ellipsis.circle")
                     .imageScale(.large)

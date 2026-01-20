@@ -84,15 +84,16 @@ struct ContentView: View {
 					ToolbarItem(placement: .topBarTrailing) {
 						EditButton()
 					}
-					
-					DefaultToolbarItem(kind: .search, placement: .bottomBar)
-					ToolbarSpacer(placement: .bottomBar)
-					ToolbarItem(placement: .bottomBar) {
-						Button("New", systemImage: "plus", role: .confirm) {
-							showingAdd = true
+					if !filteredAndSortedPairs.isEmpty {
+						DefaultToolbarItem(kind: .search, placement: .bottomBar)
+						ToolbarSpacer(placement: .bottomBar)
+						ToolbarItem(placement: .bottomBar) {
+							Button("New", systemImage: "plus", role: .confirm) {
+								showingAdd = true
+							}
+							.tint(.indigo)
+							.keyboardShortcut(.init("n"), modifiers: [.command])
 						}
-						.tint(.indigo)
-						.keyboardShortcut(.init("n"), modifiers: [.command])
 					}
                     #endif
                 }
