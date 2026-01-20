@@ -17,7 +17,7 @@ struct ContentView: View {
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
     @State private var searchText: String = ""
-    @Query private var pairs: [Pair]
+	@Query private var pairs: [Pair]
     private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
 
     var body: some View {
@@ -30,8 +30,8 @@ struct ContentView: View {
                             showingAdd = true
                         }
                     } else {
-                        List {
-                            ForEach(filtered) { pair in
+						List {
+							ForEach(filtered) { pair in
                                 HStack(spacing: 8) {
                                     ItemRowView(pair: pair)
                                     Button(action: { pair.isHidden ? revealValue(pair: pair) :pair.isHidden.toggle() }) {
@@ -55,7 +55,7 @@ struct ContentView: View {
                                                 modelContext.delete(pair)
                                             } label: {
                                                 Label("Delete", systemImage: "trash")
-                                            }
+                                            }.tint(.red)
                                         }
                                         ShareLink("Share", item: pair.value).tint(.primary)
                                     } label: {
@@ -63,9 +63,7 @@ struct ContentView: View {
                                             .imageScale(.large)
                                             .foregroundStyle(.primary)
                                             .accessibilityLabel("More for \(pair.key)")
-                                            .tint(.indigo)
-                                    }
-                                    .buttonStyle(.borderless)
+									}.tint(.primary)
                                 }
                                 .onTapGesture {
                                     copyToPasteboard(pair.value)
@@ -88,9 +86,19 @@ struct ContentView: View {
                                         Label("Delete", systemImage: "trash")
                                     }.tint(.red)
                                 }
-                            }
+//								.glassEffect(pair.isFavorite ? .regular.tint(.yellow.opacity(0.2)) : .regular)
+//								.padding()
+//								.listRowSeparator(.hidden)
+//								.listRowInsets(EdgeInsets(
+//									top: 5,
+//									leading: 16,
+//									bottom: 5,
+//									trailing: 16
+//								))
+							}
                             .onDelete(perform: delete(at:))
                         }
+//						.listStyle(.inset)
                         .animation(.default, value: pairs)
                     }
                 }
