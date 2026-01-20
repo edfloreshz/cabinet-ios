@@ -12,7 +12,7 @@ import os
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var isUnlocked = false
+	@State var isUnlocked: Bool
     @State private var showingAdd = false
     @State private var editingPair: Pair? = nil
     @State private var showCopyToast = false
@@ -40,30 +40,48 @@ struct ContentView: View {
                                     }
                                     .buttonStyle(.plain)
                                     Menu {
-                                        ControlGroup {
-                                            Button {
-                                                editingPair = pair
-                                            } label: {
-                                                Label("Edit", systemImage: "pencil")
-                                            }
-                                            Button {
-                                                pair.isFavorite.toggle()
-                                            } label: {
-                                                Label(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star")
-                                            }
-                                            Button(role: .destructive) {
-                                                modelContext.delete(pair)
-                                            } label: {
-                                                Label("Delete", systemImage: "trash")
-                                            }.tint(.red)
-                                        }
-                                        ShareLink("Share", item: pair.value).tint(.primary)
+									#if os(macOS)
+										Button {
+											editingPair = pair
+										} label: {
+											Label("Edit", systemImage: "pencil.circle.fill")
+										}
+										Button {
+											pair.isFavorite.toggle()
+										} label: {
+											Label(pair.isFavorite ? "Unpin" : "Pin",
+												  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
+										}
+										Button(role: .destructive) {
+											modelContext.delete(pair)
+										} label: {
+											Label("Delete", systemImage: "trash.fill")
+										}
+									#else
+										ControlGroup {
+											Button {
+												editingPair = pair
+											} label: {
+												Label("Edit", systemImage: "pencil.circle.fill")
+											}
+											Button {
+												pair.isFavorite.toggle()
+											} label: {
+												Label(pair.isFavorite ? "Unpin" : "Pin",
+													  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
+											}
+											Button(role: .destructive) {
+												modelContext.delete(pair)
+											} label: {
+												Label("Delete", systemImage: "trash.fill")
+											}.tint(.red)
+										}
+									#endif
+										ShareLink("Share", item: pair.value)
                                     } label: {
                                         Image(systemName: "ellipsis.circle")
-                                            .imageScale(.large)
-                                            .foregroundStyle(.primary)
                                             .accessibilityLabel("More for \(pair.key)")
-									}.tint(.primary)
+									}
                                 }
                                 .onTapGesture {
                                     copyToPasteboard(pair.value)
@@ -86,24 +104,17 @@ struct ContentView: View {
                                         Label("Delete", systemImage: "trash")
                                     }.tint(.red)
                                 }
-//								.glassEffect(pair.isFavorite ? .regular.tint(.yellow.opacity(0.2)) : .regular)
-//								.padding()
-//								.listRowSeparator(.hidden)
-//								.listRowInsets(EdgeInsets(
-//									top: 5,
-//									leading: 16,
-//									bottom: 5,
-//									trailing: 16
-//								))
 							}
                             .onDelete(perform: delete(at:))
                         }
-//						.listStyle(.inset)
                         .animation(.default, value: pairs)
                     }
                 }
                 .navigationTitle("Cabinet")
-                .toolbar {
+				#if os(iOS)
+				.navigationBarTitleDisplayMode(.inline)
+				#endif
+				.toolbar {
                     #if os(macOS)
                     ToolbarItem(placement: .primaryAction) {
                         Button {
@@ -111,24 +122,26 @@ struct ContentView: View {
                         } label: {
                             Label("Add", systemImage: "plus")
                         }
+						.tint(.indigo)
                         .keyboardShortcut(.init("n"), modifiers: [.command])
                     }
                     #else
-                    ToolbarItem(placement: .topBarLeading) {
-                        EditButton().tint(.indigo)
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingAdd = true
-                        } label: {
-                            Label("Add", systemImage: "plus")
-                        }
-                        .tint(.indigo)
-                        .keyboardShortcut(.init("n"), modifiers: [.command])
-                    }
+					ToolbarItem(placement: .topBarTrailing) {
+						EditButton()
+					}
+					
+					DefaultToolbarItem(kind: .search, placement: .bottomBar)
+					ToolbarSpacer(placement: .bottomBar)
+					ToolbarItem(placement: .bottomBar) {
+						Button("New", systemImage: "plus", role: .confirm) {
+							showingAdd = true
+						}
+						.tint(.indigo)
+						.keyboardShortcut(.init("n"), modifiers: [.command])
+					}
                     #endif
                 }
-                .searchable(text: $searchText, placement: .automatic, prompt: "Search keys or values")
+				.searchable(text: $searchText, prompt: "Search keys or values")
                 .sheet(isPresented: $showingAdd) {
                     NavigationStack {
                         EditItemView(title: "New Item", pair: Pair(key: "", value: "")) { newPair in
@@ -259,6 +272,6 @@ extension Array {
 }
 
 #Preview {
-    ContentView().modelContainer(SampleData.shared.modelContainer)
+    ContentView(isUnlocked: true).modelContainer(SampleData.shared.modelContainer)
 }
 

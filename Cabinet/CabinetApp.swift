@@ -12,8 +12,7 @@ import SwiftData
 struct CabinetApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .tint(.indigo)
+            ContentView(isUnlocked: false)
                 .modelContainer(for: Pair.self)
         }
     }
