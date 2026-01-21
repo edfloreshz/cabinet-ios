@@ -38,51 +38,29 @@ struct ContentView: View {
                                     onToggleFavorite: { pair.isFavorite.toggle() },
                                     onDelete: { modelContext.delete(pair) }
                                 )
-                                .onTapGesture {
-                                    copyToPasteboard(pair.value)
-                                    showCopiedToast()
-                                }
-                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                    Button {
-                                        pair.isFavorite.toggle()
-                                    } label: {
-                                        Label(
-                                            pair.isFavorite ? "Unpin" : "Pin",
-                                            systemImage: pair.isFavorite ? "star.slash" : "star")
-                                    }
-                                    .tint(.yellow)
-                                }
-                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        modelContext.delete(pair)
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }.tint(.red)
-                                }
+								.onTapGesture {
+									copyToPasteboard(pair.value)
+									showCopiedToast()
+								}
 							}
                             .onDelete(perform: delete(at:))
                         }
-                        .animation(.default, value: pairs)
                     }
                 }
                 .navigationTitle("Cabinet")
-				#if os(iOS)
-				.navigationBarTitleDisplayMode(.inline)
-				#endif
+				.searchable(text: $searchText, prompt: "Search keys or values")
 				.toolbar {
                     #if os(macOS)
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            showingAdd = true
-                        } label: {
-                            Label("Add", systemImage: "plus")
-                        }
+					ToolbarItem(placement: .principal) {
+						Button("New", systemImage: "plus", role: .confirm) {
+							showingAdd = true
+						}
 						.tint(.indigo)
-                        .keyboardShortcut(.init("n"), modifiers: [.command])
+						.keyboardShortcut(.init("n"), modifiers: [.command])
                     }
                     #else
 					ToolbarItem(placement: .topBarTrailing) {
-						EditButton()
+						EditButton().tint(.indigo)
 					}
 					if !filteredAndSortedPairs.isEmpty {
 						DefaultToolbarItem(kind: .search, placement: .bottomBar)
@@ -90,14 +68,11 @@ struct ContentView: View {
 						ToolbarItem(placement: .bottomBar) {
 							Button("New", systemImage: "plus", role: .confirm) {
 								showingAdd = true
-							}
-							.tint(.indigo)
-							.keyboardShortcut(.init("n"), modifiers: [.command])
+							}.tint(.indigo)
 						}
 					}
                     #endif
                 }
-				.searchable(text: $searchText, prompt: "Search keys or values")
                 .sheet(isPresented: $showingAdd) {
                     NavigationStack {
                         EditItemView(title: "New Item", pair: Pair(key: "", value: "")) { newPair in

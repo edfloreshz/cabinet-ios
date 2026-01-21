@@ -47,17 +47,21 @@ struct ItemRowView: View {
                     Label(pair.isFavorite ? "Unpin" : "Pin",
                           systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
                 }
-				ShareLink("Share", item: pair.value)
+				ShareLink(item: pair.value) {
+					Label("Share", systemImage: "square.and.arrow.up.fill")
+				}
 #else
                 ControlGroup {
                     Button { onEdit() } label: {
-                        Label("Edit", systemImage: "pencil")
+                        Label("Edit", systemImage: "pencil.circle.fill")
                     }
                     Button { onToggleFavorite() } label: {
                         Label(pair.isFavorite ? "Unpin" : "Pin",
                               systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
                     }
-					ShareLink("Share", item: pair.value)
+					ShareLink(item: pair.value) {
+						Label("Share", systemImage: "square.and.arrow.up.fill")
+					}
                 }
 				Button(role: .destructive) { onDelete() } label: {
 					Label("Delete", systemImage: "trash.fill")
@@ -74,6 +78,16 @@ struct ItemRowView: View {
             }
         }
         .contentShape(Rectangle())
+		.swipeActions(edge: .leading, allowsFullSwipe: true) {
+			Button(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star") {
+				onToggleFavorite()
+			}.tint(.yellow)
+		}
+		.swipeActions(edge: .trailing, allowsFullSwipe: true) {
+			Button("Delete", systemImage: "trash", role: .destructive) {
+				onDelete()
+			}.tint(.red)
+		}
     }
 }
 
