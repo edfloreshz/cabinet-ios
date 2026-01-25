@@ -12,7 +12,9 @@ import os
 
 struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
+#if os(iOS)
 	@Environment(\.editMode) private var editMode
+#endif
 	@State private var isEditing = false
 	@State var isUnlocked: Bool
 	@State private var showingAdd = false
@@ -56,7 +58,9 @@ struct ContentView: View {
 								}
 							}
 						}
+#if os(iOS)
 						.environment(\.editMode, .constant(isEditing ? .active : .inactive))
+#endif
 					}
 				}
 				.navigationTitle("Cabinet")
@@ -66,19 +70,23 @@ struct ContentView: View {
 				.searchable(text: $searchText, prompt: "Search keys or values")
 				.toolbar {
 #if os(macOS)
-					ToolbarItem(placement: .primaryAction) {
-						Button("Settings", systemImage: "gear") {
-							showingSettings = true
-						}
-						.tint(accentColor)
-					}
-					
-					ToolbarItem(placement: .principal) {
+					ToolbarItem(placement: .automatic) {
 						Button("New", systemImage: "plus", role: .confirm) {
 							showingAdd = true
 						}
 						.tint(accentColor)
 						.keyboardShortcut(.init("n"), modifiers: [.command])
+					}
+					ToolbarSpacer(placement: .automatic)
+					
+					DefaultToolbarItem(kind: .search, placement: .automatic)
+					
+					ToolbarSpacer(placement: .automatic)
+					ToolbarItem(placement: .secondaryAction) {
+						Button("Settings", systemImage: "gear") {
+							showingSettings = true
+						}
+						.tint(accentColor)
 					}
 #else
 					ToolbarItem(placement: .topBarLeading) {
@@ -88,18 +96,19 @@ struct ContentView: View {
 						.tint(accentColor)
 					}
 					
-					ToolbarItem(placement: .topBarTrailing) {
-						Button(isEditing ? "" : "Edit",
-							   systemImage: isEditing ? "checkmark" : "",
-							   role: isEditing ? .confirm : .close) {
-							withAnimation {
-								isEditing.toggle()
-								if !isEditing {
-									selectedItems.removeAll()
+					if !filteredAndSortedPairs.isEmpty {
+						ToolbarItem(placement: .topBarTrailing) {
+							Button(isEditing ? "" : "Edit",
+								   systemImage: isEditing ? "checkmark" : "",
+								   role: isEditing ? .confirm : .close) {
+								withAnimation {
+									isEditing.toggle()
+									if !isEditing {
+										selectedItems.removeAll()
+									}
 								}
-							}
+							}.tint(accentColor)
 						}
-							   .tint(accentColor)
 					}
 					
 					DefaultToolbarItem(kind: .search, placement: .bottomBar)
@@ -132,6 +141,9 @@ struct ContentView: View {
 				.sheet(isPresented: $showingSettings) {
 					NavigationStack {
 						SettingsView(accentColorName: $accentColorName)
+#if os(macOS)
+							.padding()
+#endif
 					}
 					.tint(accentColor)
 #if os(iOS) || os(visionOS)
