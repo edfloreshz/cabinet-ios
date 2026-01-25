@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LockedView : View {
 	let authenticate: () -> Void
+	var accentColor: Color
 	
 	var body: some View {
 		VStack(spacing: 16) {
@@ -35,7 +36,7 @@ struct LockedView : View {
 					.padding(.vertical, 10)
 			}
 			.glassEffect()
-			.tint(.indigo)
+			.tint(accentColor)
 			.buttonStyle(.borderedProminent)
 			
 			Text("You can also unlock using your device passcode.")
@@ -51,5 +52,5 @@ struct LockedView : View {
 }
 
 #Preview {
-	LockedView(authenticate: {})
+	LockedView(authenticate: {}, accentColor: .indigo)
 }

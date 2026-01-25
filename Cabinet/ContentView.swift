@@ -16,19 +16,25 @@ struct ContentView: View {
 	@State private var isEditing = false
 	@State var isUnlocked: Bool
 	@State private var showingAdd = false
+	@State private var showingSettings = false
 	@State private var editingPair: Pair? = nil
 	@State private var showCopyToast = false
 	@State private var searchText: String = ""
 	@Query private var pairs: [Pair]
 	@State private var selectedItems: Set<UUID> = []
+	@AppStorage("accentColor") private var accentColorName: String = "indigo"
 	private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
+	
+	private var accentColor: Color {
+		Color.accentColorFromName(accentColorName)
+	}
 	
 	var body: some View {
 		NavigationStack {
 			if isUnlocked {
 				Group {
 					if filteredAndSortedPairs.isEmpty {
-						EmptyView(searching: !searchText.isEmpty) {
+						EmptyView(searching: !searchText.isEmpty, accentColor: accentColor) {
 							showingAdd = true
 						}
 					} else {
@@ -36,6 +42,7 @@ struct ContentView: View {
 							ForEach(filteredAndSortedPairs) { pair in
 								ItemRowView(
 									pair: pair,
+									accentColor: accentColor,
 									onRevealOrToggleHidden: { pair.isHidden ? revealValue(pair: pair) : pair.isHidden.toggle() },
 									onEdit: { editingPair = pair },
 									onToggleFavorite: { pair.isFavorite.toggle() },
@@ -53,17 +60,34 @@ struct ContentView: View {
 					}
 				}
 				.navigationTitle("Cabinet")
+#if os(iOS)
+				.navigationBarTitleDisplayMode(.inline)
+#endif
 				.searchable(text: $searchText, prompt: "Search keys or values")
 				.toolbar {
 #if os(macOS)
+					ToolbarItem(placement: .primaryAction) {
+						Button("Settings", systemImage: "gear") {
+							showingSettings = true
+						}
+						.tint(accentColor)
+					}
+					
 					ToolbarItem(placement: .principal) {
 						Button("New", systemImage: "plus", role: .confirm) {
 							showingAdd = true
 						}
-						.tint(.indigo)
+						.tint(accentColor)
 						.keyboardShortcut(.init("n"), modifiers: [.command])
 					}
 #else
+					ToolbarItem(placement: .topBarLeading) {
+						Button("Settings", systemImage: "gear") {
+							showingSettings = true
+						}
+						.tint(accentColor)
+					}
+					
 					ToolbarItem(placement: .topBarTrailing) {
 						Button(isEditing ? "" : "Edit",
 							   systemImage: isEditing ? "checkmark" : "",
@@ -75,7 +99,7 @@ struct ContentView: View {
 								}
 							}
 						}
-							   .tint(.indigo)
+							   .tint(accentColor)
 					}
 					
 					DefaultToolbarItem(kind: .search, placement: .bottomBar)
@@ -100,9 +124,18 @@ struct ContentView: View {
 						ToolbarItem(placement: .bottomBar) {
 							Button("New", systemImage: "plus") {
 								showingAdd = true
-							}.tint(.indigo)
+							}.tint(accentColor)
 						}
 					}
+#endif
+				}
+				.sheet(isPresented: $showingSettings) {
+					NavigationStack {
+						SettingsView(accentColorName: $accentColorName)
+					}
+					.tint(accentColor)
+#if os(iOS) || os(visionOS)
+					.presentationDetents([.medium, .large])
 #endif
 				}
 				.sheet(isPresented: $showingAdd) {
@@ -111,7 +144,7 @@ struct ContentView: View {
 							modelContext.insert(newPair)
 						}
 					}
-					.tint(.indigo)
+					.tint(accentColor)
 #if os(iOS) || os(visionOS)
 					.presentationDetents([.medium, .large])
 #endif
@@ -125,7 +158,7 @@ struct ContentView: View {
 							pair.isHidden = editedPair.isHidden
 						}
 					}
-					.tint(.indigo)
+					.tint(accentColor)
 #if os(iOS) || os(visionOS)
 					.presentationDetents([.medium, .large])
 #endif
@@ -141,7 +174,7 @@ struct ContentView: View {
 					}
 				}
 			} else {
-				LockedView(authenticate: authenticate)
+				LockedView(authenticate: authenticate, accentColor: accentColor)
 			}
 		}.onAppear(perform: authenticate)
 	}
@@ -231,6 +264,23 @@ struct ContentView: View {
 extension Array {
 	fileprivate subscript(safe index: Index) -> Element? {
 		indices.contains(index) ? self[index] : nil
+	}
+}
+
+extension Color {
+	static func accentColorFromName(_ name: String) -> Color {
+		switch name {
+		case "blue": return .blue
+		case "purple": return .purple
+		case "pink": return .pink
+		case "red": return .red
+		case "orange": return .orange
+		case "yellow": return .yellow
+		case "green": return .green
+		case "teal": return .teal
+		case "cyan": return .cyan
+		default: return .indigo
+		}
 	}
 }
 

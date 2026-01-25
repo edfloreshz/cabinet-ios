@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ItemRowView: View {
 	let pair: Pair
+	var accentColor: Color
 	var onRevealOrToggleHidden: () -> Void
 	var onEdit: () -> Void
 	var onToggleFavorite: () -> Void
@@ -73,7 +74,7 @@ struct ItemRowView: View {
 					.foregroundStyle(.primary)
 					.accessibilityLabel("More for \(pair.key)")
 #if os(iOS)
-					.tint(.indigo)
+					.tint(accentColor)
 #endif
 			}
 		}
@@ -94,6 +95,7 @@ struct ItemRowView: View {
 #Preview {
 	ItemRowView(
 		pair: Pair.sampleData[0],
+		accentColor: .indigo,
 		onRevealOrToggleHidden: { },
 		onEdit: { },
 		onToggleFavorite: { },

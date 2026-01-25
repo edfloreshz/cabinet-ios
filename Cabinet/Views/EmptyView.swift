@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EmptyView: View {
 	var searching: Bool
+	var accentColor: Color
 	var onAdd: () -> Void
 	
 	var body: some View {
@@ -29,7 +30,7 @@ struct EmptyView: View {
 						.padding(.vertical, 10)
 				}
 				.glassEffect()
-				.tint(.indigo)
+				.tint(accentColor)
 				.buttonStyle(.borderedProminent)
 				.keyboardShortcut("n", modifiers: [.command])
 			}
@@ -41,5 +42,5 @@ struct EmptyView: View {
 }
 
 #Preview {
-	EmptyView(searching: false, onAdd: {})
+	EmptyView(searching: false, accentColor: .indigo, onAdd: {})
 }
