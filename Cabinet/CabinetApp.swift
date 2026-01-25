@@ -10,10 +10,10 @@ import SwiftData
 
 @main
 struct CabinetApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView(isUnlocked: false)
-                .modelContainer(for: Pair.self)
-        }
-    }
+	var body: some Scene {
+		WindowGroup {
+			ContentView(isUnlocked: false)
+				.modelContainer(for: Pair.self)
+		}
+	}
 }
