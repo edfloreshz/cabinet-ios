@@ -53,15 +53,15 @@ struct ItemRowView: View {
 				}
 #else
 				ControlGroup {
-					Button { onEdit() } label: {
-						Label("Edit", systemImage: "pencil.circle.fill")
+					ShareLink(item: pair.value) {
+						Label("Share", systemImage: "square.and.arrow.up.fill")
 					}
 					Button { onToggleFavorite() } label: {
 						Label(pair.isFavorite ? "Unpin" : "Pin",
 							  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
 					}
-					ShareLink(item: pair.value) {
-						Label("Share", systemImage: "square.and.arrow.up.fill")
+					Button { onEdit() } label: {
+						Label("Edit", systemImage: "pencil.circle.fill")
 					}
 				}
 				Button(role: .destructive) { onDelete() } label: {
