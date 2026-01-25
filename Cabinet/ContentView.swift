@@ -16,7 +16,6 @@ struct ContentView: View {
 	@Environment(\.editMode) private var editMode
 #endif
 	@State private var isEditing = false
-	@State var isUnlocked: Bool
 	@State private var showingAdd = false
 	@State private var showingSettings = false
 	@State private var editingPair: Pair? = nil
@@ -33,162 +32,162 @@ struct ContentView: View {
 	
 	var body: some View {
 		NavigationStack {
-			if isUnlocked {
-				Group {
-					if filteredAndSortedPairs.isEmpty {
-						EmptyView(searching: !searchText.isEmpty, accentColor: accentColor) {
-							showingAdd = true
-						}
-					} else {
-						List(selection: $selectedItems) {
-							ForEach(filteredAndSortedPairs) { pair in
-								ItemRowView(
-									pair: pair,
-									accentColor: accentColor,
-									onRevealOrToggleHidden: { pair.isHidden ? revealValue(pair: pair) : pair.isHidden.toggle() },
-									onEdit: { editingPair = pair },
-									onToggleFavorite: { pair.isFavorite.toggle() },
-									onDelete: { modelContext.delete(pair) }
-								)
-								.onTapGesture {
-									if !isEditing {
-										copyToPasteboard(pair.value)
-										showCopiedToast()
-									}
+			Group {
+				if filteredAndSortedPairs.isEmpty {
+					EmptyView(searching: !searchText.isEmpty, accentColor: accentColor) {
+						showingAdd = true
+					}
+				} else {
+					List(selection: $selectedItems) {
+						ForEach(filteredAndSortedPairs) { pair in
+							ItemRowView(
+								pair: pair,
+								accentColor: accentColor,
+								onRevealOrToggleHidden: { pair.isHidden ? revealValue(pair: pair) : pair.isHidden.toggle() },
+								onEdit: { editingPair = pair },
+								onToggleFavorite: { pair.isFavorite.toggle() },
+								onDelete: { modelContext.delete(pair) }
+							)
+							.onTapGesture {
+								if !isEditing {
+									copyToPasteboard(pair.value)
+									showCopiedToast()
 								}
 							}
 						}
+					}
 #if os(iOS)
-						.environment(\.editMode, .constant(isEditing ? .active : .inactive))
-#endif
-					}
-				}
-				.navigationTitle("Cabinet")
-#if os(iOS)
-				.navigationBarTitleDisplayMode(.inline)
-#endif
-				.searchable(text: $searchText, prompt: "Search keys or values")
-				.toolbar {
-#if os(macOS)
-					ToolbarItem(placement: .automatic) {
-						Button("New", systemImage: "plus", role: .confirm) {
-							showingAdd = true
-						}
-						.tint(accentColor)
-						.keyboardShortcut(.init("n"), modifiers: [.command])
-					}
-					ToolbarSpacer(placement: .automatic)
-					
-					DefaultToolbarItem(kind: .search, placement: .automatic)
-					
-					ToolbarSpacer(placement: .automatic)
-					ToolbarItem(placement: .secondaryAction) {
-						Button("Settings", systemImage: "gear") {
-							showingSettings = true
-						}
-						.tint(accentColor)
-					}
-#else
-					ToolbarItem(placement: .topBarLeading) {
-						Button("Settings", systemImage: "gear") {
-							showingSettings = true
-						}
-						.tint(accentColor)
-					}
-					
-					if !filteredAndSortedPairs.isEmpty {
-						ToolbarItem(placement: .topBarTrailing) {
-							Button(isEditing ? "" : "Edit",
-								   systemImage: isEditing ? "checkmark" : "",
-								   role: isEditing ? .confirm : .close) {
-								withAnimation {
-									isEditing.toggle()
-									if !isEditing {
-										selectedItems.removeAll()
-									}
-								}
-							}.tint(accentColor)
-						}
-					}
-					
-					DefaultToolbarItem(kind: .search, placement: .bottomBar)
-					
-					if isEditing {
-						ToolbarSpacer(placement: .bottomBar)
-						ToolbarItem(placement: .bottomBar) {
-							Button("Delete", systemImage: "trash", role: .destructive) {
-								for id in selectedItems {
-									if let item = filteredAndSortedPairs.first(where: { $0.id == id }) {
-										modelContext.delete(item)
-									}
-								}
-								selectedItems.removeAll()
-								isEditing.toggle()
-							}
-							.tint(.red)
-							.disabled(selectedItems.isEmpty)
-						}
-					} else if !filteredAndSortedPairs.isEmpty {
-						ToolbarSpacer(placement: .bottomBar)
-						ToolbarItem(placement: .bottomBar) {
-							Button("New", systemImage: "plus") {
-								showingAdd = true
-							}.tint(accentColor)
-						}
-					}
+					.environment(\.editMode, .constant(isEditing ? .active : .inactive))
 #endif
 				}
-				.sheet(isPresented: $showingSettings) {
-					NavigationStack {
-						SettingsView(accentColorName: $accentColorName)
-#if os(macOS)
-							.padding()
-#endif
-					}
-					.tint(accentColor)
-#if os(iOS) || os(visionOS)
-					.presentationDetents([.medium, .large])
-#endif
-				}
-				.sheet(isPresented: $showingAdd) {
-					NavigationStack {
-						EditItemView(title: "New Item", pair: Pair(key: "", value: "")) { newPair in
-							modelContext.insert(newPair)
-						}
-					}
-					.tint(accentColor)
-#if os(iOS) || os(visionOS)
-					.presentationDetents([.medium, .large])
-#endif
-				}
-				.sheet(item: $editingPair) { pair in
-					NavigationStack {
-						EditItemView(title: "Edit Item", pair: pair) {
-							editedPair in
-							pair.key = editedPair.key
-							pair.value = editedPair.value
-							pair.isHidden = editedPair.isHidden
-						}
-					}
-					.tint(accentColor)
-#if os(iOS) || os(visionOS)
-					.presentationDetents([.medium, .large])
-#endif
-				}
-				.overlay(alignment: .bottom) {
-					if showCopyToast {
-						Label("Copied", systemImage: "doc.on.doc")
-							.padding(.horizontal, 14)
-							.padding(.vertical, 10)
-							.background(.thinMaterial, in: Capsule())
-							.padding(.bottom, 20)
-							.transition(.move(edge: .bottom).combined(with: .opacity))
-					}
-				}
-			} else {
-				LockedView(authenticate: authenticate, accentColor: accentColor)
 			}
-		}.onAppear(perform: authenticate)
+			.navigationTitle("Cabinet")
+#if os(iOS)
+			.navigationBarTitleDisplayMode(.inline)
+#endif
+			.searchable(text: $searchText, prompt: "Search keys or values")
+			.toolbar {
+#if os(macOS)
+				ToolbarItem(placement: .automatic) {
+					Button("New", systemImage: "plus", role: .confirm) {
+						showingAdd = true
+					}
+					.tint(accentColor)
+					.keyboardShortcut(.init("n"), modifiers: [.command])
+				}
+				ToolbarSpacer(placement: .automatic)
+				
+				DefaultToolbarItem(kind: .search, placement: .automatic)
+				
+				ToolbarSpacer(placement: .automatic)
+				ToolbarItem(placement: .secondaryAction) {
+					Button("Settings", systemImage: "gear") {
+						showingSettings = true
+					}
+					.tint(accentColor)
+				}
+#else
+				ToolbarItem(placement: .topBarLeading) {
+					Button("Settings", systemImage: "gear") {
+						showingSettings = true
+					}
+					.tint(accentColor)
+				}
+				
+				if !filteredAndSortedPairs.isEmpty {
+					ToolbarItem(placement: .topBarTrailing) {
+						Button(isEditing ? "" : "Edit",
+							   systemImage: isEditing ? "checkmark" : "",
+							   role: isEditing ? .confirm : .close) {
+							withAnimation {
+								isEditing.toggle()
+								if !isEditing {
+									selectedItems.removeAll()
+								}
+							}
+						}.tint(accentColor)
+					}
+				}
+				
+				DefaultToolbarItem(kind: .search, placement: .bottomBar)
+				
+				if isEditing {
+					ToolbarSpacer(placement: .bottomBar)
+					ToolbarItem(placement: .bottomBar) {
+						Button("Delete", systemImage: "trash", role: .destructive) {
+							for id in selectedItems {
+								if let item = filteredAndSortedPairs.first(where: { $0.id == id }) {
+									modelContext.delete(item)
+								}
+							}
+							selectedItems.removeAll()
+							isEditing.toggle()
+						}
+						.tint(.red)
+						.disabled(selectedItems.isEmpty)
+					}
+				} else if !filteredAndSortedPairs.isEmpty {
+					ToolbarSpacer(placement: .bottomBar)
+					ToolbarItem(placement: .bottomBar) {
+						Button("New", systemImage: "plus") {
+							showingAdd = true
+						}.tint(accentColor)
+					}
+				}
+#endif
+			}
+			.sheet(isPresented: $showingSettings) {
+				NavigationStack {
+					SettingsView(accentColorName: $accentColorName)
+#if os(macOS)
+						.padding()
+#endif
+				}
+				.tint(accentColor)
+#if os(iOS) || os(visionOS)
+				.presentationDetents([.medium, .large])
+#endif
+			}
+			.sheet(isPresented: $showingAdd) {
+				NavigationStack {
+					EditItemView(title: "New Item",
+								 pair: Pair(key: "", value: ""),
+								 onSave: { newPair in modelContext.insert(newPair) },
+								 onRevealOrToggleHidden: { pairToReveal in pairToReveal.isHidden ? revealValue(pair: pairToReveal) : pairToReveal.isHidden.toggle() })
+				}
+				.tint(accentColor)
+#if os(iOS) || os(visionOS)
+				.presentationDetents([.medium, .large])
+#endif
+			}
+			.sheet(item: $editingPair) { pair in
+				NavigationStack {
+					EditItemView(title: "Edit Item", pair: pair, onSave: {
+						editedPair in
+						pair.key = editedPair.key
+						pair.value = editedPair.value
+						pair.isHidden = editedPair.isHidden
+					}, onRevealOrToggleHidden: {
+						pairToReveal in
+						pairToReveal.isHidden ? revealValue(pair: pairToReveal) : pairToReveal.isHidden.toggle()
+					})
+				}
+				.tint(accentColor)
+#if os(iOS) || os(visionOS)
+				.presentationDetents([.medium, .large])
+#endif
+			}
+			.overlay(alignment: .bottom) {
+				if showCopyToast {
+					Label("Copied", systemImage: "doc.on.doc")
+						.padding(.horizontal, 14)
+						.padding(.vertical, 10)
+						.background(.thinMaterial, in: Capsule())
+						.padding(.bottom, 20)
+						.transition(.move(edge: .bottom).combined(with: .opacity))
+				}
+			}
+		}
 	}
 	
 	private func revealValue(pair: Pair) {
@@ -199,23 +198,6 @@ struct ContentView: View {
 			context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "We need to unlock your data.") { success, authenticationError in
 				if success {
 					pair.isHidden.toggle()
-				} else {
-					logger.error("We were unable to unlock the device.")
-				}
-			}
-		} else {
-			logger.error("There are no biometrics available.")
-		}
-	}
-	
-	private func authenticate() {
-		let context = LAContext()
-		var error: NSError?
-		
-		if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-			context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "We need to unlock your data.") { success, authenticationError in
-				if success {
-					isUnlocked = true
 				} else {
 					logger.error("We were unable to unlock the device.")
 				}
@@ -297,6 +279,6 @@ extension Color {
 }
 
 #Preview {
-	ContentView(isUnlocked: true).modelContainer(SampleData.shared.modelContainer)
+	ContentView().modelContainer(SampleData.shared.modelContainer)
 }
 

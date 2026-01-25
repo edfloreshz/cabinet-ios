@@ -13,6 +13,7 @@ struct EditItemView: View {
 	let title: String
 	@State var pair: Pair
 	var onSave: (Pair) -> Void
+	var onRevealOrToggleHidden: (Pair) -> Void
 	
 	var body: some View {
 #if os(macOS)
@@ -37,7 +38,7 @@ struct EditItemView: View {
 						TextField("Value", text: $pair.value)
 							.textFieldStyle(.roundedBorder)
 					}
-					Button(action: { pair.isHidden.toggle() }) {
+					Button(action: { onRevealOrToggleHidden(pair) }) {
 						Image(systemName: pair.isHidden ? "eye.slash" : "eye")
 							.foregroundStyle(.secondary)
 					}
@@ -83,7 +84,7 @@ struct EditItemView: View {
 						} else {
 							TextField("Value", text: $pair.value)
 						}
-						Button(action: { pair.isHidden.toggle() }) {
+						Button(action: { onRevealOrToggleHidden(pair) }) {
 							Image(systemName: pair.isHidden ? "eye.slash" : "eye")
 								.foregroundStyle(.secondary)
 						}
@@ -110,5 +111,5 @@ struct EditItemView: View {
 }
 
 #Preview {
-	EditItemView(title: "Edit", pair: Pair.sampleData[0], onSave: { _ in })
+	EditItemView(title: "Edit", pair: Pair.sampleData[0], onSave: { _ in }, onRevealOrToggleHidden: { _ in })
 }

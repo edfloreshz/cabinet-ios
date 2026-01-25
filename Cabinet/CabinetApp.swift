@@ -12,7 +12,7 @@ import SwiftData
 struct CabinetApp: App {
 	var body: some Scene {
 		WindowGroup {
-			ContentView(isUnlocked: false)
+			ContentView()
 				.modelContainer(for: Pair.self)
 		}
 	}
