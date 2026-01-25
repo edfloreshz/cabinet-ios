@@ -27,15 +27,15 @@ struct EditItemView: View {
 					.frame(minWidth: 260)
 			}
 			HStack(alignment: .firstTextBaseline, spacing: 8) {
-				Text("Value")
+				Text("Content")
 					.frame(width: 80, alignment: .trailing)
 					.foregroundStyle(.secondary)
 				ZStack(alignment: .trailing) {
 					if pair.isHidden {
-						SecureField("Value", text: $pair.value)
+						SecureField("Content", text: $pair.value)
 							.textFieldStyle(.roundedBorder)
 					} else {
-						TextField("Value", text: $pair.value)
+						TextField("Content", text: $pair.value)
 							.textFieldStyle(.roundedBorder)
 					}
 					Button(action: { onRevealOrToggleHidden(pair) }) {
@@ -76,13 +76,13 @@ struct EditItemView: View {
 					.autocorrectionDisabled()
 #endif
 			}
-			Section("Value") {
+			Section("Content") {
 				HStack(spacing: 8) {
 					ZStack(alignment: .trailing) {
 						if pair.isHidden {
-							SecureField("Value", text: $pair.value)
+							SecureField("Content", text: $pair.value)
 						} else {
-							TextField("Value", text: $pair.value)
+							TextField("Content", text: $pair.value)
 						}
 						Button(action: { onRevealOrToggleHidden(pair) }) {
 							Image(systemName: pair.isHidden ? "eye.slash" : "eye")
@@ -94,6 +94,7 @@ struct EditItemView: View {
 			}
 		}
 		.navigationTitle(title)
+		.navigationBarTitleDisplayMode(.inline)
 		.toolbar {
 			ToolbarItem(placement: .cancellationAction) {
 				Button("Cancel") { dismiss() }
