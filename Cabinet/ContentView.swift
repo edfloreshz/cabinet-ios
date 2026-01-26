@@ -43,15 +43,22 @@ struct ContentView: View {
 							ItemRowView(
 								pair: pair,
 								accentColor: accentColor,
-								onRevealOrToggleHidden: { pair.isHidden ? revealValue(pair: pair) : pair.isHidden.toggle() },
+								onRevealOrToggleHidden: { pair.isHidden ? authenticate(action: { pair.isHidden.toggle() }) : pair.isHidden.toggle() },
 								onEdit: { editingPair = pair },
 								onToggleFavorite: { pair.isFavorite.toggle() },
 								onDelete: { modelContext.delete(pair) }
 							)
 							.onTapGesture {
 								if !isEditing {
-									copyToPasteboard(pair.value)
-									showCopiedToast()
+									if (pair.isHidden) {
+										authenticate(action: {
+											Clipboard.copy(pair.value)
+											showCopiedToast()
+										})
+									} else {
+										Clipboard.copy(pair.value)
+										showCopiedToast()
+									}
 								}
 							}
 						}
@@ -153,7 +160,9 @@ struct ContentView: View {
 					EditItemView(title: "New Item",
 								 pair: Pair(key: "", value: ""),
 								 onSave: { newPair in modelContext.insert(newPair) },
-								 onRevealOrToggleHidden: { pairToReveal in pairToReveal.isHidden ? revealValue(pair: pairToReveal) : pairToReveal.isHidden.toggle() })
+								 onRevealOrToggleHidden: { pairToReveal in pairToReveal.isHidden
+									? authenticate(action: { pairToReveal.isHidden.toggle() })
+									: pairToReveal.isHidden.toggle() })
 				}
 				.tint(accentColor)
 #if os(iOS) || os(visionOS)
@@ -169,7 +178,7 @@ struct ContentView: View {
 						pair.isHidden = editedPair.isHidden
 					}, onRevealOrToggleHidden: {
 						pairToReveal in
-						pairToReveal.isHidden ? revealValue(pair: pairToReveal) : pairToReveal.isHidden.toggle()
+						pairToReveal.isHidden ? authenticate(action: { pairToReveal.isHidden.toggle() }) : pairToReveal.isHidden.toggle()
 					})
 				}
 				.tint(accentColor)
@@ -190,14 +199,14 @@ struct ContentView: View {
 		}
 	}
 	
-	private func revealValue(pair: Pair) {
+	private func authenticate(action: @escaping () -> Void) {
 		let context = LAContext()
 		var error: NSError?
 		
 		if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
 			context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "We need to unlock your data.") { success, authenticationError in
 				if success {
-					pair.isHidden.toggle()
+					action()
 				} else {
 					logger.error("We were unable to unlock the device.")
 				}
@@ -205,16 +214,6 @@ struct ContentView: View {
 		} else {
 			logger.error("There are no biometrics available.")
 		}
-	}
-	
-	private func copyToPasteboard(_ string: String) {
-#if canImport(UIKit)
-		UIPasteboard.general.string = string
-#elseif canImport(AppKit)
-		let pb = NSPasteboard.general
-		pb.clearContents()
-		pb.setString(string, forType: .string)
-#endif
 	}
 	
 	private func showCopiedToast() {
