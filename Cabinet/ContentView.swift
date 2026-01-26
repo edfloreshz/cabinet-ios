@@ -19,7 +19,6 @@ struct ContentView: View {
 	@State private var showingAdd = false
 	@State private var showingSettings = false
 	@State private var editingPair: Pair? = nil
-	@State private var showCopyToast = false
 	@State private var searchText: String = ""
 	@Query private var pairs: [Pair]
 	@State private var selectedItems: Set<UUID> = []
@@ -43,21 +42,24 @@ struct ContentView: View {
 							ItemRowView(
 								pair: pair,
 								accentColor: accentColor,
-								onRevealOrToggleHidden: { pair.isHidden ? authenticate(action: { pair.isHidden.toggle() }) : pair.isHidden.toggle() },
 								onEdit: { editingPair = pair },
-								onToggleFavorite: { pair.isFavorite.toggle() },
 								onDelete: { modelContext.delete(pair) }
 							)
 							.onTapGesture {
 								if !isEditing {
 									if (pair.isHidden) {
-										authenticate(action: {
-											Clipboard.copy(pair.value)
-											showCopiedToast()
-										})
+										AuthenticationService.authenticate { result in
+											switch result {
+											case .success:
+												Clipboard.copy(pair.value)
+												ToastManager.shared.show("Copied", type: .info)
+											case .failure(let error):
+												ToastManager.shared.show(error.message, type: .error)
+											}
+										}
 									} else {
 										Clipboard.copy(pair.value)
-										showCopiedToast()
+										ToastManager.shared.show("Copied", type: .info)
 									}
 								}
 							}
@@ -161,8 +163,14 @@ struct ContentView: View {
 								 pair: Pair(key: "", value: ""),
 								 onSave: { newPair in modelContext.insert(newPair) },
 								 onRevealOrToggleHidden: { pairToReveal in pairToReveal.isHidden
-									? authenticate(action: { pairToReveal.isHidden.toggle() })
-									: pairToReveal.isHidden.toggle() })
+						? AuthenticationService.authenticate { result in
+							switch result {
+							case .success:
+								pairToReveal.isHidden.toggle()
+							case .failure(let error):
+								ToastManager.shared.show(error.message, type: .error)
+							}
+						} : pairToReveal.isHidden.toggle() })
 				}
 				.tint(accentColor)
 #if os(iOS) || os(visionOS)
@@ -177,52 +185,21 @@ struct ContentView: View {
 						pair.value = editedPair.value
 						pair.isHidden = editedPair.isHidden
 					}, onRevealOrToggleHidden: {
-						pairToReveal in
-						pairToReveal.isHidden ? authenticate(action: { pairToReveal.isHidden.toggle() }) : pairToReveal.isHidden.toggle()
+						pairToReveal in pairToReveal.isHidden
+						? AuthenticationService.authenticate { result in
+							switch result {
+							case .success:
+								pairToReveal.isHidden.toggle()
+							case .failure(let error):
+								ToastManager.shared.show(error.message, type: .error)
+							}
+						} : pairToReveal.isHidden.toggle()
 					})
 				}
 				.tint(accentColor)
 #if os(iOS) || os(visionOS)
 				.presentationDetents([.medium, .large])
 #endif
-			}
-			.overlay(alignment: .bottom) {
-				if showCopyToast {
-					Label("Copied", systemImage: "doc.on.doc")
-						.padding(.horizontal, 14)
-						.padding(.vertical, 10)
-						.background(.thinMaterial, in: Capsule())
-						.padding(.bottom, 20)
-						.transition(.move(edge: .bottom).combined(with: .opacity))
-				}
-			}
-		}
-	}
-	
-	private func authenticate(action: @escaping () -> Void) {
-		let context = LAContext()
-		var error: NSError?
-		
-		if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-			context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "We need to unlock your data.") { success, authenticationError in
-				if success {
-					action()
-				} else {
-					logger.error("We were unable to unlock the device.")
-				}
-			}
-		} else {
-			logger.error("There are no biometrics available.")
-		}
-	}
-	
-	private func showCopiedToast() {
-		withAnimation(.spring(duration: 0.25)) {
-			showCopyToast = true
-		}
-		DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-			withAnimation(.easeOut(duration: 0.2)) {
-				showCopyToast = false
 			}
 		}
 	}

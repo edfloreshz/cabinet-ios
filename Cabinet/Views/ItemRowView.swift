@@ -10,9 +10,7 @@ import SwiftUI
 struct ItemRowView: View {
 	let pair: Pair
 	var accentColor: Color
-	var onRevealOrToggleHidden: () -> Void
 	var onEdit: () -> Void
-	var onToggleFavorite: () -> Void
 	var onDelete: () -> Void
 	
 	var body: some View {
@@ -34,7 +32,17 @@ struct ItemRowView: View {
 					.foregroundStyle(.yellow)
 					.accessibilityHidden(true)
 			}
-			Button(action: { onRevealOrToggleHidden() }) {
+			Button(action: {
+				pair.isHidden
+				? AuthenticationService.authenticate { result in
+					switch result {
+					case .success:
+						pair.isHidden.toggle()
+					case .failure(let error):
+						ToastManager.shared.show(error.message, type: .error)
+					}
+				} : pair.isHidden.toggle()
+			}) {
 				Image(systemName: pair.isHidden ? "eye.slash" : "eye")
 					.foregroundStyle(.secondary)
 			}
@@ -48,15 +56,21 @@ struct ItemRowView: View {
 					Label(pair.isFavorite ? "Unpin" : "Pin",
 						  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
 				}
-				ShareLink(item: pair.value) {
-					Label("Share", systemImage: "square.and.arrow.up.fill")
-				}
-#else
-				ControlGroup {
+				if !pair.isHidden {
 					ShareLink(item: pair.value) {
 						Label("Share", systemImage: "square.and.arrow.up.fill")
 					}
-					Button { onToggleFavorite() } label: {
+				}
+#else
+				ControlGroup {
+					if !pair.isHidden {
+						ShareLink(item: pair.value) {
+							Label("Share", systemImage: "square.and.arrow.up.fill")
+						}
+					}
+					Button {
+						pair.isFavorite.toggle()
+					} label: {
 						Label(pair.isFavorite ? "Unpin" : "Pin",
 							  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
 					}
@@ -64,10 +78,10 @@ struct ItemRowView: View {
 						Label("Edit", systemImage: "pencil.circle.fill")
 					}
 				}
+#endif
 				Button(role: .destructive) { onDelete() } label: {
 					Label("Delete", systemImage: "trash.fill")
 				}
-#endif
 			} label: {
 				Image(systemName: "ellipsis.circle")
 					.imageScale(.large)
@@ -81,7 +95,7 @@ struct ItemRowView: View {
 		.contentShape(Rectangle())
 		.swipeActions(edge: .leading, allowsFullSwipe: true) {
 			Button(pair.isFavorite ? "Unpin" : "Pin", systemImage: pair.isFavorite ? "star.slash" : "star") {
-				onToggleFavorite()
+				pair.isFavorite.toggle()
 			}.tint(.yellow)
 		}
 		.swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -96,9 +110,7 @@ struct ItemRowView: View {
 	ItemRowView(
 		pair: Pair.sampleData[0],
 		accentColor: .indigo,
-		onRevealOrToggleHidden: { },
 		onEdit: { },
-		onToggleFavorite: { },
 		onDelete: { }
 	).padding()
 }

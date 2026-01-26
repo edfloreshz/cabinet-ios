@@ -14,6 +14,7 @@ struct CabinetApp: App {
 		WindowGroup {
 			ContentView()
 				.modelContainer(for: Pair.self)
+				.toast()
 		}
 	}
 }

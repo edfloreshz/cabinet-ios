@@ -84,7 +84,17 @@ struct EditItemView: View {
 						} else {
 							TextField("Content", text: $pair.value)
 						}
-						Button(action: { onRevealOrToggleHidden(pair) }) {
+						Button(action: {
+							pair.isHidden
+							? AuthenticationService.authenticate { result in
+								switch result {
+								case .success:
+									pair.isHidden.toggle()
+								case .failure(let error):
+									ToastManager.shared.show(error.message, type: .error)
+								}
+							} : pair.isHidden.toggle()
+						}) {
 							Image(systemName: pair.isHidden ? "eye.slash" : "eye")
 								.foregroundStyle(.secondary)
 						}
