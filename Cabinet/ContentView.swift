@@ -15,16 +15,18 @@ struct ContentView: View {
 #if os(iOS)
 	@Environment(\.editMode) private var editMode
 #endif
+	private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
+	@AppStorage("accentColor") private var accentColorName: String = "indigo"
+
 	@State private var isEditing = false
 	@State private var showingAdd = false
 	@State private var showingSettings = false
 	@State private var editingPair: Pair? = nil
 	@State private var searchText: String = ""
-	@Query private var pairs: [Pair]
 	@State private var selectedItems: Set<UUID> = []
-	@AppStorage("accentColor") private var accentColorName: String = "indigo"
-	private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
-	
+	@State private var selectedCategory: String = "All"
+	@Query private var pairs: [Pair]
+
 	private var accentColor: Color {
 		Color.accentColorFromName(accentColorName)
 	}
@@ -32,6 +34,10 @@ struct ContentView: View {
 	var body: some View {
 		NavigationStack {
 			Group {
+				Filters(accentColor: accentColor) { category in
+					selectedCategory = category
+				}
+				
 				if filteredAndSortedPairs.isEmpty {
 					EmptyView(searching: !searchText.isEmpty, accentColor: accentColor) {
 						showingAdd = true
@@ -70,6 +76,7 @@ struct ContentView: View {
 #endif
 				}
 			}
+			.toolbarBackgroundVisibility(.hidden, for: .automatic)
 			.navigationTitle("Cabinet")
 #if os(iOS)
 			.navigationBarTitleDisplayMode(.inline)
@@ -145,6 +152,11 @@ struct ContentView: View {
 				}
 #endif
 			}
+		#if os(iOS) || os(visionOS)
+			.background(Color(uiColor: .systemGroupedBackground))
+		#elseif os(macOS)
+			.background(Color(nsColor: .windowBackgroundColor))
+		#endif
 			.sheet(isPresented: $showingSettings) {
 				NavigationStack {
 					SettingsView(accentColorName: $accentColorName)
@@ -206,16 +218,29 @@ struct ContentView: View {
 	
 	private var filteredAndSortedPairs: [Pair] {
 		let base = pairs
-		let filtered: [Pair]
+		let searchFiltered: [Pair]
 		if searchText.isEmpty {
-			filtered = base
+			searchFiltered = base
 		} else {
 			let term = searchText.lowercased()
-			filtered = base.filter {
+			searchFiltered = base.filter {
 				$0.key.lowercased().contains(term) || $0.value.lowercased().contains(term)
 			}
 		}
-		return filtered.sorted { lhs, rhs in
+
+		let categoryFiltered: [Pair]
+		switch selectedCategory {
+		case "All":
+			categoryFiltered = searchFiltered
+		case "Favorites":
+			categoryFiltered = searchFiltered.filter { $0.isFavorite }
+		default:
+			categoryFiltered = searchFiltered.filter { pair in
+				(pair.categories).contains { $0.caseInsensitiveCompare(selectedCategory) == .orderedSame }
+			}
+		}
+
+		return categoryFiltered.sorted { lhs, rhs in
 			if lhs.isFavorite != rhs.isFavorite { return lhs.isFavorite && !rhs.isFavorite }
 			return lhs.key.localizedCaseInsensitiveCompare(rhs.key) == .orderedAscending
 		}

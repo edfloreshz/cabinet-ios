@@ -15,13 +15,15 @@ final class Pair {
 	var value: String
 	var isFavorite: Bool
 	var isHidden: Bool
+	var categories: [String]
 	
-	init(id: UUID = UUID(), key: String, value: String, isFavorite: Bool = false, isHidden: Bool = false) {
+	init(id: UUID = UUID(), key: String, value: String, isFavorite: Bool = false, isHidden: Bool = false, categories: [String] = []) {
 		self.id = id
 		self.key = key
 		self.value = value
 		self.isFavorite = isFavorite
 		self.isHidden = isHidden
+		self.categories = categories
 	}
 	
 	static let sampleData = [
