@@ -12,36 +12,31 @@ import os
 
 struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
-#if os(iOS)
 	@Environment(\.editMode) private var editMode
-#endif
-	private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
-	@AppStorage("accentColor") private var accentColorName: String = "indigo"
-
+	
 	@State private var isEditing = false
 	@State private var showingAdd = false
+	@State private var showingAddCategory = false
 	@State private var showingSettings = false
 	@State private var editingPair: Pair? = nil
 	@State private var searchText: String = ""
 	@State private var selectedItems: Set<UUID> = []
 	@State private var selectedCategory: String = "All"
 	@Query private var pairs: [Pair]
+	@Query private var categories: [Category]
+	
+	@AppStorage("accentColor") private var accentColorName: String = "indigo"
 
+	private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
 	private var accentColor: Color {
 		Color.accentColorFromName(accentColorName)
 	}
-	
+
 	var body: some View {
 		NavigationStack {
 			Group {
-				Filters(accentColor: accentColor) { category in
-					selectedCategory = category
-				}
-				
 				if filteredAndSortedPairs.isEmpty {
-					EmptyView(searching: !searchText.isEmpty, accentColor: accentColor) {
-						showingAdd = true
-					}
+					EmptyView(searching: !searchText.isEmpty, accentColor: accentColor)
 				} else {
 					List(selection: $selectedItems) {
 						ForEach(filteredAndSortedPairs) { pair in
@@ -52,62 +47,35 @@ struct ContentView: View {
 								onDelete: { modelContext.delete(pair) }
 							)
 							.onTapGesture {
-								if !isEditing {
-									if (pair.isHidden) {
-										AuthenticationService.authenticate { result in
-											switch result {
-											case .success:
-												Clipboard.copy(pair.value)
-												ToastManager.shared.show("Copied", type: .info)
-											case .failure(let error):
-												ToastManager.shared.show(error.message, type: .error)
-											}
+								if !isEditing && pair.isHidden {
+									AuthenticationService.authenticate { result in
+										switch result {
+										case .success:
+											Clipboard.copy(pair.value)
+											ToastManager.shared.show("Copied", type: .info)
+										case .failure(let error):
+											ToastManager.shared.show(error.message, type: .error)
 										}
-									} else {
-										Clipboard.copy(pair.value)
-										ToastManager.shared.show("Copied", type: .info)
 									}
+								} else {
+									Clipboard.copy(pair.value)
+									ToastManager.shared.show("Copied", type: .info)
 								}
 							}
 						}
 					}
-#if os(iOS)
 					.environment(\.editMode, .constant(isEditing ? .active : .inactive))
-#endif
 				}
 			}
-			.toolbarBackgroundVisibility(.hidden, for: .automatic)
 			.navigationTitle("Cabinet")
-#if os(iOS)
+			.toolbarBackgroundVisibility(.hidden, for: .automatic)
 			.navigationBarTitleDisplayMode(.inline)
-#endif
 			.searchable(text: $searchText, prompt: "Search keys or values")
 			.toolbar {
-#if os(macOS)
-				ToolbarItem(placement: .automatic) {
-					Button("New", systemImage: "plus", role: .confirm) {
-						showingAdd = true
-					}
-					.tint(accentColor)
-					.keyboardShortcut(.init("n"), modifiers: [.command])
-				}
-				ToolbarSpacer(placement: .automatic)
-				
-				DefaultToolbarItem(kind: .search, placement: .automatic)
-				
-				ToolbarSpacer(placement: .automatic)
-				ToolbarItem(placement: .secondaryAction) {
-					Button("Settings", systemImage: "gear") {
-						showingSettings = true
-					}
-					.tint(accentColor)
-				}
-#else
 				ToolbarItem(placement: .topBarLeading) {
 					Button("Settings", systemImage: "gear") {
-						showingSettings = true
+						showingSettings.toggle()
 					}
-					.tint(accentColor)
 				}
 				
 				if !filteredAndSortedPairs.isEmpty {
@@ -125,10 +93,30 @@ struct ContentView: View {
 					}
 				}
 				
+				ToolbarItem(placement: .bottomBar) {
+					Menu {
+						Picker("Categories", selection: $selectedCategory) {
+							ForEach(Category.defaultCategories) { category in
+								Label(category.name.capitalized, systemImage: category.icon).tag(category.name)
+							}
+							ForEach(categories) { category in
+								Label(category.name.capitalized, systemImage: category.icon).tag(category.name)
+							}
+						}
+						ControlGroup {
+							Button("Add Category", systemImage: "plus.circle.fill") {
+								showingAddCategory.toggle()
+							}
+						}
+					} label: {
+						Label("Filters", systemImage: "line.3.horizontal.decrease.circle")
+					}
+				}
+				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
+				ToolbarSpacer(placement: .bottomBar)
 				
 				if isEditing {
-					ToolbarSpacer(placement: .bottomBar)
 					ToolbarItem(placement: .bottomBar) {
 						Button("Delete", systemImage: "trash", role: .destructive) {
 							for id in selectedItems {
@@ -142,32 +130,20 @@ struct ContentView: View {
 						.tint(.red)
 						.disabled(selectedItems.isEmpty)
 					}
-				} else if !filteredAndSortedPairs.isEmpty {
-					ToolbarSpacer(placement: .bottomBar)
+				} else {
 					ToolbarItem(placement: .bottomBar) {
 						Button("New", systemImage: "plus") {
-							showingAdd = true
+							showingAdd.toggle()
 						}.tint(accentColor)
 					}
 				}
-#endif
 			}
-		#if os(iOS) || os(visionOS)
-			.background(Color(uiColor: .systemGroupedBackground))
-		#elseif os(macOS)
-			.background(Color(nsColor: .windowBackgroundColor))
-		#endif
 			.sheet(isPresented: $showingSettings) {
 				NavigationStack {
 					SettingsView(accentColorName: $accentColorName)
-#if os(macOS)
-						.padding()
-#endif
 				}
 				.tint(accentColor)
-#if os(iOS) || os(visionOS)
 				.presentationDetents([.medium, .large])
-#endif
 			}
 			.sheet(isPresented: $showingAdd) {
 				NavigationStack {
@@ -185,9 +161,16 @@ struct ContentView: View {
 						} : pairToReveal.isHidden.toggle() })
 				}
 				.tint(accentColor)
-#if os(iOS) || os(visionOS)
 				.presentationDetents([.medium, .large])
-#endif
+			}
+			.sheet(isPresented: $showingAddCategory) {
+				NavigationStack {
+					EditCategoryView(category: Category(name: "", icon: ""), onSave: { newCategory in
+						modelContext.insert(newCategory)
+					})
+				}
+				.tint(accentColor)
+				.presentationDetents([.medium, .large])
 			}
 			.sheet(item: $editingPair) { pair in
 				NavigationStack {
@@ -209,9 +192,7 @@ struct ContentView: View {
 					})
 				}
 				.tint(accentColor)
-#if os(iOS) || os(visionOS)
 				.presentationDetents([.medium, .large])
-#endif
 			}
 		}
 	}

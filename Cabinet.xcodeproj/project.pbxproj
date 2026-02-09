@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A05F13B02F3A41470038A4E2 /* SFSymbolsPicker in Frameworks */ = {isa = PBXBuildFile; productRef = A05F13AF2F3A41470038A4E2 /* SFSymbolsPicker */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		A0318AA82ED74B9C00D00D70 /* Cabinet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cabinet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A05F13B02F3A41470038A4E2 /* SFSymbolsPicker in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = Cabinet;
 			packageProductDependencies = (
+				A05F13AF2F3A41470038A4E2 /* SFSymbolsPicker */,
 			);
 			productName = Cabinet;
 			productReference = A0318AA82ED74B9C00D00D70 /* Cabinet.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = A0318A9F2ED74B9C00D00D70;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A05F13AE2F3A41470038A4E2 /* XCRemoteSwiftPackageReference "SFSymbolsPicker" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A0318AA92ED74B9C00D00D70 /* Products */;
 			projectDirPath = "";
@@ -359,6 +368,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A05F13AE2F3A41470038A4E2 /* XCRemoteSwiftPackageReference "SFSymbolsPicker" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alessiorubicini/SFSymbolsPicker";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.9;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A05F13AF2F3A41470038A4E2 /* SFSymbolsPicker */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A05F13AE2F3A41470038A4E2 /* XCRemoteSwiftPackageReference "SFSymbolsPicker" */;
+			productName = SFSymbolsPicker;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A0318AA02ED74B9C00D00D70 /* Project object */;
 }

@@ -48,20 +48,6 @@ struct ItemRowView: View {
 			}
 			.buttonStyle(.plain)
 			Menu {
-#if os(macOS)
-				Button { onEdit() } label: {
-					Label("Edit", systemImage: "pencil.circle.fill")
-				}
-				Button { onToggleFavorite() } label: {
-					Label(pair.isFavorite ? "Unpin" : "Pin",
-						  systemImage: pair.isFavorite ? "star.slash.fill" : "star.fill")
-				}
-				if !pair.isHidden {
-					ShareLink(item: pair.value) {
-						Label("Share", systemImage: "square.and.arrow.up.fill")
-					}
-				}
-#else
 				ControlGroup {
 					if !pair.isHidden {
 						ShareLink(item: pair.value) {
@@ -78,7 +64,6 @@ struct ItemRowView: View {
 						Label("Edit", systemImage: "pencil.circle.fill")
 					}
 				}
-#endif
 				Button(role: .destructive) { onDelete() } label: {
 					Label("Delete", systemImage: "trash.fill")
 				}
@@ -87,9 +72,7 @@ struct ItemRowView: View {
 					.imageScale(.large)
 					.foregroundStyle(.primary)
 					.accessibilityLabel("More for \(pair.key)")
-#if os(iOS)
 					.tint(accentColor)
-#endif
 			}
 		}
 		.contentShape(Rectangle())

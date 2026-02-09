@@ -10,7 +10,6 @@ import SwiftUI
 struct EmptyView: View {
 	var searching: Bool
 	var accentColor: Color
-	var onAdd: () -> Void
 	
 	var body: some View {
 		VStack(spacing: 16) {
@@ -20,20 +19,8 @@ struct EmptyView: View {
 			Text(searching ? "No matches" : "No items yet")
 				.font(.title3)
 				.bold()
-			Text(searching ? "Try a different search term." : "Add your first key–value pair.")
+			Text(searching ? "Try a different search term." : "Add your first item.")
 				.foregroundStyle(.secondary)
-			if !searching {
-				Button(action: onAdd) {
-					Label("Add Item", systemImage: "plus")
-						.font(.headline)
-						.padding(.horizontal, 20)
-						.padding(.vertical, 10)
-				}
-				.glassEffect()
-				.tint(accentColor)
-				.buttonStyle(.borderedProminent)
-				.keyboardShortcut("n", modifiers: [.command])
-			}
 		}
 		.frame(maxWidth: .infinity, maxHeight: .infinity)
 		.multilineTextAlignment(.center)
@@ -42,5 +29,5 @@ struct EmptyView: View {
 }
 
 #Preview {
-	EmptyView(searching: false, accentColor: .indigo, onAdd: {})
+	EmptyView(searching: false, accentColor: .indigo)
 }
