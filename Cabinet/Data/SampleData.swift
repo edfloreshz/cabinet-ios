@@ -19,6 +19,7 @@ class SampleData {
 	private init() {
 		let schema = Schema([
 			Pair.self,
+			Category.self
 		])
 		
 		let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)

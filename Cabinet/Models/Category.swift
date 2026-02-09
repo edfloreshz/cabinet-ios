@@ -11,13 +11,15 @@ import SwiftData
 @Model
 final class Category: Identifiable {
 	@Attribute(.unique) var name: String
+	var icon: String
 	
-	init(name: String) {
+	init(name: String, icon: String) {
 		self.name = name
+		self.icon = icon
 	}
 	
 	static var defaultCategories = [
-		Category(name: "All"),
-		Category(name: "Favorites")
+		Category(name: "All", icon: "list.clipboard.fill"),
+		Category(name: "Favorites", icon: "star.fill")
 	]
 }
