@@ -8,72 +8,42 @@
 import LocalAuthentication
 import SwiftData
 import SwiftUI
-import os
 
 struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
-	@Environment(\.editMode) private var editMode
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
 	@Query private var pairs: [Pair]
 	@Query private var categories: [Category]
 
+	@State private var viewModel = ContentViewModel()
 	@State private var isEditing = false
 	@State private var showingAdd = false
 	@State private var showingAddCategory = false
 	@State private var showingSettings = false
-	@State private var editingPair: Pair? = nil
-	@State private var searchText: String = ""
+	@State private var showDeleteConfirmation = false
+	@State private var editingCategory: Category? = nil
 	@State private var selectedItems: Set<UUID> = []
-	@State private var selectedCategory: String = "All"
-
-	private let logger = Logger(
-		subsystem: "dev.edfloreshz.Cabinet",
-		category: "Utilities"
-	)
 
 	var body: some View {
+		let displayedPairs = viewModel.filteredPairs(pairs)
+
 		NavigationStack {
 			Group {
-				if filteredAndSortedPairs.isEmpty {
+				if displayedPairs.isEmpty {
 					EmptyView(
-						searching: !searchText.isEmpty,
+						searching: !viewModel.searchText.isEmpty,
 						accentColor: accent.color
 					)
 				} else {
 					List(selection: $selectedItems) {
-						ForEach(filteredAndSortedPairs) { pair in
-							ItemRowView(
-								pair: pair,
-								onEdit: { editingPair = pair },
-								onDelete: { modelContext.delete(pair) }
-							)
-							.onTapGesture {
-								if !isEditing && pair.isHidden {
-									AuthenticationService.authenticate {
-										result in
-										switch result {
-										case .success:
-											Clipboard.copy(pair.value)
-											ToastManager.shared.show(
-												"Copied",
-												type: .info
-											)
-										case .failure(let error):
-											ToastManager.shared.show(
-												error.message,
-												type: .error
-											)
-										}
+						ForEach(displayedPairs) { pair in
+							ItemRowView(pair: pair)
+								.onTapGesture {
+									if !isEditing {
+										handleCopy(for: pair)
 									}
-								} else {
-									Clipboard.copy(pair.value)
-									ToastManager.shared.show(
-										"Copied",
-										type: .info
-									)
 								}
-							}
 						}
 					}
 					.environment(
@@ -83,94 +53,28 @@ struct ContentView: View {
 				}
 			}
 			.navigationTitle("Cabinet")
-			.toolbarBackgroundVisibility(.hidden, for: .automatic)
 			.navigationBarTitleDisplayMode(.inline)
-			.searchable(text: $searchText, prompt: "Keys, values, notes")
+			.searchable(
+				text: $viewModel.searchText,
+				prompt: "Keys, values, notes"
+			)
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
-					Button("Settings", systemImage: "gear") {
+					Button("Settings", systemImage: "gearshape") {
 						showingSettings.toggle()
 					}
 				}
-
-				if !filteredAndSortedPairs.isEmpty {
-					ToolbarItem(placement: .topBarTrailing) {
-						Button(
-							"Edit",
-							systemImage: isEditing ? "checkmark" : "pencil",
-							role: isEditing ? .confirm : .close
-						) {
-							withAnimation {
-								isEditing.toggle()
-								if !isEditing {
-									selectedItems.removeAll()
-								}
-							}
-						}.tint(isEditing ? accent.color : nil)
-					}
+				ToolbarItemGroup(placement: .topBarTrailing) {
+					editButton
 				}
-
 				ToolbarItem(placement: .bottomBar) {
-					Menu {
-						Picker("Categories", selection: $selectedCategory) {
-							ForEach(Category.defaultCategories) { category in
-								Label(
-									category.name.capitalized,
-									systemImage: category.icon
-								).tag(category.name)
-							}
-							ForEach(categories) { category in
-								Label(
-									category.name.capitalized,
-									systemImage: category.icon
-								).tag(category.name)
-							}
-						}
-						ControlGroup {
-							Button(
-								"Add Category",
-								systemImage: "plus.circle.fill"
-							) {
-								showingAddCategory.toggle()
-							}
-						}
-					} label: {
-						Label(
-							"Filters",
-							systemImage: "line.3.horizontal.decrease.circle"
-						)
-					}
+					categoryPickerMenu
 				}
 				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
 				ToolbarSpacer(placement: .bottomBar)
-
-				if isEditing {
-					ToolbarItem(placement: .bottomBar) {
-						Button(
-							"Delete",
-							systemImage: "trash",
-							role: .destructive
-						) {
-							for id in selectedItems {
-								if let item = filteredAndSortedPairs.first(
-									where: { $0.id == id })
-								{
-									modelContext.delete(item)
-								}
-							}
-							selectedItems.removeAll()
-							isEditing.toggle()
-						}
-						.tint(.red)
-						.disabled(selectedItems.isEmpty)
-					}
-				} else {
-					ToolbarItem(placement: .bottomBar) {
-						Button("New", systemImage: "plus") {
-							showingAdd.toggle()
-						}.buttonStyle(.glassProminent).tint(accent.color)
-					}
+				ToolbarItem(placement: .bottomBar) {
+					primaryAction
 				}
 			}
 			.sheet(isPresented: $showingSettings) {
@@ -184,101 +88,190 @@ struct ContentView: View {
 				NavigationStack {
 					CategoryView(
 						category: Category(name: ""),
-						onSave: { newCategory in
-							modelContext.insert(newCategory)
-						}
 					)
 				}
 				.tint(accent.color)
 				.presentationDetents([.large])
 				.interactiveDismissDisabled()
+			}
+			.sheet(item: $editingCategory) { category in
+				NavigationStack {
+					CategoryView(category: category)
+				}
+				.tint(accent.color)
+				.interactiveDismissDisabled()
+				.presentationDetents([.large])
 			}
 			.sheet(isPresented: $showingAdd) {
 				NavigationStack {
 					ItemView(
 						mode: .new,
 						pair: Pair(key: "", value: ""),
-						onSave: { newPair in
-							modelContext.insert(newPair)
-						}
 					)
 				}
 				.presentationDetents([.large])
 				.interactiveDismissDisabled()
 			}
-			.sheet(item: $editingPair) { pair in
-				NavigationStack {
-					ItemView(
-						mode: .edit,
-						pair: pair,
-						onSave: {
-							editedPair in
-							pair.key = editedPair.key
-							pair.value = editedPair.value
-							pair.isHidden = editedPair.isHidden
-							pair.categories = editedPair.categories
-							pair.notes = editedPair.notes
-						}
-					)
+		}
+	}
+
+	fileprivate var categoryPickerMenu: some View {
+		Menu {
+			Section("General") {
+				ForEach(Category.defaultCategories) { category in
+					Button {
+						viewModel.selectedCategory = category.name
+					} label: {
+						Label(
+							category.name.capitalized,
+							systemImage: category.icon
+						)
+					}
 				}
+			}
+
+			Section("Categories") {
+				ForEach(categories) { category in
+					Menu {
+						Button(
+							"Delete",
+							systemImage: "trash",
+							role: .destructive
+						) {
+							modelContext.delete(category)
+						}
+						Button("Edit", systemImage: "pencil") {
+							editingCategory = category
+						}
+						Button("Select", systemImage: "checkmark.circle") {
+							viewModel.selectedCategory = category.name
+						}
+					} label: {
+						Label(
+							category.name.capitalized,
+							systemImage: category.icon
+						)
+					}
+				}
+
+				Divider()
+
+				Button {
+					showingAddCategory.toggle()
+				} label: {
+					Label("Add Category", systemImage: "plus.circle")
+				}
+			}
+		} label: {
+			Label(
+				viewModel.selectedCategory.capitalized,
+				systemImage: "line.3.horizontal.decrease"
+			)
+		}
+	}
+
+	fileprivate var primaryAction: some View {
+		Group {
+			if isEditing {
+				Button("Delete", systemImage: "trash", role: .destructive) {
+					showDeleteConfirmation.toggle()
+				}
+				.tint(.red)
+				.disabled(selectedItems.isEmpty)
+			} else {
+				Button("New", systemImage: "plus") {
+					showingAdd.toggle()
+				}
+				.buttonStyle(.glassProminent)
 				.tint(accent.color)
-				.interactiveDismissDisabled()
-				.presentationDetents([.large])
 			}
+		}
+		.confirmationDialog(
+			"Delete selected items?",
+			isPresented: $showDeleteConfirmation,
+			titleVisibility: .visible
+		) {
+			Button("Delete", role: .destructive) {
+				deleteSelected()
+			}
+		} message: {
+			Text("This action cannot be undone.")
 		}
 	}
 
-	private var filteredAndSortedPairs: [Pair] {
-		let base = pairs
-		let searchFiltered: [Pair]
-		if searchText.isEmpty {
-			searchFiltered = base
-		} else {
-			let term = searchText.lowercased()
-			searchFiltered = base.filter {
-				$0.key.lowercased().contains(term)
-					|| $0.value.lowercased().contains(term)
-					|| $0.notes.lowercased().contains(term)
-			}
-		}
+	fileprivate var editButton: some View {
+		let displayedPairs = viewModel.filteredPairs(pairs)
 
-		let categoryFiltered: [Pair]
-		switch selectedCategory {
-		case "All":
-			categoryFiltered = searchFiltered
-		case "Favorites":
-			categoryFiltered = searchFiltered.filter { $0.isFavorite }
-		default:
-			categoryFiltered = searchFiltered.filter { pair in
-				(pair.categories).contains {
-					$0.name.caseInsensitiveCompare(selectedCategory)
-						== .orderedSame
+		return Group {
+			if isEditing {
+				Button(
+					selectedItems.count == displayedPairs.count
+						? "Deselect All" : "Select All"
+				) {
+					if selectedItems.count == displayedPairs.count {
+						selectedItems.removeAll()
+					} else {
+						selectedItems = Set(displayedPairs.map { $0.id })
+					}
 				}
 			}
-		}
-
-		return categoryFiltered.sorted { lhs, rhs in
-			if lhs.isFavorite != rhs.isFavorite {
-				return lhs.isFavorite && !rhs.isFavorite
+			if !displayedPairs.isEmpty {
+				Button(
+					"Edit",
+					systemImage: isEditing ? "checkmark" : "pencil",
+					role: isEditing ? .confirm : .close
+				) {
+					withAnimation {
+						isEditing.toggle()
+						if !isEditing {
+							selectedItems.removeAll()
+						}
+					}
+				}.tint(isEditing ? accent.color : nil)
 			}
-			return lhs.key.localizedCaseInsensitiveCompare(rhs.key)
-				== .orderedAscending
 		}
 	}
 
-	private func delete(at offsets: IndexSet) {
-		let items = offsets.compactMap { index in
-			filteredAndSortedPairs[safe: index]
+	private func handleCopy(for pair: Pair) {
+		let performCopy = {
+			#if canImport(UIKit)
+				UIPasteboard.general.string = pair.value
+			#elseif canImport(AppKit)
+				let pb = NSPasteboard.general
+				pb.clearContents()
+				pb.setString(pair.value, forType: .string)
+			#endif
+			
+			ToastManager.shared.show("Copied", type: .info)
 		}
-		for item in items {
-			modelContext.delete(item)
+
+		// Only authenticate if the item is hidden and we aren't currently in Edit Mode
+		if pair.isHidden {
+			AuthenticationService.authenticate { result in
+				switch result {
+				case .success:
+					performCopy()
+				case .failure(let error):
+					ToastManager.shared.show(error.message, type: .error)
+				}
+			}
+		} else {
+			// If not hidden or in edit mode, copy directly
+			performCopy()
 		}
 	}
-}
 
-extension Array {
-	fileprivate subscript(safe index: Index) -> Element? {
-		indices.contains(index) ? self[index] : nil
+	fileprivate func deleteSelected() {
+		for id in selectedItems {
+			if let item = pairs.first(where: { $0.id == id }) {
+				modelContext.delete(item)
+			}
+		}
+
+		withAnimation {
+			selectedItems.removeAll()
+			isEditing = false
+		}
 	}
 }
 

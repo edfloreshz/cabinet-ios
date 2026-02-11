@@ -21,8 +21,7 @@ struct ItemView: View {
 	@Query private var categories: [Category]
 
 	let mode: ViewMode
-	@State var pair: Pair
-	var onSave: (Pair) -> Void
+	@Bindable var pair: Pair
 
 	var body: some View {
 		Form {
@@ -46,43 +45,47 @@ struct ItemView: View {
 			}
 
 			Section(header: Text("Value")) {
-					HStack {
-						if pair.isHidden {
-							SecureField("Your secret value", text: $pair.value)
-								.focused($isContentFocused)
-						} else {
-							TextField("Your value", text: $pair.value)
-								.focused($isContentFocused)
-						}
-
-						Button(action: {
-							pair.isHidden
-								? AuthenticationService.authenticate { result in
-									switch result {
-									case .success:
-										pair.isHidden.toggle()
-									case .failure(let error):
-										ToastManager.shared.show(
-											error.message,
-											type: .error
-										)
-									}
-								} : pair.isHidden.toggle()
-						}) {
-							Image(
-								systemName: pair.isHidden ? "eye.slash" : "eye"
-							)
-							.foregroundStyle(.secondary)
-						}
-						.buttonStyle(.plain)
+				HStack {
+					if pair.isHidden {
+						SecureField("Your secret value", text: $pair.value)
+							.focused($isContentFocused)
+					} else {
+						TextField("Your value", text: $pair.value)
+							.focused($isContentFocused)
 					}
+
+					Button(action: {
+						pair.isHidden
+							? AuthenticationService.authenticate { result in
+								switch result {
+								case .success:
+									pair.isHidden.toggle()
+								case .failure(let error):
+									ToastManager.shared.show(
+										error.message,
+										type: .error
+									)
+								}
+							} : pair.isHidden.toggle()
+					}) {
+						Image(
+							systemName: pair.isHidden ? "eye.slash" : "eye"
+						)
+						.foregroundStyle(.secondary)
+					}
+					.buttonStyle(.plain)
+				}
 			}
-			
+
 			Section(header: Text("Notes")) {
-				TextField("Type remarks or notes here", text: $pair.notes, axis: .vertical)
-					.lineLimit(3...5)
+				TextField(
+					"Type remarks or notes here",
+					text: $pair.notes,
+					axis: .vertical
+				)
+				.lineLimit(3...5)
 			}
-			
+
 			Section(header: Text("Categories")) {
 				if categories.isEmpty {
 					Text("No categories available")
@@ -119,7 +122,6 @@ struct ItemView: View {
 			}
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Save", systemImage: "checkmark") {
-					onSave(pair)
 					dismiss()
 				}
 				.tint(accent.color)
@@ -144,5 +146,5 @@ struct ItemView: View {
 }
 
 #Preview {
-	ItemView(mode: .new, pair: Pair.sampleData[0], onSave: { _ in })
+	ItemView(mode: .new, pair: Pair.sampleData[0])
 }

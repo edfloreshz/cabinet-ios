@@ -13,7 +13,7 @@ final class Category: Identifiable {
 	@Attribute(.unique) var name: String
 	var icon: String
 
-	init(name: String, icon: String = "line.3.horizontal.decrease.circle") {
+	init(name: String, icon: String = "tag.fill") {
 		self.name = name
 		self.icon = icon
 	}
@@ -22,7 +22,7 @@ final class Category: Identifiable {
 		Category(name: "All", icon: "list.clipboard.fill"),
 		Category(name: "Favorites", icon: "star.fill"),
 	]
-	
+
 	static var sampleCategories = [
 		Category(name: "School", icon: "graduationcap.fill"),
 		Category(name: "Bank", icon: "dollarsign.bank.building.fill"),
