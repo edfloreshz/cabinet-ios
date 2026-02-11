@@ -12,7 +12,7 @@ import SwiftData
 @Observable
 class ContentViewModel {
 	var searchText: String = ""
-	var selectedCategory: String = "All"
+	var selectedDrawer: String = "All"
 
 	// This logic is moved from the ContentView to here
 	func filteredPairs(_ pairs: [Pair]) -> [Pair] {
@@ -30,22 +30,22 @@ class ContentViewModel {
 			}
 		}
 
-		let categoryFiltered: [Pair]
-		switch selectedCategory {
+		let drawerFiltered: [Pair]
+		switch selectedDrawer {
 		case "All":
-			categoryFiltered = searchFiltered
+			drawerFiltered = searchFiltered
 		case "Favorites":
-			categoryFiltered = searchFiltered.filter { $0.isFavorite }
+			drawerFiltered = searchFiltered.filter { $0.isFavorite }
 		default:
-			categoryFiltered = searchFiltered.filter { pair in
-				pair.categories.contains {
-					$0.name.caseInsensitiveCompare(selectedCategory)
+			drawerFiltered = searchFiltered.filter { pair in
+				pair.drawers.contains {
+					$0.name.caseInsensitiveCompare(selectedDrawer)
 						== .orderedSame
 				}
 			}
 		}
 
-		return categoryFiltered.sorted { lhs, rhs in
+		return drawerFiltered.sorted { lhs, rhs in
 			if lhs.isFavorite != rhs.isFavorite {
 				return lhs.isFavorite && !rhs.isFavorite
 			}

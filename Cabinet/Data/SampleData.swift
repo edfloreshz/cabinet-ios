@@ -19,7 +19,7 @@ class SampleData {
 	private init() {
 		let schema = Schema([
 			Pair.self,
-			Category.self,
+			Drawer.self,
 		])
 
 		let modelConfiguration = ModelConfiguration(
