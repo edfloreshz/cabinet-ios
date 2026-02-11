@@ -21,9 +21,9 @@
   - iOS 26 or later
   - Xcode 26 or later
 - Build & Run:
-  1. Open the project in Xcode.
-  2. Select the Cabinet app target.
-  3. Press Run (⌘R) to build and launch on a device or simulator.
+  - Open the project in Xcode.
+  - Select the Cabinet app target.
+  - Press Run (⌘R) to build and launch on a device or simulator.
 
 ## Usage
 - Create a new item: Tap the + button and enter a title, content, and optional notes.
