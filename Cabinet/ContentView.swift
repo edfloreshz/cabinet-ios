@@ -190,7 +190,7 @@ struct ContentView: View {
 					)
 				}
 				.tint(accent.color)
-				.presentationDetents([.medium, .large])
+				.presentationDetents([.large])
 				.interactiveDismissDisabled()
 			}
 			.sheet(isPresented: $showingAdd) {

@@ -17,7 +17,7 @@ struct ItemView: View {
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 	@FocusState private var isContentFocused: Bool
 	@FocusState private var isNameFocused: Bool
-	@State private var isCategoryPickerShown: Bool = false
+	@State private var selectedCategories: Set<Category> = []
 	@Query private var categories: [Category]
 
 	let mode: ViewMode
@@ -45,16 +45,13 @@ struct ItemView: View {
 				.listRowBackground(Color.clear)
 			}
 
-			Section {
-				LabeledContent("Data") {
+			Section(header: Text("Value")) {
 					HStack {
 						if pair.isHidden {
-							SecureField("Your secret data", text: $pair.value)
-								.multilineTextAlignment(.trailing)
+							SecureField("Your secret value", text: $pair.value)
 								.focused($isContentFocused)
 						} else {
-							TextField("Your data", text: $pair.value)
-								.multilineTextAlignment(.trailing)
+							TextField("Your value", text: $pair.value)
 								.focused($isContentFocused)
 						}
 
@@ -79,25 +76,36 @@ struct ItemView: View {
 						}
 						.buttonStyle(.plain)
 					}
-				}
-
-				TextField("Notes", text: $pair.notes, axis: .vertical)
+			}
+			
+			Section(header: Text("Notes")) {
+				TextField("Type remarks or notes here", text: $pair.notes, axis: .vertical)
 					.lineLimit(3...5)
-
-				if pair.categories.isEmpty {
-					Button("Select categories") {
-						isCategoryPickerShown.toggle()
-					}
+			}
+			
+			Section(header: Text("Categories")) {
+				if categories.isEmpty {
+					Text("No categories available")
 				} else {
-					Button("Select categories") {
-						isCategoryPickerShown.toggle()
-					}
 					List(categories, id: \.self) { item in
 						HStack {
 							Image(systemName: item.icon)
 							Text(item.name)
+							Spacer()
+							if pair.categories.contains(item) {
+								Image(systemName: "checkmark")
+									.foregroundColor(accent.color)
+							}
 						}
 						.contentShape(Rectangle())
+						.onTapGesture {
+							if selectedCategories.contains(item) {
+								selectedCategories.remove(item)
+							} else {
+								selectedCategories.insert(item)
+							}
+							pair.categories = Array(selectedCategories)
+						}
 					}
 				}
 			}
@@ -121,14 +129,6 @@ struct ItemView: View {
 						.isEmpty
 				)
 			}
-		}
-		.sheet(isPresented: $isCategoryPickerShown) {
-			CategoryPicker(
-				options: categories,
-				onChange: { selectedCategories in
-					pair.categories = Array(selectedCategories)
-				}
-			)
 		}
 		.onAppear {
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

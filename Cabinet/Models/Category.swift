@@ -22,4 +22,9 @@ final class Category: Identifiable {
 		Category(name: "All", icon: "list.clipboard.fill"),
 		Category(name: "Favorites", icon: "star.fill"),
 	]
+	
+	static var sampleCategories = [
+		Category(name: "School", icon: "graduationcap.fill"),
+		Category(name: "Bank", icon: "dollarsign.bank.building.fill"),
+	]
 }

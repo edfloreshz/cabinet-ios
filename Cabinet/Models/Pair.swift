@@ -39,6 +39,7 @@ final class Pair {
 	static let sampleData = [
 		Pair(key: "RFC", value: "DHRF990011Y3D", isFavorite: true),
 		Pair(key: "Email", value: "eduardo@gmail.com"),
-		Pair(key: "Bank Account", value: "12390520234", isHidden: true),
+		Pair(key: "Bank Account", value: "12390520234", isHidden: true, categories: [Category(name: "Bank", icon: "dollarsign.bank.building.fill")]),
+		Pair(key: "School ID", value: "12345435312", categories: [Category(name: "School", icon: "graduationcap.fill")]),
 	]
 }
