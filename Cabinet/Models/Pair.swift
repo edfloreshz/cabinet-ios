@@ -1,5 +1,5 @@
 //
-//  KVPair.swift
+//  Pair.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/11/25.
@@ -17,8 +17,16 @@ final class Pair {
 	var isHidden: Bool
 	var categories: [Category]
 	var notes: String
-	
-	init(id: UUID = UUID(), key: String, value: String, isFavorite: Bool = false, isHidden: Bool = false, categories: [Category] = [], notes: String = "") {
+
+	init(
+		id: UUID = UUID(),
+		key: String,
+		value: String,
+		isFavorite: Bool = false,
+		isHidden: Bool = false,
+		categories: [Category] = [],
+		notes: String = ""
+	) {
 		self.id = id
 		self.key = key
 		self.value = value
@@ -27,10 +35,10 @@ final class Pair {
 		self.categories = categories
 		self.notes = notes
 	}
-	
+
 	static let sampleData = [
 		Pair(key: "RFC", value: "DHRF990011Y3D", isFavorite: true),
 		Pair(key: "Email", value: "eduardo@gmail.com"),
-		Pair(key: "Bank Account", value: "12390520234", isHidden: true)
+		Pair(key: "Bank Account", value: "12390520234", isHidden: true),
 	]
 }

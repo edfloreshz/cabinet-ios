@@ -1,12 +1,12 @@
 //
-//  EditCategoryView.swift
+//  CategoryView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 09/02/26.
 //
 
-import SwiftUI
 import SFSymbolsPicker
+import SwiftUI
 
 struct CategoryView: View {
 	@Environment(\.dismiss) private var dismiss
@@ -15,10 +15,10 @@ struct CategoryView: View {
 
 	@State var category: Category
 	@State var isPresented = false
-	
+
 	var onSave: (Category) -> Void
-	
-    var body: some View {
+
+	var body: some View {
 		Form {
 			Section {
 				VStack(spacing: 12) {
@@ -33,7 +33,7 @@ struct CategoryView: View {
 							.glassEffect()
 							.foregroundStyle(accent.color)
 					}
-					
+
 					TextField("Name", text: $category.name)
 						.textInputAutocapitalization(.none)
 						.autocorrectionDisabled()
@@ -59,20 +59,34 @@ struct CategoryView: View {
 				}
 				.tint(accent.color)
 				.buttonStyle(.glassProminent)
-				.disabled(category.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+				.disabled(
+					category.name.trimmingCharacters(
+						in: .whitespacesAndNewlines
+					).isEmpty
+				)
 			}
 		}
-		.sheet(isPresented: $isPresented, content: {
-			SymbolsPicker(selection: $category.icon, title: "Pick a symbol", autoDismiss: true)
-		})
+		.sheet(
+			isPresented: $isPresented,
+			content: {
+				SymbolsPicker(
+					selection: $category.icon,
+					title: "Pick a symbol",
+					autoDismiss: true
+				)
+			}
+		)
 		.onAppear {
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 				isNameFocused = true
 			}
 		}
-    }
+	}
 }
 
 #Preview {
-	CategoryView(category: Category(name: "All", icon: "square.grid.2x2"), onSave: { _ in })
+	CategoryView(
+		category: Category(name: "All", icon: "square.grid.2x2"),
+		onSave: { _ in }
+	)
 }

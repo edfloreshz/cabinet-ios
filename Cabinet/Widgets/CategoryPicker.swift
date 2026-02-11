@@ -14,8 +14,8 @@ struct CategoryPicker: View {
 	var options: [Category]
 	@State private var selectedItems: Set<Category> = []
 	var onChange: (Set<Category>) -> Void
-	
-    var body: some View {
+
+	var body: some View {
 		NavigationStack {
 			Group {
 				if options.isEmpty {
@@ -58,14 +58,17 @@ struct CategoryPicker: View {
 				}
 			}
 		}
-    }
+	}
 }
 
 #Preview {
-	CategoryPicker(options: [
-		Category(name: "Apple", icon: "apple.logo"),
-		Category(name: "Xbox", icon: "xbox.logo"),
-		Category(name: "Playstation", icon: "playstation.logo"),
-		Category(name: "Shazam", icon: "shazam.logo.fill")
-	], onChange: { _ in })
+	CategoryPicker(
+		options: [
+			Category(name: "Apple", icon: "apple.logo"),
+			Category(name: "Xbox", icon: "xbox.logo"),
+			Category(name: "Playstation", icon: "playstation.logo"),
+			Category(name: "Shazam", icon: "shazam.logo.fill"),
+		],
+		onChange: { _ in }
+	)
 }

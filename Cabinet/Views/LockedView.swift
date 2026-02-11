@@ -7,26 +7,26 @@
 
 import SwiftUI
 
-struct LockedView : View {
+struct LockedView: View {
 	let authenticate: () -> Void
 	var accentColor: Color
-	
+
 	var body: some View {
 		VStack(spacing: 16) {
 			Image(systemName: "lock.fill")
 				.font(.system(size: 48, weight: .semibold))
 				.foregroundStyle(.secondary)
 				.accessibilityHidden(true)
-			
+
 			Text("Locked")
 				.font(.title2).bold()
-			
+
 			Text("Unlock with Face ID / Touch ID to access your items.")
 				.font(.callout)
 				.foregroundStyle(.secondary)
 				.multilineTextAlignment(.center)
 				.padding(.horizontal)
-			
+
 			Button {
 				authenticate()
 			} label: {
@@ -38,7 +38,7 @@ struct LockedView : View {
 			.glassEffect()
 			.tint(accentColor)
 			.buttonStyle(.borderedProminent)
-			
+
 			Text("You can also unlock using your device passcode.")
 				.font(.footnote)
 				.foregroundStyle(.secondary)

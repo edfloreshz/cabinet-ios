@@ -10,13 +10,16 @@ import SwiftUI
 struct SettingsView: View {
 	@Environment(\.dismiss) private var dismiss
 	@AppStorage("accentColor") private var accentColorName: String = "indigo"
-	
+
 	var body: some View {
 		Form {
 			Section {
-				LazyVGrid(columns: [
-					GridItem(.adaptive(minimum: 60), spacing: 16)
-				], spacing: 16) {
+				LazyVGrid(
+					columns: [
+						GridItem(.adaptive(minimum: 60), spacing: 16)
+					],
+					spacing: 16
+				) {
 					ForEach(ThemeColor.allCases, id: \.self) { colorOption in
 						Button {
 							withAnimation(.spring(duration: 0.3)) {
@@ -27,12 +30,12 @@ struct SettingsView: View {
 								Circle()
 									.fill(colorOption.color.gradient)
 									.frame(width: 60, height: 60)
-								
+
 								if accentColorName == colorOption.rawValue {
 									Circle()
 										.strokeBorder(.white, lineWidth: 3)
 										.frame(width: 60, height: 60)
-									
+
 									Image(systemName: "checkmark")
 										.font(.title3.bold())
 										.foregroundStyle(.white)

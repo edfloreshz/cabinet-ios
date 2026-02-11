@@ -5,8 +5,8 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct CabinetApp: App {

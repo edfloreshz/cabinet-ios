@@ -5,8 +5,8 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 enum ViewMode {
 	case new, edit
@@ -19,11 +19,11 @@ struct ItemView: View {
 	@FocusState private var isNameFocused: Bool
 	@State private var isCategoryPickerShown: Bool = false
 	@Query private var categories: [Category]
-	
+
 	let mode: ViewMode
 	@State var pair: Pair
 	var onSave: (Pair) -> Void
-	
+
 	var body: some View {
 		Form {
 			Section {
@@ -35,7 +35,7 @@ struct ItemView: View {
 						.padding(15)
 						.glassEffect()
 						.foregroundStyle(.brown)
-					
+
 					TextField("Title", text: $pair.key)
 						.font(.system(size: 28, weight: .bold))
 						.multilineTextAlignment(.center)
@@ -44,7 +44,7 @@ struct ItemView: View {
 				.frame(maxWidth: .infinity)
 				.listRowBackground(Color.clear)
 			}
-			
+
 			Section {
 				LabeledContent("Data") {
 					HStack {
@@ -53,32 +53,37 @@ struct ItemView: View {
 								.multilineTextAlignment(.trailing)
 								.focused($isContentFocused)
 						} else {
-								TextField("Your data", text: $pair.value)
-									.multilineTextAlignment(.trailing)
-									.focused($isContentFocused)
+							TextField("Your data", text: $pair.value)
+								.multilineTextAlignment(.trailing)
+								.focused($isContentFocused)
 						}
-						
+
 						Button(action: {
 							pair.isHidden
-							? AuthenticationService.authenticate { result in
-								switch result {
-								case .success:
-									pair.isHidden.toggle()
-								case .failure(let error):
-									ToastManager.shared.show(error.message, type: .error)
-								}
-							} : pair.isHidden.toggle()
+								? AuthenticationService.authenticate { result in
+									switch result {
+									case .success:
+										pair.isHidden.toggle()
+									case .failure(let error):
+										ToastManager.shared.show(
+											error.message,
+											type: .error
+										)
+									}
+								} : pair.isHidden.toggle()
 						}) {
-							Image(systemName: pair.isHidden ? "eye.slash" : "eye")
-								.foregroundStyle(.secondary)
+							Image(
+								systemName: pair.isHidden ? "eye.slash" : "eye"
+							)
+							.foregroundStyle(.secondary)
 						}
 						.buttonStyle(.plain)
 					}
 				}
-				
+
 				TextField("Notes", text: $pair.notes, axis: .vertical)
 					.lineLimit(3...5)
-				
+
 				if pair.categories.isEmpty {
 					Button("Select categories") {
 						isCategoryPickerShown.toggle()
@@ -111,21 +116,27 @@ struct ItemView: View {
 				}
 				.tint(accent.color)
 				.buttonStyle(.glassProminent)
-				.disabled(pair.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+				.disabled(
+					pair.key.trimmingCharacters(in: .whitespacesAndNewlines)
+						.isEmpty
+				)
 			}
 		}
 		.sheet(isPresented: $isCategoryPickerShown) {
-			CategoryPicker(options: categories, onChange: { selectedCategories in
-				pair.categories = Array(selectedCategories)
-			})
+			CategoryPicker(
+				options: categories,
+				onChange: { selectedCategories in
+					pair.categories = Array(selectedCategories)
+				}
+			)
 		}
 		.onAppear {
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 				switch mode {
-					case .edit:
-						isContentFocused = true
-					case .new:
-						isNameFocused = true
+				case .edit:
+					isContentFocused = true
+				case .new:
+					isNameFocused = true
 				}
 			}
 		}
