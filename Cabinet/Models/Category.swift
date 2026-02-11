@@ -13,7 +13,7 @@ final class Category: Identifiable {
 	@Attribute(.unique) var name: String
 	var icon: String
 	
-	init(name: String, icon: String) {
+	init(name: String, icon: String = "line.3.horizontal.decrease.circle") {
 		self.name = name
 		self.icon = icon
 	}
