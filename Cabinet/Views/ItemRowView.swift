@@ -5,14 +5,16 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
+import SwiftData
 import SwiftUI
 
 struct ItemRowView: View {
+	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@State private var showDeleteConfirmation = false
 
 	let pair: Pair
-	var onEdit: () -> Void
-	var onDelete: () -> Void
+	@State var editingPair: Pair?
 
 	var body: some View {
 		HStack(alignment: .center, spacing: 12) {
@@ -55,42 +57,33 @@ struct ItemRowView: View {
 					.foregroundStyle(.secondary)
 			}
 			.buttonStyle(.plain)
-			Menu {
-				ControlGroup {
-					if !pair.isHidden {
-						ShareLink(item: pair.value) {
-							Label(
-								"Share",
-								systemImage: "square.and.arrow.up.fill"
-							)
-						}
-					}
-					Button {
-						pair.isFavorite.toggle()
-					} label: {
-						Label(
-							pair.isFavorite ? "Unpin" : "Pin",
-							systemImage: pair.isFavorite
-								? "star.slash.fill" : "star.fill"
-						)
-					}
-					Button {
-						onEdit()
-					} label: {
-						Label("Edit", systemImage: "pencil.circle.fill")
+		}
+		.contextMenu {
+			ControlGroup {
+				if !pair.isHidden {
+					ShareLink(item: pair.value) {
+						Label("Share", systemImage: "square.and.arrow.up.fill")
 					}
 				}
-				Button(role: .destructive) {
-					onDelete()
+				Button {
+					pair.isFavorite.toggle()
 				} label: {
-					Label("Delete", systemImage: "trash.fill")
+					Label(
+						pair.isFavorite ? "Unpin" : "Pin",
+						systemImage: pair.isFavorite
+							? "star.slash.fill" : "star.fill"
+					)
 				}
+				Button {
+					editingPair = pair
+				} label: {
+					Label("Edit", systemImage: "pencil")
+				}
+			}
+			Button(role: .destructive) {
+				showDeleteConfirmation = true
 			} label: {
-				Image(systemName: "ellipsis.circle")
-					.imageScale(.large)
-					.foregroundStyle(.primary)
-					.accessibilityLabel("More for \(pair.key)")
-					.tint(accent.color)
+				Label("Delete", systemImage: "trash.fill")
 			}
 		}
 		.contentShape(Rectangle())
@@ -101,19 +94,39 @@ struct ItemRowView: View {
 			) {
 				pair.isFavorite.toggle()
 			}.tint(.yellow)
+
+			ShareLink(item: pair.value) {
+				Label("Share", systemImage: "square.and.arrow.up.fill")
+			}
 		}
 		.swipeActions(edge: .trailing, allowsFullSwipe: true) {
-			Button("Delete", systemImage: "trash", role: .destructive) {
-				onDelete()
+			Button("Delete", systemImage: "trash") {
+				showDeleteConfirmation = true
 			}.tint(.red)
+
+			Button("Edit", systemImage: "pencil") {
+				editingPair = pair
+			}.tint(.blue)
+		}
+		.confirmationDialog(
+			"Delete ‘\(pair.key)’?",
+			isPresented: $showDeleteConfirmation,
+			titleVisibility: .visible
+		) {
+			Button("Delete", role: .destructive) {
+				modelContext.delete(pair)
+			}
+			Button("Cancel", role: .cancel) {}
+		} message: {
+			Text("This action cannot be undone.")
+		}
+		.sheet(item: $editingPair) { pair in
+			NavigationStack {
+				ItemView(mode: .edit, pair: pair)
+			}
+			.tint(accent.color)
+			.interactiveDismissDisabled()
+			.presentationDetents([.large])
 		}
 	}
-}
-
-#Preview {
-	ItemRowView(
-		pair: Pair.sampleData[0],
-		onEdit: {},
-		onDelete: {}
-	).padding()
 }

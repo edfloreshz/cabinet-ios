@@ -6,17 +6,17 @@
 //
 
 import SFSymbolsPicker
+import SwiftData
 import SwiftUI
 
 struct CategoryView: View {
+	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isNameFocused: Bool
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
-	@State var category: Category
+	@Bindable var category: Category
 	@State var isPresented = false
-
-	var onSave: (Category) -> Void
 
 	var body: some View {
 		Form {
@@ -31,7 +31,7 @@ struct CategoryView: View {
 							.frame(width: 40, height: 40)
 							.padding(20)
 							.glassEffect()
-							.foregroundStyle(accent.color)
+							.foregroundStyle(.foreground)
 					}
 
 					TextField("Name", text: $category.name)
@@ -54,7 +54,7 @@ struct CategoryView: View {
 			}
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Save", systemImage: "checkmark") {
-					onSave(category)
+					saveCategory()
 					dismiss()
 				}
 				.tint(accent.color)
@@ -82,11 +82,20 @@ struct CategoryView: View {
 			}
 		}
 	}
+
+	private func saveCategory() {
+		// Check if the category is already managed by SwiftData
+		if category.modelContext == nil {
+			modelContext.insert(category)
+		}
+
+		// Optional: Explicitly save (though SwiftData usually autosaves on the next main loop)
+		try? modelContext.save()
+	}
 }
 
 #Preview {
 	CategoryView(
-		category: Category(name: "All", icon: "square.grid.2x2"),
-		onSave: { _ in }
+		category: Category(name: "All", icon: "tag.fill")
 	)
 }
