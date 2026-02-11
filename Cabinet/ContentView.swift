@@ -21,8 +21,10 @@ struct ContentView: View {
 	@State private var showingAdd = false
 	@State private var showingAddCategory = false
 	@State private var showingSettings = false
-	@State private var showDeleteConfirmation = false
+	@State private var showItemDeleteConfirmation = false
+	@State private var showCategoryDeleteConfirmation = false
 	@State private var editingCategory: Category? = nil
+	@State private var categoryToDelete: Category? = nil
 	@State private var selectedItems: Set<UUID> = []
 
 	var body: some View {
@@ -138,7 +140,8 @@ struct ContentView: View {
 							systemImage: "trash",
 							role: .destructive
 						) {
-							modelContext.delete(category)
+							categoryToDelete = category
+							showCategoryDeleteConfirmation = true
 						}
 						Button("Edit", systemImage: "pencil") {
 							editingCategory = category
@@ -168,13 +171,32 @@ struct ContentView: View {
 				systemImage: "line.3.horizontal.decrease"
 			)
 		}
+		.confirmationDialog(
+			"Delete '\(categoryToDelete?.name ?? "Category")'?",
+			isPresented: $showCategoryDeleteConfirmation,
+			titleVisibility: .visible
+		) {
+			Button("Delete", role: .destructive) {
+				if let category = categoryToDelete {
+					if viewModel.selectedCategory == category.name {
+						viewModel.selectedCategory = "All"
+					}
+					modelContext.delete(category)
+				}
+			}
+			Button("Cancel", role: .cancel) {
+				categoryToDelete = nil
+			}
+		} message: {
+			Text("This action cannot be undone. Items in this category will not be deleted, but will no longer be categorized.")
+		}
 	}
 
 	fileprivate var primaryAction: some View {
 		Group {
 			if isEditing {
 				Button("Delete", systemImage: "trash", role: .destructive) {
-					showDeleteConfirmation.toggle()
+					showItemDeleteConfirmation.toggle()
 				}
 				.tint(.red)
 				.disabled(selectedItems.isEmpty)
@@ -188,7 +210,7 @@ struct ContentView: View {
 		}
 		.confirmationDialog(
 			"Delete selected items?",
-			isPresented: $showDeleteConfirmation,
+			isPresented: $showItemDeleteConfirmation,
 			titleVisibility: .visible
 		) {
 			Button("Delete", role: .destructive) {
@@ -241,7 +263,7 @@ struct ContentView: View {
 				pb.clearContents()
 				pb.setString(pair.value, forType: .string)
 			#endif
-			
+
 			ToastManager.shared.show("Copied", type: .info)
 		}
 
