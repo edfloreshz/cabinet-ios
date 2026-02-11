@@ -9,20 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
 	@Environment(\.dismiss) private var dismiss
-	@Binding var accentColorName: String
-	
-	let accentColors: [(name: String, color: Color)] = [
-		("indigo", .indigo),
-		("blue", .blue),
-		("purple", .purple),
-		("pink", .pink),
-		("red", .red),
-		("orange", .orange),
-		("yellow", .yellow),
-		("green", .green),
-		("teal", .teal),
-		("cyan", .cyan)
-	]
+	@AppStorage("accentColor") private var accentColorName: String = "indigo"
 	
 	var body: some View {
 		Form {
@@ -30,10 +17,10 @@ struct SettingsView: View {
 				LazyVGrid(columns: [
 					GridItem(.adaptive(minimum: 60), spacing: 16)
 				], spacing: 16) {
-					ForEach(accentColors, id: \.name) { colorOption in
+					ForEach(ThemeColor.allCases, id: \.self) { colorOption in
 						Button {
 							withAnimation(.spring(duration: 0.3)) {
-								accentColorName = colorOption.name
+								accentColorName = colorOption.rawValue
 							}
 						} label: {
 							ZStack {
@@ -41,7 +28,7 @@ struct SettingsView: View {
 									.fill(colorOption.color.gradient)
 									.frame(width: 60, height: 60)
 								
-								if accentColorName == colorOption.name {
+								if accentColorName == colorOption.rawValue {
 									Circle()
 										.strokeBorder(.white, lineWidth: 3)
 										.frame(width: 60, height: 60)
@@ -70,4 +57,8 @@ struct SettingsView: View {
 			}
 		}
 	}
+}
+
+#Preview {
+	SettingsView()
 }

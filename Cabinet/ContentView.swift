@@ -13,6 +13,10 @@ import os
 struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.editMode) private var editMode
+	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+
+	@Query private var pairs: [Pair]
+	@Query private var categories: [Category]
 	
 	@State private var isEditing = false
 	@State private var showingAdd = false
@@ -22,27 +26,19 @@ struct ContentView: View {
 	@State private var searchText: String = ""
 	@State private var selectedItems: Set<UUID> = []
 	@State private var selectedCategory: String = "All"
-	@Query private var pairs: [Pair]
-	@Query private var categories: [Category]
 	
-	@AppStorage("accentColor") private var accentColorName: String = "indigo"
-
 	private let logger = Logger(subsystem: "dev.edfloreshz.Cabinet", category: "Utilities")
-	private var accentColor: Color {
-		Color.accentColorFromName(accentColorName)
-	}
 
 	var body: some View {
 		NavigationStack {
 			Group {
 				if filteredAndSortedPairs.isEmpty {
-					EmptyView(searching: !searchText.isEmpty, accentColor: accentColor)
+					EmptyView(searching: !searchText.isEmpty, accentColor: accent.color)
 				} else {
 					List(selection: $selectedItems) {
 						ForEach(filteredAndSortedPairs) { pair in
 							ItemRowView(
 								pair: pair,
-								accentColor: accentColor,
 								onEdit: { editingPair = pair },
 								onDelete: { modelContext.delete(pair) }
 							)
@@ -70,7 +66,7 @@ struct ContentView: View {
 			.navigationTitle("Cabinet")
 			.toolbarBackgroundVisibility(.hidden, for: .automatic)
 			.navigationBarTitleDisplayMode(.inline)
-			.searchable(text: $searchText, prompt: "Search keys or values")
+			.searchable(text: $searchText, prompt: "Keys, values, notes")
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
 					Button("Settings", systemImage: "gear") {
@@ -80,16 +76,14 @@ struct ContentView: View {
 				
 				if !filteredAndSortedPairs.isEmpty {
 					ToolbarItem(placement: .topBarTrailing) {
-						Button(isEditing ? "" : "Edit",
-							   systemImage: isEditing ? "checkmark" : "",
-							   role: isEditing ? .confirm : .close) {
+						Button("Edit", systemImage: isEditing ? "checkmark" : "pencil", role: isEditing ? .confirm : .close) {
 							withAnimation {
 								isEditing.toggle()
 								if !isEditing {
 									selectedItems.removeAll()
 								}
 							}
-						}.tint(accentColor)
+						}.tint(isEditing ? accent.color : nil)
 					}
 				}
 				
@@ -134,65 +128,49 @@ struct ContentView: View {
 					ToolbarItem(placement: .bottomBar) {
 						Button("New", systemImage: "plus") {
 							showingAdd.toggle()
-						}.tint(accentColor)
+						}.buttonStyle(.glassProminent).tint(accent.color)
 					}
 				}
 			}
 			.sheet(isPresented: $showingSettings) {
 				NavigationStack {
-					SettingsView(accentColorName: $accentColorName)
+					SettingsView()
 				}
-				.tint(accentColor)
-				.presentationDetents([.medium, .large])
-			}
-			.sheet(isPresented: $showingAdd) {
-				NavigationStack {
-					EditItemView(title: "New Item",
-								 pair: Pair(key: "", value: ""),
-								 onSave: { newPair in modelContext.insert(newPair) },
-								 onRevealOrToggleHidden: { pairToReveal in pairToReveal.isHidden
-						? AuthenticationService.authenticate { result in
-							switch result {
-							case .success:
-								pairToReveal.isHidden.toggle()
-							case .failure(let error):
-								ToastManager.shared.show(error.message, type: .error)
-							}
-						} : pairToReveal.isHidden.toggle() })
-				}
-				.tint(accentColor)
+				.tint(accent.color)
 				.presentationDetents([.medium, .large])
 			}
 			.sheet(isPresented: $showingAddCategory) {
 				NavigationStack {
-					EditCategoryView(category: Category(name: "", icon: ""), onSave: { newCategory in
+					CategoryView(category: Category(name: ""), onSave: { newCategory in
 						modelContext.insert(newCategory)
 					})
 				}
-				.tint(accentColor)
+				.tint(accent.color)
 				.presentationDetents([.medium, .large])
+				.interactiveDismissDisabled()
+			}
+			.sheet(isPresented: $showingAdd) {
+				NavigationStack {
+					ItemView(mode: .new, pair: Pair(key: "", value: ""), onSave: { newPair in modelContext.insert(newPair) })
+				}
+				.presentationDetents([.large])
+				.interactiveDismissDisabled()
 			}
 			.sheet(item: $editingPair) { pair in
 				NavigationStack {
-					EditItemView(title: "Edit Item", pair: pair, onSave: {
+					ItemView(mode: .edit, pair: pair,
+					 onSave: {
 						editedPair in
 						pair.key = editedPair.key
 						pair.value = editedPair.value
 						pair.isHidden = editedPair.isHidden
-					}, onRevealOrToggleHidden: {
-						pairToReveal in pairToReveal.isHidden
-						? AuthenticationService.authenticate { result in
-							switch result {
-							case .success:
-								pairToReveal.isHidden.toggle()
-							case .failure(let error):
-								ToastManager.shared.show(error.message, type: .error)
-							}
-						} : pairToReveal.isHidden.toggle()
+						pair.categories = editedPair.categories
+						pair.notes = editedPair.notes
 					})
 				}
-				.tint(accentColor)
-				.presentationDetents([.medium, .large])
+				.tint(accent.color)
+				.interactiveDismissDisabled()
+				.presentationDetents([.large])
 			}
 		}
 	}
@@ -205,7 +183,7 @@ struct ContentView: View {
 		} else {
 			let term = searchText.lowercased()
 			searchFiltered = base.filter {
-				$0.key.lowercased().contains(term) || $0.value.lowercased().contains(term)
+				$0.key.lowercased().contains(term) || $0.value.lowercased().contains(term) || $0.notes.lowercased().contains(term)
 			}
 		}
 
@@ -217,7 +195,7 @@ struct ContentView: View {
 			categoryFiltered = searchFiltered.filter { $0.isFavorite }
 		default:
 			categoryFiltered = searchFiltered.filter { pair in
-				(pair.categories).contains { $0.caseInsensitiveCompare(selectedCategory) == .orderedSame }
+				(pair.categories).contains { $0.name.caseInsensitiveCompare(selectedCategory) == .orderedSame }
 			}
 		}
 
@@ -243,24 +221,6 @@ extension Array {
 	}
 }
 
-extension Color {
-	static func accentColorFromName(_ name: String) -> Color {
-		switch name {
-		case "blue": return .blue
-		case "purple": return .purple
-		case "pink": return .pink
-		case "red": return .red
-		case "orange": return .orange
-		case "yellow": return .yellow
-		case "green": return .green
-		case "teal": return .teal
-		case "cyan": return .cyan
-		default: return .indigo
-		}
-	}
-}
-
 #Preview {
 	ContentView().modelContainer(SampleData.shared.modelContainer)
 }
-

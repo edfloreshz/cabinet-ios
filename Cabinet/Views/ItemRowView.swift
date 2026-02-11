@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct ItemRowView: View {
+	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+
 	let pair: Pair
-	var accentColor: Color
 	var onEdit: () -> Void
 	var onDelete: () -> Void
 	
@@ -72,7 +73,7 @@ struct ItemRowView: View {
 					.imageScale(.large)
 					.foregroundStyle(.primary)
 					.accessibilityLabel("More for \(pair.key)")
-					.tint(accentColor)
+					.tint(accent.color)
 			}
 		}
 		.contentShape(Rectangle())
@@ -92,7 +93,6 @@ struct ItemRowView: View {
 #Preview {
 	ItemRowView(
 		pair: Pair.sampleData[0],
-		accentColor: .indigo,
 		onEdit: { },
 		onDelete: { }
 	).padding()
