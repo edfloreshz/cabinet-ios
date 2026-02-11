@@ -14,17 +14,17 @@ struct ContentView: View {
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
 	@Query private var pairs: [Pair]
-	@Query private var categories: [Category]
+	@Query private var drawers: [Drawer]
 
 	@State private var viewModel = ContentViewModel()
 	@State private var isEditing = false
 	@State private var showingAdd = false
-	@State private var showingAddCategory = false
+	@State private var showingAddDrawer = false
 	@State private var showingSettings = false
 	@State private var showItemDeleteConfirmation = false
-	@State private var showCategoryDeleteConfirmation = false
-	@State private var editingCategory: Category? = nil
-	@State private var categoryToDelete: Category? = nil
+	@State private var showDrawerDeleteConfirmation = false
+	@State private var editingDrawer: Drawer? = nil
+	@State private var drawerToDelete: Drawer? = nil
 	@State private var selectedItems: Set<UUID> = []
 
 	var body: some View {
@@ -70,7 +70,7 @@ struct ContentView: View {
 					editButton
 				}
 				ToolbarItem(placement: .bottomBar) {
-					categoryPickerMenu
+					drawerPickerMenu
 				}
 				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
@@ -86,19 +86,18 @@ struct ContentView: View {
 				.tint(accent.color)
 				.presentationDetents([.medium, .large])
 			}
-			.sheet(isPresented: $showingAddCategory) {
+			.sheet(isPresented: $showingAddDrawer) {
 				NavigationStack {
-					CategoryView(
-						category: Category(name: ""),
+					DrawerView(
+						drawer: Drawer(name: ""),
 					)
 				}
-				.tint(accent.color)
 				.presentationDetents([.large])
 				.interactiveDismissDisabled()
 			}
-			.sheet(item: $editingCategory) { category in
+			.sheet(item: $editingDrawer) { drawer in
 				NavigationStack {
-					CategoryView(category: category)
+					DrawerView(drawer: drawer)
 				}
 				.tint(accent.color)
 				.interactiveDismissDisabled()
@@ -117,42 +116,42 @@ struct ContentView: View {
 		}
 	}
 
-	fileprivate var categoryPickerMenu: some View {
+	fileprivate var drawerPickerMenu: some View {
 		Menu {
 			Section("General") {
-				ForEach(Category.defaultCategories) { category in
+				ForEach(Drawer.defaultDrawers) { drawer in
 					Button {
-						viewModel.selectedCategory = category.name
+						viewModel.selectedDrawer = drawer.name
 					} label: {
 						Label(
-							category.name.capitalized,
-							systemImage: category.icon
+							drawer.name.capitalized,
+							systemImage: drawer.icon
 						)
 					}
 				}
 			}
 
-			Section("Categories") {
-				ForEach(categories) { category in
+			Section("Drawers") {
+				ForEach(drawers) { drawer in
 					Menu {
 						Button(
 							"Delete",
 							systemImage: "trash",
 							role: .destructive
 						) {
-							categoryToDelete = category
-							showCategoryDeleteConfirmation = true
+							drawerToDelete = drawer
+							showDrawerDeleteConfirmation = true
 						}
 						Button("Edit", systemImage: "pencil") {
-							editingCategory = category
+							editingDrawer = drawer
 						}
 						Button("Select", systemImage: "checkmark.circle") {
-							viewModel.selectedCategory = category.name
+							viewModel.selectedDrawer = drawer.name
 						}
 					} label: {
 						Label(
-							category.name.capitalized,
-							systemImage: category.icon
+							drawer.name.capitalized,
+							systemImage: drawer.icon
 						)
 					}
 				}
@@ -160,35 +159,35 @@ struct ContentView: View {
 				Divider()
 
 				Button {
-					showingAddCategory.toggle()
+					showingAddDrawer.toggle()
 				} label: {
-					Label("Add Category", systemImage: "plus.circle")
+					Label("Add Drawer", systemImage: "plus.circle")
 				}
 			}
 		} label: {
 			Label(
-				viewModel.selectedCategory.capitalized,
+				viewModel.selectedDrawer.capitalized,
 				systemImage: "line.3.horizontal.decrease"
 			)
 		}
 		.confirmationDialog(
-			"Delete '\(categoryToDelete?.name ?? "Category")'?",
-			isPresented: $showCategoryDeleteConfirmation,
+			"Delete '\(drawerToDelete?.name ?? "drawer")'?",
+			isPresented: $showDrawerDeleteConfirmation,
 			titleVisibility: .visible
 		) {
 			Button("Delete", role: .destructive) {
-				if let category = categoryToDelete {
-					if viewModel.selectedCategory == category.name {
-						viewModel.selectedCategory = "All"
+				if let drawer = drawerToDelete {
+					if viewModel.selectedDrawer == drawer.name {
+						viewModel.selectedDrawer = "All"
 					}
-					modelContext.delete(category)
+					modelContext.delete(drawer)
 				}
 			}
 			Button("Cancel", role: .cancel) {
-				categoryToDelete = nil
+				drawerToDelete = nil
 			}
 		} message: {
-			Text("This action cannot be undone. Items in this category will not be deleted, but will no longer be categorized.")
+			Text("This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized.")
 		}
 	}
 

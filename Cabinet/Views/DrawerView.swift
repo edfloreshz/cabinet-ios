@@ -1,5 +1,5 @@
 //
-//  CategoryView.swift
+//  DrawerView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 09/02/26.
@@ -9,13 +9,13 @@ import SFSymbolsPicker
 import SwiftData
 import SwiftUI
 
-struct CategoryView: View {
+struct DrawerView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isNameFocused: Bool
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
-	@Bindable var category: Category
+	@Bindable var drawer: Drawer
 	@State var isPresented = false
 
 	var body: some View {
@@ -25,7 +25,7 @@ struct CategoryView: View {
 					Button(action: {
 						isPresented.toggle()
 					}) {
-						Image(systemName: category.icon)
+						Image(systemName: drawer.icon)
 							.resizable()
 							.scaledToFit()
 							.frame(width: 40, height: 40)
@@ -34,7 +34,7 @@ struct CategoryView: View {
 							.foregroundStyle(.foreground)
 					}
 
-					TextField("Name", text: $category.name)
+					TextField("Name", text: $drawer.name)
 						.textInputAutocapitalization(.none)
 						.autocorrectionDisabled()
 						.font(.system(size: 28, weight: .bold))
@@ -45,7 +45,7 @@ struct CategoryView: View {
 				.listRowBackground(Color.clear)
 			}
 		}
-		.navigationTitle("Category")
+		.navigationTitle("Drawer")
 		.navigationBarTitleDisplayMode(.inline)
 		.scrollDismissesKeyboard(.interactively)
 		.toolbar {
@@ -54,13 +54,13 @@ struct CategoryView: View {
 			}
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Save", systemImage: "checkmark") {
-					saveCategory()
+					saveDrawer()
 					dismiss()
 				}
 				.tint(accent.color)
 				.buttonStyle(.glassProminent)
 				.disabled(
-					category.name.trimmingCharacters(
+					drawer.name.trimmingCharacters(
 						in: .whitespacesAndNewlines
 					).isEmpty
 				)
@@ -70,7 +70,7 @@ struct CategoryView: View {
 			isPresented: $isPresented,
 			content: {
 				SymbolsPicker(
-					selection: $category.icon,
+					selection: $drawer.icon,
 					title: "Pick a symbol",
 					autoDismiss: true
 				)
@@ -83,10 +83,9 @@ struct CategoryView: View {
 		}
 	}
 
-	private func saveCategory() {
-		// Check if the category is already managed by SwiftData
-		if category.modelContext == nil {
-			modelContext.insert(category)
+	private func saveDrawer() {
+		if drawer.modelContext == nil {
+			modelContext.insert(drawer)
 		}
 
 		// Optional: Explicitly save (though SwiftData usually autosaves on the next main loop)
@@ -95,7 +94,7 @@ struct CategoryView: View {
 }
 
 #Preview {
-	CategoryView(
-		category: Category(name: "All", icon: "tag.fill")
+	DrawerView(
+		drawer: Drawer(name: "All", icon: "tag.fill")
 	)
 }

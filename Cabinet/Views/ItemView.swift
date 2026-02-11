@@ -17,8 +17,8 @@ struct ItemView: View {
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 	@FocusState private var isContentFocused: Bool
 	@FocusState private var isNameFocused: Bool
-	@State private var selectedCategories: Set<Category> = []
-	@Query private var categories: [Category]
+	@State private var selectedDrawers: Set<Drawer> = []
+	@Query private var drawers: [Drawer]
 
 	let mode: ViewMode
 	@Bindable var pair: Pair
@@ -86,28 +86,28 @@ struct ItemView: View {
 				.lineLimit(3...5)
 			}
 
-			Section(header: Text("Categories")) {
-				if categories.isEmpty {
-					Text("No categories available")
+			Section(header: Text("Drawers")) {
+				if drawers.isEmpty {
+					Text("No drawers available")
 				} else {
-					List(categories, id: \.self) { item in
+					List(drawers, id: \.self) { item in
 						HStack {
 							Image(systemName: item.icon)
 							Text(item.name)
 							Spacer()
-							if pair.categories.contains(item) {
+							if pair.drawers.contains(item) {
 								Image(systemName: "checkmark")
 									.foregroundColor(accent.color)
 							}
 						}
 						.contentShape(Rectangle())
 						.onTapGesture {
-							if selectedCategories.contains(item) {
-								selectedCategories.remove(item)
+							if selectedDrawers.contains(item) {
+								selectedDrawers.remove(item)
 							} else {
-								selectedCategories.insert(item)
+								selectedDrawers.insert(item)
 							}
-							pair.categories = Array(selectedCategories)
+							pair.drawers = Array(selectedDrawers)
 						}
 					}
 				}

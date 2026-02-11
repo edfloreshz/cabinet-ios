@@ -13,7 +13,7 @@ struct CabinetApp: App {
 	var body: some Scene {
 		WindowGroup {
 			ContentView()
-				.modelContainer(for: [Pair.self, Category.self])
+				.modelContainer(for: [Pair.self, Drawer.self])
 				.toast()
 		}
 	}
