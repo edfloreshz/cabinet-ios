@@ -123,7 +123,7 @@ struct ItemRowView: View {
 		}
 		.sheet(item: $editingPair) { pair in
 			NavigationStack {
-				ItemView(mode: .edit, pair: pair)
+				ItemView(mode: .edit, pair: pair, onSave: {})
 			}
 			.tint(accent.color)
 			.interactiveDismissDisabled()

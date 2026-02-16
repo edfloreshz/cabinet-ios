@@ -29,17 +29,15 @@ class ContentViewModel {
 			}
 		}
 
-		var destinationFiltered: [Pair]
+		var destinationFiltered: [Pair] = searchFiltered
 
 		switch destination {
 		case .drawer(let drawer):
-			selectedFilter = .all
 			destinationFiltered = searchFiltered.filter { pair in
 				pair.drawers.contains(drawer.id)
 			}
 		case .filter(let filter):
 			selectedFilter = filter
-			destinationFiltered = searchFiltered
 		}
 		
 		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!

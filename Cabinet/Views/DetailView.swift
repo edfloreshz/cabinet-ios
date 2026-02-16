@@ -24,21 +24,19 @@ struct DetailView: View {
 		viewModel.filteredPairs(pairs, destination: destination)
 	}
 
-	var navigationTitle: String {
+	var navigationTitle: Text {
 		switch destination {
 		case .drawer(let drawer):
-			return drawer.name.capitalized
+			Text(drawer.name.capitalized)
 		case .filter(let filterCategory):
-			return filterCategory.rawValue.capitalized
-		}
-	}
-
-	var drawerIds: [UUID] {
-		switch destination {
-		case .drawer(let drawer):
-			return [drawer.id]
-		case .filter:
-			return []
+			switch filterCategory {
+			case .all:
+				Text("All")
+			case .favorites:
+				Text("Favorites")
+			case .recents:
+				Text("Recents")
+			}
 		}
 	}
 
@@ -103,15 +101,45 @@ struct DetailView: View {
 			#endif
 		}
 		.sheet(isPresented: $showingAdd) {
-			NavigationStack {
-				ItemView(
-					mode: .new,
-					pair: Pair(key: "", value: "", drawers: drawerIds),
-				)
-			}
-			.presentationDetents([.large])
-			.interactiveDismissDisabled()
+			addSheet
 		}
+		.onChange(of: destination) {
+			switch destination {
+			case .drawer(_):
+				viewModel.selectedFilter = .all
+			case .filter(let filter):
+				viewModel.selectedFilter = filter
+			}
+		}
+	}
+	
+	var selectedDrawers: [UUID] {
+		switch destination {
+		case .drawer(let drawer):
+			return [drawer.id]
+		case .filter:
+			return []
+		}
+	}
+	
+	fileprivate var addSheet: some View {
+		let pair = Pair(key: "", value: "", drawers: selectedDrawers)
+		
+		if viewModel.selectedFilter == .favorites {
+			pair.isFavorite = true
+		}
+		
+		return NavigationStack {
+			ItemView(
+				mode: .new,
+				pair: pair,
+				onSave: {
+					viewModel.selectedFilter = .all
+				}
+			)
+		}
+		.presentationDetents([.large])
+		.interactiveDismissDisabled()
 	}
 
 	fileprivate var filterPickerMenu: some View {

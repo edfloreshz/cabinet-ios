@@ -22,9 +22,10 @@ struct ItemView: View {
 	@State private var selectedDrawers: Set<UUID> = []
 	@State var isPresented = false
 	@Query private var drawers: [Drawer]
-
+	
 	let mode: ViewMode
 	@State var pair: Pair
+	let onSave: () -> Void
 
 	var body: some View {
 		Form {
@@ -131,6 +132,7 @@ struct ItemView: View {
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Save", systemImage: "checkmark") {
 					savePair()
+					onSave()
 					dismiss()
 				}
 				.tint(accent.color)
@@ -174,5 +176,5 @@ struct ItemView: View {
 }
 
 #Preview {
-	ItemView(mode: .new, pair: Pair.sampleData[0])
+	ItemView(mode: .new, pair: Pair.sampleData[0], onSave: {})
 }

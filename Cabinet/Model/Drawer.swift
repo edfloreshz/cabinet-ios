@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 final class Drawer: Identifiable {
@@ -14,7 +15,7 @@ final class Drawer: Identifiable {
 	var name: String
 	var icon: String
 
-	init(name: String, icon: String = "tag.fill") {
+	init(name: String, icon: String = "archivebox") {
 		self.name = name
 		self.icon = icon
 	}
