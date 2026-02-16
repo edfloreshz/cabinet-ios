@@ -25,7 +25,9 @@ struct MasterView: View {
 	@State private var drawerToDelete: Drawer? = nil
 	@State private var selectedItems: Set<UUID> = []
 	@State private var searchText: String = ""
-	@State private var selectedDestination: NavigationDestination? = .filter(.all)
+	@State private var selectedDestination: NavigationDestination? = .filter(
+		.all
+	)
 
 	var filteredDrawers: [Drawer] {
 		if searchText.isEmpty {
@@ -58,7 +60,7 @@ struct MasterView: View {
 						}
 					}
 					Section(
-						header: Text("Drawers").font(.title3).fontWeight(.bold)
+						header: Text("Drawers").fontWeight(.bold)
 					) {
 						if filteredDrawers.isEmpty {
 							EmptyDrawersView(
@@ -74,7 +76,9 @@ struct MasterView: View {
 										Text(drawer.name)
 									} icon: {
 										Image(systemName: drawer.icon)
-											.foregroundStyle(accent.color)
+											#if os(iOS) || os(iPadOS) || os(visionOS)
+												.foregroundStyle(accent.color)
+											#endif
 									}
 								}
 								.tag(NavigationDestination.drawer(drawer))
@@ -103,6 +107,7 @@ struct MasterView: View {
 					prompt: "Search"
 				)
 			#endif
+			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
 			.toolbar {
 				#if os(iOS) || os(iPadOS) || os(visionOS)
 					ToolbarItem(placement: .topBarLeading) {
@@ -116,12 +121,7 @@ struct MasterView: View {
 						primaryAction
 					}
 				#else
-					ToolbarItem(placement: .automatic) {
-						Button("Settings", systemImage: "gearshape") {
-							showingSettings.toggle()
-						}
-					}
-					ToolbarItem(placement: .automatic) {
+					ToolbarItem(placement: .primaryAction) {
 						primaryAction
 					}
 				#endif

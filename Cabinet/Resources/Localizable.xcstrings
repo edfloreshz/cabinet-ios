@@ -64,6 +64,16 @@
         }
       }
     },
+    "Change icon" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar icono"
+          }
+        }
+      }
+    },
     "Choose a drawer from the sidebar to view its contents" : {
       "localizations" : {
         "es-419" : {
@@ -180,6 +190,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Filtrar"
+          }
+        }
+      }
+    },
+    "Hide value" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar valor"
           }
         }
       }
@@ -350,6 +370,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compartir"
+          }
+        }
+      }
+    },
+    "Show value" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar valor"
           }
         }
       }
