@@ -25,16 +25,7 @@ struct ContentView: View {
 	@State private var drawerToDelete: Drawer? = nil
 	@State private var selectedItems: Set<UUID> = []
 	@State private var searchText: String = ""
-	@State private var selectedDestination: NavigationDestination?
-
-	@State private var allCount = 0
-	@State private var favoritesCount = 0
-	@State private var recentCount = 0
-
-	let columns = [
-		GridItem(.flexible(), spacing: 16),
-		GridItem(.flexible(), spacing: 16),
-	]
+	@State private var selectedDestination: NavigationDestination? = .filter(.all)
 
 	var filteredDrawers: [Drawer] {
 		if searchText.isEmpty {

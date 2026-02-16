@@ -78,12 +78,10 @@ struct DetailView: View {
 				ToolbarItemGroup(placement: .topBarTrailing) {
 					editButton
 				}
-				if case .drawer(_) = destination {
-					ToolbarItem(placement: .bottomBar) {
-						filterPickerMenu
-					}
-					ToolbarSpacer(placement: .bottomBar)
+				ToolbarItem(placement: .bottomBar) {
+					filterPickerMenu
 				}
+				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
 				ToolbarSpacer(placement: .bottomBar)
 				ToolbarItem(placement: .bottomBar) {
@@ -102,14 +100,6 @@ struct DetailView: View {
 		}
 		.sheet(isPresented: $showingAdd) {
 			addSheet
-		}
-		.onChange(of: destination) {
-			switch destination {
-			case .drawer(_):
-				viewModel.selectedFilter = .all
-			case .filter(let filter):
-				viewModel.selectedFilter = filter
-			}
 		}
 	}
 	
