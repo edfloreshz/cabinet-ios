@@ -243,7 +243,6 @@ struct DetailView: View {
 			ToastManager.shared.show("Copied", type: .info)
 		}
 
-		// Only authenticate if the item is hidden and we aren't currently in Edit Mode
 		if pair.isHidden {
 			AuthenticationService.authenticate { result in
 				switch result {
@@ -254,7 +253,6 @@ struct DetailView: View {
 				}
 			}
 		} else {
-			// If not hidden or in edit mode, copy directly
 			performCopy()
 		}
 	}

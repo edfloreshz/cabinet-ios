@@ -7,8 +7,6 @@ enum KeychainError: Error {
 }
 
 struct KeychainService {
-    // Use Generic Password items for arbitrary data (works reliably across iOS and macOS)
-    // We use `service` as a namespace (bundle identifier if available) and `account` as the key identifier.
     private static var service: String {
         if let id = Bundle.main.bundleIdentifier, !id.isEmpty {
             return id
@@ -25,7 +23,6 @@ struct KeychainService {
             kSecAttrSynchronizable as String: kCFBooleanFalse as Any
         ]
 
-        // Try update first, fall back to add if not found
         let attributesToUpdate: [String: Any] = [
             kSecValueData as String: data
         ]
