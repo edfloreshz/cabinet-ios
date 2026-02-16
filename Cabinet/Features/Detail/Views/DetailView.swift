@@ -16,6 +16,7 @@ struct DetailView: View {
 	@State private var showingAdd = false
 	@State private var showItemDeleteConfirmation = false
 	@State private var selectedItems: Set<UUID> = []
+	@State private var showingSettings: Bool = false
 
 	@Query private var pairs: [Pair]
 
@@ -90,6 +91,12 @@ struct DetailView: View {
 					primaryAction
 				}
 			#else
+				ToolbarItem(placement: .automatic) {
+					Button("Settings", systemImage: "gearshape") {
+						showingSettings.toggle()
+					}
+				}
+				ToolbarSpacer()
 				if case .drawer(_) = destination {
 					ToolbarItem(placement: .automatic) {
 						filterPickerMenu
@@ -102,6 +109,18 @@ struct DetailView: View {
 		}
 		.sheet(isPresented: $showingAdd) {
 			addSheet
+		}
+		.sheet(isPresented: $showingSettings) {
+			NavigationStack {
+				SettingsView()
+			}
+			.tint(accent.color)
+			.presentationDetents([.medium, .large])
+		}
+		.onChange(of: destination) {
+			if case .drawer(_) = destination {
+				viewModel.selectedFilter = .all
+			}
 		}
 	}
 
@@ -122,7 +141,7 @@ struct DetailView: View {
 		}
 
 		return NavigationStack {
-			ItemView(
+			ItemDetailView(
 				mode: .new,
 				pair: pair,
 				onSave: {
