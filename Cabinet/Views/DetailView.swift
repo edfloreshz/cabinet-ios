@@ -16,9 +16,8 @@ struct DetailView: View {
 	@State private var showingAdd = false
 	@State private var showItemDeleteConfirmation = false
 	@State private var selectedItems: Set<UUID> = []
-	@State private var selectedFilter: Filter = .all
 
-	@Query private var pairs: [Pair]
+	@State var pairs: [Pair]
 
 	var destination: NavigationDestination
 	var displayedPairs: [Pair] {
@@ -28,9 +27,9 @@ struct DetailView: View {
 	var navigationTitle: String {
 		switch destination {
 		case .drawer(let drawer):
-			return drawer.name
+			return drawer.name.capitalized
 		case .filter(let filterCategory):
-			return filterCategory.rawValue
+			return filterCategory.rawValue.capitalized
 		}
 	}
 	
@@ -78,10 +77,12 @@ struct DetailView: View {
 			ToolbarItemGroup(placement: .topBarTrailing) {
 				editButton
 			}
-			ToolbarItem(placement: .bottomBar) {
-				filterPickerMenu
+			if case .drawer(_) = destination {
+				ToolbarItem(placement: .bottomBar) {
+					filterPickerMenu
+				}
+				ToolbarSpacer(placement: .bottomBar)
 			}
-			ToolbarSpacer(placement: .bottomBar)
 			DefaultToolbarItem(kind: .search, placement: .bottomBar)
 			ToolbarSpacer(placement: .bottomBar)
 			ToolbarItem(placement: .bottomBar) {
@@ -102,9 +103,9 @@ struct DetailView: View {
 	
 	fileprivate var filterPickerMenu: some View {
 		Menu {
-			Picker("Filter", selection: $selectedFilter) {
+			Picker("Filter", selection: $viewModel.selectedFilter) {
 				ForEach(Filter.allCases, id: \.self) { filter in
-					filter.view
+					filter.label
 				}
 			}.pickerStyle(.inline)
 		} label: {
@@ -219,6 +220,6 @@ struct DetailView: View {
 }
 
 #Preview {
-	DetailView(destination: NavigationDestination.drawer(Drawer.sampleData.first!))
+	DetailView(pairs: [], destination: NavigationDestination.drawer(Drawer.sampleData.first!))
 		.modelContainer(SampleData.shared.modelContainer)
 }

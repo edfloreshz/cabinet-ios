@@ -11,17 +11,29 @@ enum Filter: String, CaseIterable, Identifiable {
 	case all, favorites, recents
 	var id: Self { self }
 
-	var view: some View {
+	var label: some View {
 		switch self {
 		case .all:
-			Label("All", systemImage: "list.clipboard.fill")
-				.tag(self)
+			Label {
+				Text("All")
+			} icon: {
+				Image(systemName: self.icon)
+					.foregroundStyle(self.color)
+			}.tag(self)
 		case .favorites:
-			Label("Favorites", systemImage: "star.fill")
-				.tag(self)
+			Label {
+				Text("Favorites")
+			} icon: {
+				Image(systemName: self.icon)
+					.foregroundStyle(self.color)
+			}.tag(self)
 		case .recents:
-			Label("Recents", systemImage: "calendar.badge.clock")
-				.tag(self)
+			Label {
+				Text("Recents")
+			} icon: {
+				Image(systemName: self.icon)
+					.foregroundStyle(self.color)
+			}.tag(self)
 		}
 	}
 

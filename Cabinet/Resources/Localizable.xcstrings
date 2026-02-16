@@ -64,6 +64,16 @@
         }
       }
     },
+    "Choose a drawer from the sidebar to view its contents" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un cajón de la barra lateral para ver su contenido"
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "es-419" : {
@@ -300,6 +310,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buscar"
+          }
+        }
+      }
+    },
+    "Select a drawer" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona un cajón"
           }
         }
       }

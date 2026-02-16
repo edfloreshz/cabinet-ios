@@ -4,14 +4,15 @@
 //
 //  Created by Eduardo Flores on 15/02/26.
 //
-
 import SwiftUI
-
 struct FilterCard: View {
 	@State var filter: Filter
+	@Binding var selectedDestination: NavigationDestination?
 	
-    var body: some View {
-		NavigationLink(value: NavigationDestination.filter(filter)) {
+	var body: some View {
+		Button {
+			selectedDestination = NavigationDestination.filter(filter)
+		} label: {
 			VStack(alignment: .leading, spacing: 0) {
 				HStack {
 					Image(systemName: filter.icon)
@@ -20,9 +21,9 @@ struct FilterCard: View {
 					
 					Spacer()
 					
-//					Text(filter.count.formatted())
-//						.font(.system(size: 32, weight: .bold))
-//						.foregroundStyle(.white)
+					//					Text(filter.count.formatted())
+					//						.font(.system(size: 32, weight: .bold))
+					//						.foregroundStyle(.white)
 				}
 				.padding(.top, 20)
 				.padding(.horizontal, 20)
@@ -39,9 +40,10 @@ struct FilterCard: View {
 			.background(filter.color.gradient)
 			.clipShape(RoundedRectangle(cornerRadius: 16))
 		}
-    }
+		.buttonStyle(.plain)
+	}
 }
-
 #Preview {
-	FilterCard(filter: .all)
+	@Previewable @State var selectedDestination: NavigationDestination? = nil
+	FilterCard(filter: .all, selectedDestination: $selectedDestination)
 }

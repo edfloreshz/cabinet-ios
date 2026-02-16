@@ -29,7 +29,7 @@ class ContentViewModel {
 			}
 		}
 
-		let destinationFiltered: [Pair]
+		var destinationFiltered: [Pair]
 
 		switch destination {
 		case .drawer(let drawer):
@@ -38,17 +38,17 @@ class ContentViewModel {
 			}
 		case .filter(let filter):
 			selectedFilter = filter
-			
-			let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-
-			switch selectedFilter {
-			case .all:
-				destinationFiltered = searchFiltered
-			case .favorites:
-				destinationFiltered = searchFiltered.filter { $0.isFavorite }
-			case .recents:
-				destinationFiltered = searchFiltered.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
-			}
+		}
+		
+		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+		
+		switch selectedFilter {
+		case .all:
+			destinationFiltered = searchFiltered
+		case .favorites:
+			destinationFiltered = searchFiltered.filter { $0.isFavorite }
+		case .recents:
+			destinationFiltered = searchFiltered.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
 		}
 
 		return destinationFiltered.sorted { lhs, rhs in

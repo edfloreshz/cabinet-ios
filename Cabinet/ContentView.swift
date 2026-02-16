@@ -5,17 +5,18 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
+internal import CoreData
 import LocalAuthentication
 import SwiftData
 import SwiftUI
-internal import CoreData
 
 struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
 	@Query private var drawers: [Drawer]
-	
+	@Query private var pairs: [Pair]
+
 	@State private var showingSettings: Bool = false
 	@State private var showDrawerDeleteConfirmation = false
 	@State private var isEditing = false
@@ -24,20 +25,15 @@ struct ContentView: View {
 	@State private var drawerToDelete: Drawer? = nil
 	@State private var selectedItems: Set<UUID> = []
 	@State private var searchText: String = ""
-	
+	@State private var selectedDestination: NavigationDestination?
+
 	@State private var allCount = 0
+	@State private var favoritesCount = 0
 	@State private var recentCount = 0
-	
-	var categories: [Category] {
-		[
-			Category(title: "All", icon: "list.clipboard.fill", color: .blue, count: allCount),
-			Category(title: "Recents", icon: "calendar.badge.clock", color: .red, count: recentCount),
-		]
-	}
-	
+
 	let columns = [
 		GridItem(.flexible(), spacing: 16),
-		GridItem(.flexible(), spacing: 16)
+		GridItem(.flexible(), spacing: 16),
 	]
 
 	var filteredDrawers: [Drawer] {
@@ -49,47 +45,64 @@ struct ContentView: View {
 			}
 		}
 	}
-	
+
 	var body: some View {
-		NavigationStack {
-			LazyVGrid(columns: columns, spacing: 16) {
-				ForEach(Filter.allCases) { filter in
-					FilterCard(filter: filter)
-				}
-			}
-			.padding()
-			List {
-				Section(header: Text("Drawers").font(.title3).fontWeight(.bold)) {
-					if filteredDrawers.isEmpty {
-						EmptyDrawersView(
-							searching: !searchText.isEmpty,
-							accentColor: accent.color
-						)
-					} else {
-						ForEach(filteredDrawers) { drawer in
-							NavigationLink(value: NavigationDestination.drawer(drawer)) {
-								Label {
-									Text(drawer.name)
-								} icon: {
-									Image(systemName: drawer.icon)
-										.foregroundStyle(accent.color)
+		NavigationSplitView {
+			VStack(spacing: 0) {
+				List(selection: $selectedDestination) {
+					Section {
+						ForEach(Filter.allCases) { filter in
+							NavigationLink(
+								value: NavigationDestination.filter(filter)
+							) {
+								HStack {
+									filter.label
+									Spacer()
+									Text(countForFilter(filter).formatted())
+										.foregroundStyle(.secondary)
+										.font(.subheadline)
 								}
 							}
-							.swipeActions(edge: .trailing, allowsFullSwipe: true) {
-								Button("Delete", systemImage: "trash") {
-									drawerToDelete = drawer
-								}.tint(.red)
-								
-								Button("Edit", systemImage: "pencil") {
-									editingDrawer = drawer
-								}.tint(.blue)
+							.tag(NavigationDestination.filter(filter))
+						}
+					}
+					Section(
+						header: Text("Drawers").font(.title3).fontWeight(.bold)
+					) {
+						if filteredDrawers.isEmpty {
+							EmptyDrawersView(
+								searching: !searchText.isEmpty,
+								accentColor: accent.color
+							)
+						} else {
+							ForEach(filteredDrawers) { drawer in
+								NavigationLink(
+									value: NavigationDestination.drawer(drawer)
+								) {
+									Label {
+										Text(drawer.name)
+									} icon: {
+										Image(systemName: drawer.icon)
+											.foregroundStyle(accent.color)
+									}
+								}
+								.tag(NavigationDestination.drawer(drawer))
+								.swipeActions(
+									edge: .trailing,
+									allowsFullSwipe: true
+								) {
+									Button("Delete", systemImage: "trash") {
+										drawerToDelete = drawer
+									}.tint(.red)
+
+									Button("Edit", systemImage: "pencil") {
+										editingDrawer = drawer
+									}.tint(.blue)
+								}
 							}
 						}
 					}
 				}
-			}
-			.navigationDestination(for: NavigationDestination.self) { destination in
-				DetailView(destination: destination)
 			}
 			.navigationTitle("Cabinet")
 			.navigationBarTitleDisplayMode(.inline)
@@ -109,74 +122,78 @@ struct ContentView: View {
 					primaryAction
 				}
 			}
-			.confirmationDialog(
-				"Delete '\(drawerToDelete?.name ?? "")'?",
-				isPresented: Binding(
-					get: { drawerToDelete != nil },
-					set: { if !$0 { drawerToDelete = nil } }
-				),
-				titleVisibility: .visible
-			) {
-				Button("Delete", role: .destructive) {
-					if let drawer = drawerToDelete {
-						modelContext.delete(drawer)
-						drawerToDelete = nil
-					}
-				}
-				Button("Cancel", role: .cancel) {
+		} detail: {
+			if let destination = selectedDestination {
+				DetailView(pairs: pairs, destination: destination)
+			} else {
+				ContentUnavailableView(
+					"Select a drawer",
+					systemImage: "archivebox",
+					description: Text(
+						"Choose a drawer from the sidebar to view its contents"
+					)
+				)
+			}
+		}
+		.confirmationDialog(
+			"Delete '\(drawerToDelete?.name ?? "")'?",
+			isPresented: Binding(
+				get: { drawerToDelete != nil },
+				set: { if !$0 { drawerToDelete = nil } }
+			),
+			titleVisibility: .visible
+		) {
+			Button("Delete", role: .destructive) {
+				if let drawer = drawerToDelete {
+					modelContext.delete(drawer)
 					drawerToDelete = nil
 				}
-			} message: {
-				Text("This action cannot be undone.")
 			}
-			.sheet(isPresented: $showingSettings) {
-				NavigationStack {
-					SettingsView()
-				}
-				.tint(accent.color)
-				.presentationDetents([.medium, .large])
+			Button("Cancel", role: .cancel) {
+				drawerToDelete = nil
 			}
-			.sheet(isPresented: $showingAdd) {
-				NavigationStack {
-					DrawerView(
-						drawer: Drawer(name: ""),
-					)
-				}
-				.presentationDetents([.large])
-				.interactiveDismissDisabled()
+		} message: {
+			Text("This action cannot be undone.")
+		}
+		.sheet(isPresented: $showingSettings) {
+			NavigationStack {
+				SettingsView()
 			}
-			.sheet(item: $editingDrawer) { drawer in
-				NavigationStack {
-					DrawerView(drawer: drawer)
-				}
-				.tint(accent.color)
-				.interactiveDismissDisabled()
-				.presentationDetents([.large])
+			.tint(accent.color)
+			.presentationDetents([.medium, .large])
+		}
+		.sheet(isPresented: $showingAdd) {
+			NavigationStack {
+				DrawerView(
+					drawer: Drawer(name: ""),
+				)
 			}
-			.task {
-				await updateCounts()
+			.presentationDetents([.large])
+			.interactiveDismissDisabled()
+		}
+		.sheet(item: $editingDrawer) { drawer in
+			NavigationStack {
+				DrawerView(drawer: drawer)
 			}
+			.tint(accent.color)
+			.interactiveDismissDisabled()
+			.presentationDetents([.large])
 		}
 	}
 	
-	func updateCounts() async {
-		let allDescriptor = FetchDescriptor<Pair>()
-		allCount = (try? modelContext.fetchCount(allDescriptor)) ?? 0
-		
-		let now = Date()
-		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: now)!
-		
-		// Fetch and filter manually instead of using predicate
-		let allPairsDescriptor = FetchDescriptor<Pair>()
-		if let allPairs = try? modelContext.fetch(allPairsDescriptor) {
-			recentCount = allPairs.filter { pair in
-				pair.lastUsedDate != nil && pair.lastUsedDate! >= sevenDaysAgo
-			}.count
-		} else {
-			recentCount = 0
+	func countForFilter(_ filter: Filter) -> Int {
+		switch filter {
+		case .all:
+			return pairs.count
+		case .favorites:
+			return pairs.filter { $0.isFavorite }.count
+		case .recents:
+			let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+			return pairs.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }.count
+
 		}
 	}
-	
+
 	fileprivate var primaryAction: some View {
 		Group {
 			if isEditing {
@@ -202,17 +219,19 @@ struct ContentView: View {
 				deleteSelected()
 			}
 		} message: {
-			Text("This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized.")
+			Text(
+				"This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized."
+			)
 		}
 	}
-	
+
 	fileprivate func deleteSelected() {
 		for id in selectedItems {
 			if let item = drawers.first(where: { $0.id == id }) {
 				modelContext.delete(item)
 			}
 		}
-		
+
 		withAnimation {
 			selectedItems.removeAll()
 			isEditing = false
