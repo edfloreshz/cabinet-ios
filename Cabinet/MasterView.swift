@@ -83,13 +83,12 @@ struct MasterView: View {
 								}
 								.tag(NavigationDestination.drawer(drawer))
 								.contextMenu {
-									Button("Delete", systemImage: "trash") {
-										drawerToDelete = drawer
-									}.tint(.red)
-									
 									Button("Edit", systemImage: "pencil") {
 										editingDrawer = drawer
-									}.tint(.blue)
+									}
+									Button("Delete", systemImage: "trash") {
+										drawerToDelete = drawer
+									}
 								}
 								.swipeActions(
 									edge: .trailing,
