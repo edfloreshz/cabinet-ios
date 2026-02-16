@@ -180,7 +180,6 @@ struct ItemDetailView: View {
 	fileprivate var macOSForm: some View {
 		Group {
 			VStack(spacing: 20) {
-				// Icon button
 				Button(action: {
 					isPresented.toggle()
 				}) {
@@ -195,7 +194,6 @@ struct ItemDetailView: View {
 				.buttonStyle(.plain)
 				.help("Change icon")
 
-				// Title field
 				VStack(alignment: .leading, spacing: 4) {
 					Text("Title")
 						.font(.system(size: 13, weight: .semibold))
@@ -208,7 +206,6 @@ struct ItemDetailView: View {
 				}
 				.frame(maxWidth: 280)
 
-				// Value field with show/hide toggle
 				VStack(alignment: .leading, spacing: 4) {
 					Text("Value")
 						.font(.system(size: 13, weight: .semibold))
@@ -261,7 +258,6 @@ struct ItemDetailView: View {
 				}
 				.frame(maxWidth: 280)
 
-				// Notes field
 				VStack(alignment: .leading, spacing: 4) {
 					Text("Notes")
 						.font(.system(size: 13, weight: .semibold))
@@ -282,7 +278,6 @@ struct ItemDetailView: View {
 				}
 				.frame(maxWidth: 280)
 
-				// Drawers section
 				VStack(alignment: .leading, spacing: 8) {
 					Text("Drawers")
 						.font(.system(size: 13, weight: .semibold))

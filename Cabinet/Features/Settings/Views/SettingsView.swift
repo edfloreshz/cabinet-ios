@@ -20,77 +20,31 @@ struct SettingsView: View {
 
 	private var macOSSettings: some View {
 		VStack(spacing: 0) {
-			VStack(spacing: 20) {
-				VStack(alignment: .leading, spacing: 8) {
-					Text("Accent Color")
-						.font(.system(size: 13, weight: .semibold))
-						.foregroundStyle(.secondary)
+			VStack {
+				HStack(alignment: .center) {
+					
+					Circle()
+						.fill(accent.color)
+						.frame(width: 20, height: 20)
+					
+					Text("Accent Color:")
+						.font(.system(size: 13))
 
-					LazyVGrid(
-						columns: Array(
-							repeating: GridItem(.fixed(48), spacing: 12),
-							count: 6
-						),
-						spacing: 12
-					) {
-						ForEach(ThemeColor.allCases, id: \.self) {
-							colorOption in
-							Button {
-								withAnimation(.spring(duration: 0.3)) {
-									accent = colorOption
-								}
-							} label: {
-								ZStack {
-									Circle()
-										.fill(colorOption.color.gradient)
-										.frame(width: 48, height: 48)
-
-									if accent == colorOption {
-										Circle()
-											.strokeBorder(
-												.white,
-												lineWidth: 2.5
-											)
-											.frame(width: 48, height: 48)
-											.shadow(
-												color: .black.opacity(0.2),
-												radius: 2,
-												y: 1
-											)
-
-										Image(systemName: "checkmark")
-											.font(
-												.system(size: 14, weight: .bold)
-											)
-											.foregroundStyle(.white)
-											.shadow(
-												color: .black.opacity(0.3),
-												radius: 1,
-												y: 0.5
-											)
-									}
-								}
-							}
-							.buttonStyle(.plain)
-							.help(colorOption.rawValue.capitalized)
+					Picker("", selection: $accent) {
+						ForEach(ThemeColor.allCases, id: \.self) { colorOption in
+							Text(colorOption.rawValue.capitalized)
+								.font(.system(size: 13))
+							.tag(colorOption)
 						}
 					}
-					.padding(12)
-					.background(.background.opacity(0.5))
-					.clipShape(RoundedRectangle(cornerRadius: 8))
-					.overlay(
-						RoundedRectangle(cornerRadius: 8)
-							.stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-					)
+					.pickerStyle(.menu)
+					.frame(width: 180)
 				}
-				.frame(maxWidth: 380)
-
-				Spacer()
+				.padding()
 			}
-			.padding(20)
-
+			
 			Divider()
-
+			
 			HStack {
 				Spacer()
 				Button("Done") {
@@ -102,7 +56,6 @@ struct SettingsView: View {
 			.padding(.vertical, 12)
 			.background(.background)
 		}
-		.frame(width: 420, height: 300)
 	}
 
 	private var iOSSettings: some View {
