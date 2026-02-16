@@ -12,13 +12,24 @@ import SwiftData
 final class Pair {
 	@Attribute(.unique) var id: UUID
 	var key: String
-	var value: String
 	var icon: String
 	var isFavorite: Bool
 	var isHidden: Bool
 	var drawers: [UUID]
 	var notes: String
 	var lastUsedDate: Date?
+	var encryptedValue: Data
+
+	var value: String {
+		get {
+			(try? CryptoService.decryptToString(encryptedValue)) ?? ""
+		}
+		set {
+			if let data = try? CryptoService.encryptString(newValue) {
+				encryptedValue = data
+			}
+		}
+	}
 
 	init(
 		id: UUID = UUID(),
@@ -33,11 +44,12 @@ final class Pair {
 		self.id = id
 		self.key = key
 		self.icon = icon
-		self.value = value
 		self.isFavorite = isFavorite
 		self.isHidden = isHidden
 		self.drawers = drawers
 		self.notes = notes
+		self.lastUsedDate = nil
+		self.encryptedValue = (try? CryptoService.encryptString(value)) ?? Data()
 	}
 	
 	static let sampleData: [Pair] = [
