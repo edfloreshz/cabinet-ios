@@ -12,7 +12,7 @@ import SwiftUI
 struct CabinetApp: App {
 	var body: some Scene {
 		WindowGroup {
-			ContentView()
+			MasterView()
 				.modelContainer(for: [Pair.self, Drawer.self])
 				.toast()
 		}

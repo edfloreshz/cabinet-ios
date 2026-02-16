@@ -10,7 +10,7 @@ import LocalAuthentication
 import SwiftData
 import SwiftUI
 
-struct ContentView: View {
+struct MasterView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
@@ -169,7 +169,7 @@ struct ContentView: View {
 		}
 		.sheet(isPresented: $showingAdd) {
 			NavigationStack {
-				DrawerView(
+				DrawerDetailView(
 					drawer: Drawer(name: ""),
 				)
 			}
@@ -178,7 +178,7 @@ struct ContentView: View {
 		}
 		.sheet(item: $editingDrawer) { drawer in
 			NavigationStack {
-				DrawerView(drawer: drawer)
+				DrawerDetailView(drawer: drawer)
 			}
 			.tint(accent.color)
 			.interactiveDismissDisabled()
@@ -253,5 +253,5 @@ struct ContentView: View {
 }
 
 #Preview {
-	ContentView().modelContainer(SampleData.shared.modelContainer)
+	MasterView().modelContainer(SampleData.shared.modelContainer)
 }

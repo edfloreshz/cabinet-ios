@@ -9,7 +9,7 @@ import SFSymbolsPicker
 import SwiftData
 import SwiftUI
 
-struct DrawerView: View {
+struct DrawerDetailView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isNameFocused: Bool
@@ -94,7 +94,7 @@ struct DrawerView: View {
 }
 
 #Preview {
-	DrawerView(
+	DrawerDetailView(
 		drawer: Drawer(name: "All", icon: "tag.fill")
 	)
 }

@@ -11,7 +11,7 @@ import SwiftUI
 struct DetailView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
-	@State private var viewModel = ContentViewModel()
+	@State private var viewModel = DetailViewModel()
 	@State private var isEditing = false
 	@State private var showingAdd = false
 	@State private var showItemDeleteConfirmation = false
@@ -78,8 +78,10 @@ struct DetailView: View {
 				ToolbarItemGroup(placement: .topBarTrailing) {
 					editButton
 				}
-				ToolbarItem(placement: .bottomBar) {
-					filterPickerMenu
+				if case .drawer(_) = destination {
+					ToolbarItem(placement: .bottomBar) {
+						filterPickerMenu
+					}
 				}
 				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
@@ -102,7 +104,7 @@ struct DetailView: View {
 			addSheet
 		}
 	}
-	
+
 	var selectedDrawers: [UUID] {
 		switch destination {
 		case .drawer(let drawer):
@@ -111,14 +113,14 @@ struct DetailView: View {
 			return []
 		}
 	}
-	
+
 	fileprivate var addSheet: some View {
 		let pair = Pair(key: "", value: "", drawers: selectedDrawers)
-		
+
 		if viewModel.selectedFilter == .favorites {
 			pair.isFavorite = true
 		}
-		
+
 		return NavigationStack {
 			ItemView(
 				mode: .new,

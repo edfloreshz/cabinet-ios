@@ -1,5 +1,5 @@
 //
-//  ContentViewModel.swift
+//  DetailViewModel.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 11/02/26.
@@ -10,7 +10,7 @@ import Observation
 import SwiftData
 
 @Observable
-class ContentViewModel {
+class DetailViewModel {
 	var searchText: String = ""
 	var selectedFilter: Filter = .all
 
