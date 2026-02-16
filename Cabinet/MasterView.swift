@@ -114,8 +114,10 @@ struct MasterView: View {
 					text: $searchText,
 					prompt: "Search"
 				)
+				.navigationSplitViewColumnWidth(min: 310, ideal: 310)
+			#else
+				.navigationSplitViewColumnWidth(min: 230, ideal: 230)
 			#endif
-			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
 			.toolbar {
 				#if os(iOS) || os(iPadOS) || os(visionOS)
 					ToolbarItem(placement: .topBarLeading) {
