@@ -8,57 +8,93 @@
 import LocalAuthentication
 import SwiftData
 import SwiftUI
+internal import CoreData
 
 struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 
-	@Query private var pairs: [Pair]
 	@Query private var drawers: [Drawer]
-
-	@State private var viewModel = ContentViewModel()
+	
+	@State private var showingSettings: Bool = false
+	@State private var showDrawerDeleteConfirmation = false
 	@State private var isEditing = false
 	@State private var showingAdd = false
-	@State private var showingAddDrawer = false
-	@State private var showingSettings = false
-	@State private var showItemDeleteConfirmation = false
-	@State private var showDrawerDeleteConfirmation = false
 	@State private var editingDrawer: Drawer? = nil
 	@State private var drawerToDelete: Drawer? = nil
 	@State private var selectedItems: Set<UUID> = []
+	@State private var searchText: String = ""
+	
+	@State private var allCount = 0
+	@State private var recentCount = 0
+	
+	var categories: [Category] {
+		[
+			Category(title: "All", icon: "list.clipboard.fill", color: .blue, count: allCount),
+			Category(title: "Recents", icon: "calendar.badge.clock", color: .red, count: recentCount),
+		]
+	}
+	
+	let columns = [
+		GridItem(.flexible(), spacing: 16),
+		GridItem(.flexible(), spacing: 16)
+	]
 
+	var filteredDrawers: [Drawer] {
+		if searchText.isEmpty {
+			return drawers
+		} else {
+			return drawers.filter {
+				$0.name.lowercased().contains(searchText.lowercased())
+			}
+		}
+	}
+	
 	var body: some View {
-		let displayedPairs = viewModel.filteredPairs(pairs)
-
 		NavigationStack {
-			Group {
-				if displayedPairs.isEmpty {
-					EmptyView(
-						searching: !viewModel.searchText.isEmpty,
-						accentColor: accent.color
-					)
-				} else {
-					List(selection: $selectedItems) {
-						ForEach(displayedPairs) { pair in
-							ItemRowView(pair: pair)
-								.onTapGesture {
-									if !isEditing {
-										handleCopy(for: pair)
-									}
+			LazyVGrid(columns: columns, spacing: 16) {
+				ForEach(categories) { category in
+					CategoryCard(category: category)
+				}
+			}
+			.padding()
+			List {
+				Section(header: Text("Drawers").font(.title3).fontWeight(.bold)) {
+					if filteredDrawers.isEmpty {
+						EmptyDrawersView(
+							searching: !searchText.isEmpty,
+							accentColor: accent.color
+						)
+					} else {
+						ForEach(filteredDrawers) { drawer in
+							NavigationLink(value: drawer) {
+								Label {
+									Text(drawer.name)
+								} icon: {
+									Image(systemName: drawer.icon)
+										.foregroundStyle(accent.color)
 								}
+							}
+							.swipeActions(edge: .trailing, allowsFullSwipe: true) {
+								Button("Delete", systemImage: "trash") {
+									drawerToDelete = drawer
+								}.tint(.red)
+								
+								Button("Edit", systemImage: "pencil") {
+									editingDrawer = drawer
+								}.tint(.blue)
+							}
 						}
 					}
-					.environment(
-						\.editMode,
-						.constant(isEditing ? .active : .inactive)
-					)
 				}
+			}.navigationDestination(for: Drawer.self) { drawer in
+				DrawerDetails(drawer: drawer)
 			}
 			.navigationTitle("Cabinet")
 			.navigationBarTitleDisplayMode(.inline)
 			.searchable(
-				text: $viewModel.searchText,
-				prompt: "Keys, values, notes"
+				text: $searchText,
+				prompt: "Search"
 			)
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
@@ -66,18 +102,31 @@ struct ContentView: View {
 						showingSettings.toggle()
 					}
 				}
-				ToolbarItemGroup(placement: .topBarTrailing) {
-					editButton
-				}
-				ToolbarItem(placement: .bottomBar) {
-					drawerPickerMenu
-				}
-				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
 				ToolbarSpacer(placement: .bottomBar)
-				ToolbarItem(placement: .bottomBar) {
+				ToolbarItem(placement: .automatic) {
 					primaryAction
 				}
+			}
+			.confirmationDialog(
+				"Delete '\(drawerToDelete?.name ?? "")'?",
+				isPresented: Binding(
+					get: { drawerToDelete != nil },
+					set: { if !$0 { drawerToDelete = nil } }
+				),
+				titleVisibility: .visible
+			) {
+				Button("Delete", role: .destructive) {
+					if let drawer = drawerToDelete {
+						modelContext.delete(drawer)
+						drawerToDelete = nil
+					}
+				}
+				Button("Cancel", role: .cancel) {
+					drawerToDelete = nil
+				}
+			} message: {
+				Text("This action cannot be undone.")
 			}
 			.sheet(isPresented: $showingSettings) {
 				NavigationStack {
@@ -86,7 +135,7 @@ struct ContentView: View {
 				.tint(accent.color)
 				.presentationDetents([.medium, .large])
 			}
-			.sheet(isPresented: $showingAddDrawer) {
+			.sheet(isPresented: $showingAdd) {
 				NavigationStack {
 					DrawerView(
 						drawer: Drawer(name: ""),
@@ -103,99 +152,35 @@ struct ContentView: View {
 				.interactiveDismissDisabled()
 				.presentationDetents([.large])
 			}
-			.sheet(isPresented: $showingAdd) {
-				NavigationStack {
-					ItemView(
-						mode: .new,
-						pair: Pair(key: "", value: ""),
-					)
-				}
-				.presentationDetents([.large])
-				.interactiveDismissDisabled()
+			.task {
+				await updateCounts()
 			}
 		}
 	}
-
-	fileprivate var drawerPickerMenu: some View {
-		Menu {
-			Section("General") {
-				ForEach(Drawer.defaultDrawers) { drawer in
-					Button {
-						viewModel.selectedDrawer = drawer.name
-					} label: {
-						Label(
-							drawer.name.capitalized,
-							systemImage: drawer.icon
-						)
-					}
-				}
-			}
-
-			Section("Drawers") {
-				ForEach(drawers) { drawer in
-					Menu {
-						Button(
-							"Delete",
-							systemImage: "trash",
-							role: .destructive
-						) {
-							drawerToDelete = drawer
-							showDrawerDeleteConfirmation = true
-						}
-						Button("Edit", systemImage: "pencil") {
-							editingDrawer = drawer
-						}
-						Button("Select", systemImage: "checkmark.circle") {
-							viewModel.selectedDrawer = drawer.name
-						}
-					} label: {
-						Label(
-							drawer.name.capitalized,
-							systemImage: drawer.icon
-						)
-					}
-				}
-
-				Divider()
-
-				Button {
-					showingAddDrawer.toggle()
-				} label: {
-					Label("Add Drawer", systemImage: "plus.circle")
-				}
-			}
-		} label: {
-			Label(
-				viewModel.selectedDrawer.capitalized,
-				systemImage: "line.3.horizontal.decrease"
-			)
-		}
-		.confirmationDialog(
-			"Delete '\(drawerToDelete?.name ?? "drawer")'?",
-			isPresented: $showDrawerDeleteConfirmation,
-			titleVisibility: .visible
-		) {
-			Button("Delete", role: .destructive) {
-				if let drawer = drawerToDelete {
-					if viewModel.selectedDrawer == drawer.name {
-						viewModel.selectedDrawer = "All"
-					}
-					modelContext.delete(drawer)
-				}
-			}
-			Button("Cancel", role: .cancel) {
-				drawerToDelete = nil
-			}
-		} message: {
-			Text("This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized.")
+	
+	func updateCounts() async {
+		let allDescriptor = FetchDescriptor<Pair>()
+		allCount = (try? modelContext.fetchCount(allDescriptor)) ?? 0
+		
+		let now = Date()
+		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: now)!
+		
+		// Fetch and filter manually instead of using predicate
+		let allPairsDescriptor = FetchDescriptor<Pair>()
+		if let allPairs = try? modelContext.fetch(allPairsDescriptor) {
+			recentCount = allPairs.filter { pair in
+				pair.lastUsedDate != nil && pair.lastUsedDate! >= sevenDaysAgo
+			}.count
+		} else {
+			recentCount = 0
 		}
 	}
-
+	
 	fileprivate var primaryAction: some View {
 		Group {
 			if isEditing {
 				Button("Delete", systemImage: "trash", role: .destructive) {
-					showItemDeleteConfirmation.toggle()
+					showDrawerDeleteConfirmation.toggle()
 				}
 				.tint(.red)
 				.disabled(selectedItems.isEmpty)
@@ -209,86 +194,24 @@ struct ContentView: View {
 		}
 		.confirmationDialog(
 			"Delete selected items?",
-			isPresented: $showItemDeleteConfirmation,
+			isPresented: $showDrawerDeleteConfirmation,
 			titleVisibility: .visible
 		) {
 			Button("Delete", role: .destructive) {
 				deleteSelected()
 			}
 		} message: {
-			Text("This action cannot be undone.")
+			Text("This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized.")
 		}
 	}
-
-	fileprivate var editButton: some View {
-		let displayedPairs = viewModel.filteredPairs(pairs)
-
-		return Group {
-			if isEditing {
-				Button(
-					selectedItems.count == displayedPairs.count
-						? "Deselect All" : "Select All"
-				) {
-					if selectedItems.count == displayedPairs.count {
-						selectedItems.removeAll()
-					} else {
-						selectedItems = Set(displayedPairs.map { $0.id })
-					}
-				}
-			}
-			if !displayedPairs.isEmpty {
-				Button(
-					"Edit",
-					systemImage: isEditing ? "checkmark" : "pencil",
-					role: isEditing ? .confirm : .close
-				) {
-					withAnimation {
-						isEditing.toggle()
-						if !isEditing {
-							selectedItems.removeAll()
-						}
-					}
-				}.tint(isEditing ? accent.color : nil)
-			}
-		}
-	}
-
-	private func handleCopy(for pair: Pair) {
-		let performCopy = {
-			#if canImport(UIKit)
-				UIPasteboard.general.string = pair.value
-			#elseif canImport(AppKit)
-				let pb = NSPasteboard.general
-				pb.clearContents()
-				pb.setString(pair.value, forType: .string)
-			#endif
-
-			ToastManager.shared.show("Copied", type: .info)
-		}
-
-		// Only authenticate if the item is hidden and we aren't currently in Edit Mode
-		if pair.isHidden {
-			AuthenticationService.authenticate { result in
-				switch result {
-				case .success:
-					performCopy()
-				case .failure(let error):
-					ToastManager.shared.show(error.message, type: .error)
-				}
-			}
-		} else {
-			// If not hidden or in edit mode, copy directly
-			performCopy()
-		}
-	}
-
+	
 	fileprivate func deleteSelected() {
 		for id in selectedItems {
-			if let item = pairs.first(where: { $0.id == id }) {
+			if let item = drawers.first(where: { $0.id == id }) {
 				modelContext.delete(item)
 			}
 		}
-
+		
 		withAnimation {
 			selectedItems.removeAll()
 			isEditing = false

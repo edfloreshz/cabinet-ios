@@ -11,12 +11,12 @@
         }
       }
     },
-    "Add Drawer" : {
+    "Add your first drawer." : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agregar cajón"
+            "value" : "Añade tu primer cajon."
           }
         }
       }
@@ -27,6 +27,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Agrega tu primer elemento."
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos"
           }
         }
       }
@@ -141,12 +151,22 @@
         }
       }
     },
-    "General" : {
+    "Favorites" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "General"
+            "value" : "Favoritos"
+          }
+        }
+      }
+    },
+    "Filter" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtrar"
           }
         }
       }
@@ -157,16 +177,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elemento"
-          }
-        }
-      }
-    },
-    "Keys, values, notes" : {
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Claves, valores, notas"
           }
         }
       }
@@ -207,6 +217,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hay cajones disponibles"
+          }
+        }
+      }
+    },
+    "No drawers yet" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aun no hay cajones"
           }
         }
       }
@@ -261,12 +281,12 @@
         }
       }
     },
-    "Select" : {
+    "Search" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seleccionar"
+            "value" : "Buscar"
           }
         }
       }

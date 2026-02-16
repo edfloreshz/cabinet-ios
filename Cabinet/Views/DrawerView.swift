@@ -84,11 +84,7 @@ struct DrawerView: View {
 	}
 
 	private func saveDrawer() {
-		if drawer.modelContext == nil {
-			modelContext.insert(drawer)
-		}
-
-		// Optional: Explicitly save (though SwiftData usually autosaves on the next main loop)
+		modelContext.insert(drawer)
 		try? modelContext.save()
 	}
 }

@@ -32,7 +32,7 @@ class SampleData {
 				for: schema,
 				configurations: [modelConfiguration]
 			)
-
+		
 			for pair in Pair.sampleData {
 				context.insert(pair)
 			}

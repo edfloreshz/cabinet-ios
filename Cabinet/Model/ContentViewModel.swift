@@ -12,10 +12,9 @@ import SwiftData
 @Observable
 class ContentViewModel {
 	var searchText: String = ""
-	var selectedDrawer: String = "All"
+	var selectedFilter: String = "All"
 
-	// This logic is moved from the ContentView to here
-	func filteredPairs(_ pairs: [Pair]) -> [Pair] {
+	func filteredPairs(_ pairs: [Pair], drawer: Drawer) -> [Pair] {
 		let base = pairs
 		let searchFiltered: [Pair]
 
@@ -30,18 +29,27 @@ class ContentViewModel {
 			}
 		}
 
-		let drawerFiltered: [Pair]
-		switch selectedDrawer {
+		let filterFiltered: [Pair]
+		switch selectedFilter {
 		case "All":
-			drawerFiltered = searchFiltered
+			filterFiltered = searchFiltered
 		case "Favorites":
-			drawerFiltered = searchFiltered.filter { $0.isFavorite }
+			filterFiltered = searchFiltered.filter { $0.isFavorite }
 		default:
-			drawerFiltered = searchFiltered.filter { pair in
-				pair.drawers.contains {
-					$0.name.caseInsensitiveCompare(selectedDrawer)
-						== .orderedSame
-				}
+			filterFiltered = searchFiltered
+		}
+
+		let drawerFiltered: [Pair]
+		
+		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+		switch drawer.name {
+		case "All":
+			drawerFiltered = filterFiltered
+		case "Recents":
+			drawerFiltered = filterFiltered.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
+		default:
+			drawerFiltered = filterFiltered.filter { pair in
+				pair.drawers.contains(drawer.id)
 			}
 		}
 

@@ -10,7 +10,8 @@ import SwiftData
 
 @Model
 final class Drawer: Identifiable {
-	@Attribute(.unique) var name: String
+	@Attribute(.unique) var id: UUID = UUID()
+	var name: String
 	var icon: String
 
 	init(name: String, icon: String = "tag.fill") {
@@ -18,12 +19,7 @@ final class Drawer: Identifiable {
 		self.icon = icon
 	}
 
-	static var defaultDrawers = [
-		Drawer(name: "All", icon: "list.clipboard.fill"),
-		Drawer(name: "Favorites", icon: "star.fill"),
-	]
-
-	static var sampleDrawers = [
+	static let sampleData: [Drawer] = [
 		Drawer(name: "School", icon: "graduationcap.fill"),
 		Drawer(name: "Bank", icon: "dollarsign.bank.building.fill"),
 	]

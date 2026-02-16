@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EmptyView: View {
+struct EmptyItemsView: View {
 	var searching: Bool
 	var accentColor: Color
 
@@ -32,5 +32,5 @@ struct EmptyView: View {
 }
 
 #Preview {
-	EmptyView(searching: false, accentColor: .indigo)
+	EmptyItemsView(searching: false, accentColor: .indigo)
 }
