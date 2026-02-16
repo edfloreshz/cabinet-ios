@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct DrawerDetails: View {
+struct DetailView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 	@State private var viewModel = ContentViewModel()
@@ -20,11 +20,29 @@ struct DrawerDetails: View {
 
 	@Query private var pairs: [Pair]
 
-	var drawer: Drawer
+	var destination: NavigationDestination
 	var displayedPairs: [Pair] {
-		viewModel.filteredPairs(pairs, drawer: drawer)
+		viewModel.filteredPairs(pairs, destination: destination)
 	}
 
+	var navigationTitle: String {
+		switch destination {
+		case .drawer(let drawer):
+			return drawer.name
+		case .filter(let filterCategory):
+			return filterCategory.rawValue
+		}
+	}
+	
+	var drawerIds: [UUID] {
+		switch destination {
+		case .drawer(let drawer):
+			return [drawer.id]
+		case .filter:
+			return []
+		}
+	}
+	
     var body: some View {
 		Group {
 			if displayedPairs.isEmpty {
@@ -46,9 +64,7 @@ struct DrawerDetails: View {
 				}
 			}
 		}
-		.navigationTitle(
-			drawer.name == "All" ? Text("All") : Text(drawer.name)
-		)
+		.navigationTitle(navigationTitle)
 		.navigationBarTitleDisplayMode(.inline)
 		.environment(
 			\.editMode,
@@ -73,12 +89,10 @@ struct DrawerDetails: View {
 			}
 		}
 		.sheet(isPresented: $showingAdd) {
-			let drawers = drawer.name == "All" ? [] : [drawer.id]
-			
 			NavigationStack {
 				ItemView(
 					mode: .new,
-					pair: Pair(key: "", value: "", drawers: drawers),
+					pair: Pair(key: "", value: "", drawers: drawerIds),
 				)
 			}
 			.presentationDetents([.large])
@@ -95,7 +109,7 @@ struct DrawerDetails: View {
 			}.pickerStyle(.inline)
 		} label: {
 			Label(
-				viewModel.selectedFilter.capitalized,
+				viewModel.selectedFilter.rawValue.capitalized,
 				systemImage: "line.3.horizontal.decrease"
 			)
 		}
@@ -205,6 +219,6 @@ struct DrawerDetails: View {
 }
 
 #Preview {
-	DrawerDetails(drawer: Drawer.sampleData.first!)
+	DetailView(destination: NavigationDestination.drawer(Drawer.sampleData.first!))
 		.modelContainer(SampleData.shared.modelContainer)
 }

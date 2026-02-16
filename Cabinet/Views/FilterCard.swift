@@ -7,41 +7,41 @@
 
 import SwiftUI
 
-struct CategoryCard: View {
-	@State var category: Category
+struct FilterCard: View {
+	@State var filter: Filter
 	
     var body: some View {
-		NavigationLink(value: Drawer(name: category.title)) {
+		NavigationLink(value: NavigationDestination.filter(filter)) {
 			VStack(alignment: .leading, spacing: 0) {
 				HStack {
-					Image(systemName: category.icon)
+					Image(systemName: filter.icon)
 						.font(.system(size: 28))
 						.foregroundStyle(.white)
 					
 					Spacer()
 					
-					Text(category.count.formatted())
-						.font(.system(size: 32, weight: .bold))
-						.foregroundStyle(.white)
+//					Text(filter.count.formatted())
+//						.font(.system(size: 32, weight: .bold))
+//						.foregroundStyle(.white)
 				}
 				.padding(.top, 20)
 				.padding(.horizontal, 20)
 				
 				Spacer()
 				
-				Text(category.title.capitalized)
+				Text(filter.rawValue.capitalized)
 					.font(.system(size: 20, weight: .semibold))
 					.foregroundStyle(.white)
 					.padding(.horizontal, 20)
 					.padding(.bottom, 20)
 			}
 			.frame(height: 120)
-			.background(category.color.gradient)
+			.background(filter.color.gradient)
 			.clipShape(RoundedRectangle(cornerRadius: 16))
 		}
     }
 }
 
 #Preview {
-	CategoryCard(category: Category(title: "All", icon: "list.clipboard.fill", color: .blue, count: 10))
+	FilterCard(filter: .all)
 }

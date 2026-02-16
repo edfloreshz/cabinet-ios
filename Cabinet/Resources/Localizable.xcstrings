@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "Accent Color" : {
       "localizations" : {
         "es-419" : {
@@ -267,6 +270,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fijar"
+          }
+        }
+      }
+    },
+    "Recents" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recientes"
           }
         }
       }

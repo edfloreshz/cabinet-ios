@@ -53,8 +53,8 @@ struct ContentView: View {
 	var body: some View {
 		NavigationStack {
 			LazyVGrid(columns: columns, spacing: 16) {
-				ForEach(categories) { category in
-					CategoryCard(category: category)
+				ForEach(Filter.allCases) { filter in
+					FilterCard(filter: filter)
 				}
 			}
 			.padding()
@@ -67,7 +67,7 @@ struct ContentView: View {
 						)
 					} else {
 						ForEach(filteredDrawers) { drawer in
-							NavigationLink(value: drawer) {
+							NavigationLink(value: NavigationDestination.drawer(drawer)) {
 								Label {
 									Text(drawer.name)
 								} icon: {
@@ -87,8 +87,9 @@ struct ContentView: View {
 						}
 					}
 				}
-			}.navigationDestination(for: Drawer.self) { drawer in
-				DrawerDetails(drawer: drawer)
+			}
+			.navigationDestination(for: NavigationDestination.self) { destination in
+				DetailView(destination: destination)
 			}
 			.navigationTitle("Cabinet")
 			.navigationBarTitleDisplayMode(.inline)
