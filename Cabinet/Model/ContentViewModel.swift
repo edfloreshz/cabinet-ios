@@ -33,25 +33,29 @@ class ContentViewModel {
 
 		switch destination {
 		case .drawer(let drawer):
+			selectedFilter = .all
 			destinationFiltered = searchFiltered.filter { pair in
 				pair.drawers.contains(drawer.id)
 			}
 		case .filter(let filter):
 			selectedFilter = filter
+			destinationFiltered = searchFiltered
 		}
 		
 		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
 		
+		var filtered: [Pair]
+		
 		switch selectedFilter {
 		case .all:
-			destinationFiltered = searchFiltered
+			filtered = destinationFiltered
 		case .favorites:
-			destinationFiltered = searchFiltered.filter { $0.isFavorite }
+			filtered = destinationFiltered.filter { $0.isFavorite }
 		case .recents:
-			destinationFiltered = searchFiltered.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
+			filtered = destinationFiltered.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
 		}
 
-		return destinationFiltered.sorted { lhs, rhs in
+		return filtered.sorted { lhs, rhs in
 			if lhs.isFavorite != rhs.isFavorite {
 				return lhs.isFavorite && !rhs.isFavorite
 			}
