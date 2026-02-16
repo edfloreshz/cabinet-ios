@@ -82,8 +82,8 @@ struct DetailView: View {
 					ToolbarItem(placement: .bottomBar) {
 						filterPickerMenu
 					}
+					ToolbarSpacer(placement: .bottomBar)
 				}
-				ToolbarSpacer(placement: .bottomBar)
 				DefaultToolbarItem(kind: .search, placement: .bottomBar)
 				ToolbarSpacer(placement: .bottomBar)
 				ToolbarItem(placement: .bottomBar) {

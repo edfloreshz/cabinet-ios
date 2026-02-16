@@ -170,7 +170,6 @@ struct ItemView: View {
 	private func savePair() {
 		pair.drawers = Array(selectedDrawers)
 		modelContext.insert(pair)
-
 		try? modelContext.save()
 	}
 }
