@@ -51,7 +51,9 @@ struct SettingsView: View {
 			}
 		}
 		.navigationTitle("Settings")
-		.navigationBarTitleDisplayMode(.inline)
+		#if os(iOS) || os(iPadOS) || os(visionOS)
+			.navigationBarTitleDisplayMode(.inline)
+		#endif
 		.toolbar {
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Done") {

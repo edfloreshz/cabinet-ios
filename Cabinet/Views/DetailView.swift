@@ -5,8 +5,8 @@
 //  Created by Eduardo Flores on 15/02/26.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct DetailView: View {
 	@Environment(\.modelContext) private var modelContext
@@ -17,7 +17,7 @@ struct DetailView: View {
 	@State private var showItemDeleteConfirmation = false
 	@State private var selectedItems: Set<UUID> = []
 
-	@State var pairs: [Pair]
+	@Query private var pairs: [Pair]
 
 	var destination: NavigationDestination
 	var displayedPairs: [Pair] {
@@ -32,7 +32,7 @@ struct DetailView: View {
 			return filterCategory.rawValue.capitalized
 		}
 	}
-	
+
 	var drawerIds: [UUID] {
 		switch destination {
 		case .drawer(let drawer):
@@ -41,8 +41,8 @@ struct DetailView: View {
 			return []
 		}
 	}
-	
-    var body: some View {
+
+	var body: some View {
 		Group {
 			if displayedPairs.isEmpty {
 				EmptyItemsView(
@@ -64,30 +64,43 @@ struct DetailView: View {
 			}
 		}
 		.navigationTitle(navigationTitle)
-		.navigationBarTitleDisplayMode(.inline)
-		.environment(
-			\.editMode,
-			 .constant(isEditing ? .active : .inactive)
-		)
+		#if os(iOS) || os(iPadOS) || os(visionOS)
+			.navigationBarTitleDisplayMode(.inline)
+			.environment(
+				\.editMode,
+				.constant(isEditing ? .active : .inactive)
+			)
+		#endif
 		.searchable(
 			text: $viewModel.searchText,
 			prompt: "Search"
 		)
 		.toolbar {
-			ToolbarItemGroup(placement: .topBarTrailing) {
-				editButton
-			}
-			if case .drawer(_) = destination {
-				ToolbarItem(placement: .bottomBar) {
-					filterPickerMenu
+			#if os(iOS) || os(iPadOS) || os(visionOS)
+				ToolbarItemGroup(placement: .topBarTrailing) {
+					editButton
 				}
+				if case .drawer(_) = destination {
+					ToolbarItem(placement: .bottomBar) {
+						filterPickerMenu
+					}
+					ToolbarSpacer(placement: .bottomBar)
+				}
+				DefaultToolbarItem(kind: .search, placement: .bottomBar)
 				ToolbarSpacer(placement: .bottomBar)
-			}
-			DefaultToolbarItem(kind: .search, placement: .bottomBar)
-			ToolbarSpacer(placement: .bottomBar)
-			ToolbarItem(placement: .bottomBar) {
-				primaryAction
-			}
+				ToolbarItem(placement: .bottomBar) {
+					primaryAction
+				}
+			#else
+				if case .drawer(_) = destination {
+					ToolbarItem(placement: .automatic) {
+						filterPickerMenu
+					}
+				}
+				ToolbarItem(placement: .automatic) {
+					primaryAction
+				}
+			#endif
 		}
 		.sheet(isPresented: $showingAdd) {
 			NavigationStack {
@@ -99,8 +112,8 @@ struct DetailView: View {
 			.presentationDetents([.large])
 			.interactiveDismissDisabled()
 		}
-    }
-	
+	}
+
 	fileprivate var filterPickerMenu: some View {
 		Menu {
 			Picker("Filter", selection: $viewModel.selectedFilter) {
@@ -115,7 +128,7 @@ struct DetailView: View {
 			)
 		}
 	}
-	
+
 	fileprivate var primaryAction: some View {
 		Group {
 			if isEditing {
@@ -128,7 +141,9 @@ struct DetailView: View {
 				Button("New", systemImage: "plus") {
 					showingAdd.toggle()
 				}
-				.buttonStyle(.glassProminent)
+				#if os(iOS) || os(iPadOS) || os(visionOS)
+					.buttonStyle(.glassProminent)
+				#endif
 				.tint(accent.color)
 			}
 		}
@@ -144,13 +159,13 @@ struct DetailView: View {
 			Text("This action cannot be undone.")
 		}
 	}
-	
+
 	fileprivate var editButton: some View {
 		return Group {
 			if isEditing {
 				Button(
 					selectedItems.count == displayedPairs.count
-					? "Deselect All" : "Select All"
+						? "Deselect All" : "Select All"
 				) {
 					if selectedItems.count == displayedPairs.count {
 						selectedItems.removeAll()
@@ -175,20 +190,20 @@ struct DetailView: View {
 			}
 		}
 	}
-	
+
 	private func handleCopy(for pair: Pair) {
 		let performCopy = {
-#if canImport(UIKit)
-			UIPasteboard.general.string = pair.value
-#elseif canImport(AppKit)
-			let pb = NSPasteboard.general
-			pb.clearContents()
-			pb.setString(pair.value, forType: .string)
-#endif
-			
+			#if canImport(UIKit)
+				UIPasteboard.general.string = pair.value
+			#elseif canImport(AppKit)
+				let pb = NSPasteboard.general
+				pb.clearContents()
+				pb.setString(pair.value, forType: .string)
+			#endif
+
 			ToastManager.shared.show("Copied", type: .info)
 		}
-		
+
 		// Only authenticate if the item is hidden and we aren't currently in Edit Mode
 		if pair.isHidden {
 			AuthenticationService.authenticate { result in
@@ -204,14 +219,14 @@ struct DetailView: View {
 			performCopy()
 		}
 	}
-	
+
 	fileprivate func deleteSelected() {
 		for id in selectedItems {
 			if let item = pairs.first(where: { $0.id == id }) {
 				modelContext.delete(item)
 			}
 		}
-		
+
 		withAnimation {
 			selectedItems.removeAll()
 			isEditing = false
@@ -220,6 +235,8 @@ struct DetailView: View {
 }
 
 #Preview {
-	DetailView(pairs: [], destination: NavigationDestination.drawer(Drawer.sampleData.first!))
-		.modelContainer(SampleData.shared.modelContainer)
+	DetailView(
+		destination: NavigationDestination.drawer(Drawer.sampleData.first!)
+	)
+	.modelContainer(SampleData.shared.modelContainer)
 }

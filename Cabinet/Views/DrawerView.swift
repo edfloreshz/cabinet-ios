@@ -35,7 +35,9 @@ struct DrawerView: View {
 					}
 
 					TextField("Name", text: $drawer.name)
-						.textInputAutocapitalization(.none)
+						#if os(iOS) || os(iPadOS) || os(visionOS)
+							.textInputAutocapitalization(.none)
+						#endif
 						.autocorrectionDisabled()
 						.font(.system(size: 28, weight: .bold))
 						.multilineTextAlignment(.center)
@@ -46,7 +48,9 @@ struct DrawerView: View {
 			}
 		}
 		.navigationTitle("Drawer")
-		.navigationBarTitleDisplayMode(.inline)
+		#if os(iOS) || os(iPadOS) || os(visionOS)
+			.navigationBarTitleDisplayMode(.inline)
+		#endif
 		.scrollDismissesKeyboard(.interactively)
 		.toolbar {
 			ToolbarItem(placement: .cancellationAction) {

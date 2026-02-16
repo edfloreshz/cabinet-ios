@@ -105,26 +105,40 @@ struct ContentView: View {
 				}
 			}
 			.navigationTitle("Cabinet")
-			.navigationBarTitleDisplayMode(.inline)
-			.searchable(
-				text: $searchText,
-				prompt: "Search"
-			)
+			#if os(iOS) || os(iPadOS) || os(visionOS)
+				.navigationBarTitleDisplayMode(.inline)
+				.searchable(
+					text: $searchText,
+					prompt: "Search"
+				)
+			#endif
 			.toolbar {
-				ToolbarItem(placement: .topBarLeading) {
-					Button("Settings", systemImage: "gearshape") {
-						showingSettings.toggle()
+				#if os(iOS) || os(iPadOS) || os(visionOS)
+					ToolbarItem(placement: .topBarLeading) {
+						Button("Settings", systemImage: "gearshape") {
+							showingSettings.toggle()
+						}
 					}
-				}
-				DefaultToolbarItem(kind: .search, placement: .bottomBar)
-				ToolbarSpacer(placement: .bottomBar)
-				ToolbarItem(placement: .automatic) {
-					primaryAction
-				}
+					DefaultToolbarItem(kind: .search, placement: .bottomBar)
+					ToolbarSpacer(placement: .bottomBar)
+					ToolbarItem(placement: .automatic) {
+						primaryAction
+					}
+				#else
+					ToolbarItem(placement: .automatic) {
+						Button("Settings", systemImage: "gearshape") {
+							showingSettings.toggle()
+						}
+					}
+					ToolbarItem(placement: .automatic) {
+						primaryAction
+					}
+				#endif
+
 			}
 		} detail: {
 			if let destination = selectedDestination {
-				DetailView(pairs: pairs, destination: destination)
+				DetailView(destination: destination)
 			} else {
 				ContentUnavailableView(
 					"Select a drawer",
@@ -180,7 +194,7 @@ struct ContentView: View {
 			.presentationDetents([.large])
 		}
 	}
-	
+
 	func countForFilter(_ filter: Filter) -> Int {
 		switch filter {
 		case .all:
@@ -188,8 +202,14 @@ struct ContentView: View {
 		case .favorites:
 			return pairs.filter { $0.isFavorite }.count
 		case .recents:
-			let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-			return pairs.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }.count
+			let sevenDaysAgo = Calendar.current.date(
+				byAdding: .day,
+				value: -7,
+				to: Date()
+			)!
+			return pairs.filter {
+				$0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo
+			}.count
 
 		}
 	}
@@ -206,7 +226,9 @@ struct ContentView: View {
 				Button("New", systemImage: "plus") {
 					showingAdd.toggle()
 				}
-				.buttonStyle(.glassProminent)
+				#if os(iOS) || os(iPadOS) || os(visionOS)
+					.buttonStyle(.glassProminent)
+				#endif
 				.tint(accent.color)
 			}
 		}

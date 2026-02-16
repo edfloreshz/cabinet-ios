@@ -5,9 +5,9 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
+import SFSymbolsPicker
 import SwiftData
 import SwiftUI
-import SFSymbolsPicker
 
 enum ViewMode {
 	case new, edit
@@ -120,7 +120,9 @@ struct ItemView: View {
 			}
 		}
 		.navigationTitle("Item")
-		.navigationBarTitleDisplayMode(.inline)
+		#if os(iOS) || os(iPadOS) || os(visionOS)
+			.navigationBarTitleDisplayMode(.inline)
+		#endif
 		.scrollDismissesKeyboard(.interactively)
 		.toolbar {
 			ToolbarItem(placement: .cancellationAction) {
@@ -151,7 +153,7 @@ struct ItemView: View {
 		)
 		.onAppear {
 			selectedDrawers = Set(pair.drawers)
-			
+
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 				switch mode {
 				case .edit:
@@ -162,11 +164,11 @@ struct ItemView: View {
 			}
 		}
 	}
-	
+
 	private func savePair() {
 		pair.drawers = Array(selectedDrawers)
 		modelContext.insert(pair)
-		
+
 		try? modelContext.save()
 	}
 }
