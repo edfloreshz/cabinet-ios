@@ -2,7 +2,14 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
     },
     "Accent Color" : {
       "localizations" : {
@@ -15,7 +22,14 @@
       }
     },
     "Accent Color:" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color de acento:"
+          }
+        }
+      }
     },
     "Add your first drawer." : {
       "localizations" : {
@@ -43,6 +57,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos"
+          }
+        }
+      }
+    },
+    "All your items" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos tus elementos"
           }
         }
       }
@@ -307,6 +331,26 @@
         }
       }
     },
+    "Purpose" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proposito"
+          }
+        }
+      }
+    },
+    "Recently copied" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiados recientemente"
+          }
+        }
+      }
+    },
     "Recents" : {
       "localizations" : {
         "es-419" : {
@@ -477,12 +521,32 @@
         }
       }
     },
+    "What is the purpose of this drawer?" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cual es el propósito de este cajón?"
+          }
+        }
+      }
+    },
     "You can also unlock using your device passcode." : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "También puedes desbloquear usando el código de tu dispositivo."
+          }
+        }
+      }
+    },
+    "Your favorites" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus favoritos"
           }
         }
       }

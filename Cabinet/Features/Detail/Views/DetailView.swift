@@ -40,6 +40,22 @@ struct DetailView: View {
 			}
 		}
 	}
+	
+	var navigationSubtitle: Text {
+		switch destination {
+		case .drawer(let drawer):
+			Text(drawer.purpose)
+		case .filter(let filterCategory):
+			switch filterCategory {
+			case .all:
+				Text("All your items")
+			case .favorites:
+				Text("Your favorites")
+			case .recents:
+				Text("Recently copied")
+			}
+		}
+	}
 
 	var body: some View {
 		Group {
@@ -63,6 +79,7 @@ struct DetailView: View {
 			}
 		}
 		.navigationTitle(navigationTitle)
+		.navigationSubtitle(navigationSubtitle)
 		#if os(iOS) || os(iPadOS) || os(visionOS)
 			.navigationBarTitleDisplayMode(.inline)
 			.environment(

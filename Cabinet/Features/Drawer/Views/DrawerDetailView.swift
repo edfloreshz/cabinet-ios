@@ -67,34 +67,43 @@ struct DrawerDetailView: View {
 	}
 
 	fileprivate var iOSForm: some View {
-		Section {
-			VStack(spacing: 12) {
-				Button(action: {
-					isPresented.toggle()
-				}) {
-					Image(systemName: drawer.icon)
-						.resizable()
-						.scaledToFit()
-						.frame(width: 40, height: 40)
-						.padding(20)
-						.glassEffect()
-						.foregroundStyle(.foreground)
-				}
+		Group {
+			Section {
+				VStack(spacing: 12) {
+					Button(action: {
+						isPresented.toggle()
+					}) {
+						Image(systemName: drawer.icon)
+							.resizable()
+							.scaledToFit()
+							.frame(width: 40, height: 40)
+							.padding(20)
+							.glassEffect()
+							.foregroundStyle(.foreground)
+					}
 
-				TextField("Name", text: $drawer.name)
-					#if os(iOS) || os(iPadOS) || os(visionOS)
-						.textInputAutocapitalization(.none)
-					#endif
-					.autocorrectionDisabled()
-					.font(.system(size: 28, weight: .bold))
-					.multilineTextAlignment(.center)
-					.focused($isNameFocused)
+					TextField("Name", text: $drawer.name)
+						#if os(iOS) || os(iPadOS) || os(visionOS)
+							.textInputAutocapitalization(.none)
+						#endif
+						.autocorrectionDisabled()
+						.font(.system(size: 28, weight: .bold))
+						.multilineTextAlignment(.center)
+						.focused($isNameFocused)
+				}
+				.frame(maxWidth: .infinity)
+				.listRowBackground(Color.clear)
 			}
-			.frame(maxWidth: .infinity)
-			.listRowBackground(Color.clear)
+			Section(header: Text("Purpose")) {
+				TextField(
+					"What is the purpose of this drawer?",
+					text: $drawer.purpose,
+					axis: .vertical
+				)
+			}
 		}
 	}
-	
+
 	fileprivate var macOSForm: some View {
 		VStack(spacing: 20) {
 			Button(action: {
@@ -110,13 +119,25 @@ struct DrawerDetailView: View {
 			}
 			.buttonStyle(.plain)
 			.help("Change icon")
-			
+
 			VStack(alignment: .leading, spacing: 4) {
 				Text("Name")
 					.font(.system(size: 13, weight: .semibold))
 					.foregroundStyle(.secondary)
-				
+
 				TextField("", text: $drawer.name)
+					.textFieldStyle(.roundedBorder)
+					.font(.system(size: 13))
+					.focused($isNameFocused)
+			}
+			.frame(maxWidth: 280)
+
+			VStack(alignment: .leading, spacing: 4) {
+				Text("Purpose")
+					.font(.system(size: 13, weight: .semibold))
+					.foregroundStyle(.secondary)
+
+				TextField("What is the purpose of this drawer?", text: $drawer.purpose)
 					.textFieldStyle(.roundedBorder)
 					.font(.system(size: 13))
 					.focused($isNameFocused)
