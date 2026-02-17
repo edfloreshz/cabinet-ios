@@ -11,6 +11,12 @@
         }
       }
     },
+    "1 Minute" : {
+
+    },
+    "5 Minutes" : {
+
+    },
     "Accent Color" : {
       "localizations" : {
         "es-419" : {
@@ -22,6 +28,7 @@
       }
     },
     "Accent Color:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
@@ -70,6 +77,18 @@
           }
         }
       }
+    },
+    "Appearance" : {
+
+    },
+    "Auto-Lock" : {
+
+    },
+    "Biometrics" : {
+
+    },
+    "Biometrics are not available on this device." : {
+
     },
     "Cabinet" : {
       "localizations" : {
@@ -162,6 +181,7 @@
       }
     },
     "Done" : {
+      "extractionState" : "stale",
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
@@ -201,6 +221,9 @@
         }
       }
     },
+    "Enable Biometrics" : {
+
+    },
     "Favorites" : {
       "localizations" : {
         "es-419" : {
@@ -231,6 +254,9 @@
         }
       }
     },
+    "Immediately" : {
+
+    },
     "Item" : {
       "localizations" : {
         "es-419" : {
@@ -240,6 +266,9 @@
           }
         }
       }
+    },
+    "Lock After" : {
+
     },
     "Locked" : {
       "localizations" : {
@@ -260,6 +289,9 @@
           }
         }
       }
+    },
+    "Never" : {
+
     },
     "New" : {
       "localizations" : {
@@ -361,6 +393,9 @@
         }
       }
     },
+    "Require Password on Wake" : {
+
+    },
     "Save" : {
       "localizations" : {
         "es-419" : {
@@ -380,6 +415,9 @@
           }
         }
       }
+    },
+    "Security" : {
+
     },
     "Select a drawer" : {
       "localizations" : {
@@ -430,6 +468,9 @@
           }
         }
       }
+    },
+    "Theme" : {
+
     },
     "This action cannot be undone." : {
       "localizations" : {
