@@ -98,7 +98,6 @@ struct DrawerDetailView: View {
 				TextField(
 					"What is the purpose of this drawer?",
 					text: $drawer.purpose,
-					axis: .vertical
 				)
 			}
 		}
@@ -137,10 +136,9 @@ struct DrawerDetailView: View {
 					.font(.system(size: 13, weight: .semibold))
 					.foregroundStyle(.secondary)
 
-				TextField("What is the purpose of this drawer?", text: $drawer.purpose)
+				TextField("", text: $drawer.purpose)
 					.textFieldStyle(.roundedBorder)
 					.font(.system(size: 13))
-					.focused($isNameFocused)
 			}
 			.frame(maxWidth: 280)
 		}
