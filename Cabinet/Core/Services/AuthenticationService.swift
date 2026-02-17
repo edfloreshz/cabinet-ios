@@ -32,6 +32,12 @@ class AuthenticationService {
 			}
 		}
 	}
+		
+	static func biometricsAvailable() -> Bool {
+		let context = LAContext()
+		var error: NSError?
+		return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+	}
 
 	static func authenticate(
 		reason: String = "We need to unlock your data.",

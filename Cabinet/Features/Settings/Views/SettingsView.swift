@@ -9,6 +9,14 @@ import SwiftUI
 struct SettingsView: View {
 	@Environment(\.dismiss) private var dismiss
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("biometricsEnabled") private var biometricsEnabled: Bool = false
+	@AppStorage("lockTimeout") private var lockTimeout: Int = -1
+	@AppStorage("requirePasswordOnWake") private var requirePasswordOnWake:
+		Bool = true
+
+	var biometricsAvailable: Bool {
+		AuthenticationService.biometricsAvailable()
+	}
 
 	var body: some View {
 		#if os(macOS)
@@ -19,88 +27,116 @@ struct SettingsView: View {
 	}
 
 	private var macOSSettings: some View {
-		VStack(spacing: 0) {
-			VStack {
-				HStack(alignment: .center) {
-					Text("Accent Color:")
-						.font(.system(size: 13))
+		TabView {
+			Tab("Appearance", systemImage: "paintpalette.fill") {
+				Form {
+					Section("Theme") {
+						HStack {
+							Picker("Accent Color", selection: $accent) {
+								ForEach(ThemeColor.allCases, id: \.self) {
+									colorOption in
+									Text(colorOption.rawValue.capitalized)
+										.tag(colorOption)
+								}
+							}
+							.pickerStyle(.menu)
 
-					Picker("", selection: $accent) {
-						ForEach(ThemeColor.allCases, id: \.self) { colorOption in
-							Text(colorOption.rawValue.capitalized)
-								.font(.system(size: 13))
-							.tag(colorOption)
+							Circle()
+								.fill(accent.color)
+								.frame(width: 14, height: 14)
 						}
 					}
-					.pickerStyle(.menu)
-					
-					Circle()
-						.fill(accent.color)
-						.frame(width: 20, height: 20)
 				}
-				.padding()
+				.formStyle(.grouped)
+				.frame(width: 360)
 			}
-			
-			Divider()
-			
-			HStack {
-				Spacer()
-				Button("Done") {
-					dismiss()
+
+			Tab("Security", systemImage: "lock.fill") {
+				Form {
+					Section("Biometrics") {
+						Toggle("Enable Biometrics", isOn: $biometricsEnabled)
+							.disabled(!biometricsAvailable)
+
+						if !biometricsAvailable {
+							Label(
+								"Biometrics are not available on this device.",
+								systemImage: "exclamationmark.triangle"
+							)
+							.font(.caption)
+							.foregroundStyle(.secondary)
+						}
+					}
+
+					Section("Auto-Lock") {
+						Picker("Lock After", selection: $lockTimeout) {
+							Text("Immediately").tag(0)
+							Text("1 Minute").tag(1)
+							Text("5 Minutes").tag(5)
+							Text("Never").tag(-1)
+						}
+						.pickerStyle(.menu)
+
+						Toggle(
+							"Require Password on Wake",
+							isOn: $requirePasswordOnWake
+						)
+					}
 				}
-				.keyboardShortcut(.defaultAction)
+				.formStyle(.grouped)
+				.frame(width: 360)
 			}
-			.padding(.horizontal, 20)
-			.padding(.vertical, 12)
-			.background(.background)
 		}
 	}
 
 	private var iOSSettings: some View {
-		Form {
-			Section {
-				LazyVGrid(
-					columns: [GridItem(.adaptive(minimum: 60), spacing: 16)],
-					spacing: 16
-				) {
-					ForEach(ThemeColor.allCases, id: \.self) { colorOption in
-						Button {
-							withAnimation(.spring(duration: 0.3)) {
-								accent = colorOption
-							}
-						} label: {
-							ZStack {
-								Circle()
-									.fill(colorOption.color.gradient)
-									.frame(width: 60, height: 60)
-								if accent == colorOption {
-									Circle()
-										.strokeBorder(.white, lineWidth: 3)
-										.frame(width: 60, height: 60)
-									Image(systemName: "checkmark")
-										.font(.title3.bold())
-										.foregroundStyle(.white)
-								}
+		NavigationStack {
+			Form {
+				Section("Theme") {
+					HStack {
+						Picker("Accent Color", selection: $accent) {
+							ForEach(ThemeColor.allCases, id: \.self) {
+								colorOption in
+								Text(colorOption.rawValue.capitalized)
+									.tag(colorOption)
 							}
 						}
-						.buttonStyle(.plain)
+						.pickerStyle(.menu)
+						Circle()
+							.fill(accent.color)
+							.frame(width: 14, height: 14)
 					}
 				}
-				.padding(.vertical, 8)
-			} header: {
-				Text("Accent Color")
-			}
-		}
-		.navigationTitle("Settings")
-		#if os(iOS) || os(iPadOS) || os(visionOS)
-			.navigationBarTitleDisplayMode(.inline)
-		#endif
-		.toolbar {
-			ToolbarItem(placement: .confirmationAction) {
-				Button("Done") {
-					dismiss()
+
+				Section("Biometrics") {
+					Toggle("Enable Biometrics", isOn: $biometricsEnabled)
+						.disabled(!biometricsAvailable)
+					if !biometricsAvailable {
+						Label(
+							"Biometrics are not available on this device.",
+							systemImage: "exclamationmark.triangle"
+						)
+						.font(.caption)
+						.foregroundStyle(.secondary)
+					}
+				}
+
+				Section("Auto-Lock") {
+					Picker("Lock After", selection: $lockTimeout) {
+						Text("Immediately").tag(0)
+						Text("1 Minute").tag(1)
+						Text("5 Minutes").tag(5)
+						Text("Never").tag(-1)
+					}
+					Toggle(
+						"Require Password on Wake",
+						isOn: $requirePasswordOnWake
+					)
 				}
 			}
+			.navigationTitle("Settings")
+			#if os(iOS) || os(iPadOS) || os(visionOS)
+				.navigationBarTitleDisplayMode(.inline)
+			#endif
 		}
 	}
 }
