@@ -22,11 +22,6 @@ struct SettingsView: View {
 		VStack(spacing: 0) {
 			VStack {
 				HStack(alignment: .center) {
-					
-					Circle()
-						.fill(accent.color)
-						.frame(width: 20, height: 20)
-					
 					Text("Accent Color:")
 						.font(.system(size: 13))
 
@@ -38,7 +33,10 @@ struct SettingsView: View {
 						}
 					}
 					.pickerStyle(.menu)
-					.frame(width: 180)
+					
+					Circle()
+						.fill(accent.color)
+						.frame(width: 20, height: 20)
 				}
 				.padding()
 			}
