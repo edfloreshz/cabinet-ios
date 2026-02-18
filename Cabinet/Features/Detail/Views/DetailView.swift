@@ -10,6 +10,11 @@ import SwiftUI
 
 struct DetailView: View {
 	@Environment(\.modelContext) private var modelContext
+
+	#if os(macOS)
+		@Environment(\.openSettings) private var openSettings
+	#endif
+
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 	@State private var viewModel = DetailViewModel()
 	@State private var isEditing = false
@@ -40,7 +45,6 @@ struct DetailView: View {
 			}
 		}
 	}
-	
 	var navigationSubtitle: Text {
 		switch destination {
 		case .drawer(let drawer):
@@ -110,7 +114,7 @@ struct DetailView: View {
 			#else
 				ToolbarItem(placement: .automatic) {
 					Button("Settings", systemImage: "gearshape") {
-						showingSettings.toggle()
+						openSettings()
 					}
 				}
 				ToolbarSpacer()

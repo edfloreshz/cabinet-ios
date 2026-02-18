@@ -5,10 +5,8 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
-internal import CoreData
-import LocalAuthentication
-import SwiftData
 import SwiftUI
+import SwiftData
 
 struct MasterView: View {
 	@Environment(\.modelContext) private var modelContext
@@ -32,10 +30,10 @@ struct MasterView: View {
 	var filteredDrawers: [Drawer] {
 		if searchText.isEmpty {
 			return drawers
-		} else {
-			return drawers.filter {
-				$0.name.lowercased().contains(searchText.lowercased())
-			}
+		}
+		
+		return drawers.filter {
+			$0.name.lowercased().contains(searchText.lowercased())
 		}
 	}
 
@@ -179,9 +177,8 @@ struct MasterView: View {
 		}
 		.sheet(isPresented: $showingAdd) {
 			NavigationStack {
-				DrawerDetailView(
-					drawer: Drawer(name: ""),
-				)
+				DrawerDetailView(drawer: Drawer(name: ""))
+					.presentationSizing(.fitted)
 			}
 			.presentationDetents([.large])
 			.interactiveDismissDisabled()
@@ -189,10 +186,10 @@ struct MasterView: View {
 		.sheet(item: $editingDrawer) { drawer in
 			NavigationStack {
 				DrawerDetailView(drawer: drawer)
+					.presentationSizing(.fitted)
 			}
-			.tint(accent.color)
-			.interactiveDismissDisabled()
 			.presentationDetents([.large])
+			.interactiveDismissDisabled()
 		}
 	}
 

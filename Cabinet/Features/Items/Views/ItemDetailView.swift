@@ -28,7 +28,7 @@ struct ItemDetailView: View {
 	let onSave: () -> Void
 
 	var body: some View {
-		Form {
+		Group {
 			#if os(macOS)
 				macOSForm
 			#else
@@ -36,9 +36,9 @@ struct ItemDetailView: View {
 			#endif
 		}
 		.navigationTitle("Item")
-		#if os(iOS) || os(iPadOS) || os(visionOS)
-			.navigationBarTitleDisplayMode(.inline)
-		#endif
+#if os(iOS) || os(iPadOS) || os(visionOS)
+		.navigationBarTitleDisplayMode(.inline)
+#endif
 		.scrollDismissesKeyboard(.interactively)
 		.toolbar {
 			ToolbarItem(placement: .cancellationAction) {
@@ -83,7 +83,7 @@ struct ItemDetailView: View {
 	}
 
 	fileprivate var iOSForm: some View {
-		Group {
+		Form {
 			Section {
 				VStack(spacing: 12) {
 					Button(action: {
@@ -97,7 +97,7 @@ struct ItemDetailView: View {
 							.glassEffect()
 							.foregroundStyle(.brown)
 					}
-
+					
 					TextField("Title", text: $pair.key)
 						.font(.system(size: 28, weight: .bold))
 						.multilineTextAlignment(.center)
@@ -106,7 +106,7 @@ struct ItemDetailView: View {
 				.frame(maxWidth: .infinity)
 				.listRowBackground(Color.clear)
 			}
-
+			
 			Section(header: Text("Value")) {
 				HStack {
 					if pair.isHidden {
@@ -116,20 +116,20 @@ struct ItemDetailView: View {
 						TextField("Your value", text: $pair.value)
 							.focused($isContentFocused)
 					}
-
+					
 					Button(action: {
 						pair.isHidden
-							? AuthenticationService.authenticate { result in
-								switch result {
-								case .success:
-									pair.isHidden.toggle()
-								case .failure(let error):
-									ToastManager.shared.show(
-										error.message,
-										type: .error
-									)
-								}
-							} : pair.isHidden.toggle()
+						? AuthenticationService.authenticate { result in
+							switch result {
+							case .success:
+								pair.isHidden.toggle()
+							case .failure(let error):
+								ToastManager.shared.show(
+									error.message,
+									type: .error
+								)
+							}
+						} : pair.isHidden.toggle()
 					}) {
 						Image(
 							systemName: pair.isHidden ? "eye.slash" : "eye"
@@ -139,7 +139,7 @@ struct ItemDetailView: View {
 					.buttonStyle(.plain)
 				}
 			}
-
+			
 			Section(header: Text("Notes")) {
 				TextField(
 					"Type remarks or notes here",
@@ -148,7 +148,7 @@ struct ItemDetailView: View {
 				)
 				.lineLimit(3...5)
 			}
-
+			
 			Section(header: Text("Drawers")) {
 				if drawers.isEmpty {
 					Text("No drawers available")
@@ -178,179 +178,146 @@ struct ItemDetailView: View {
 	}
 
 	fileprivate var macOSForm: some View {
-		Group {
-			VStack(spacing: 20) {
+		Form {
+			TextField("Title", text: $pair.key)
+				.focused($isNameFocused)
+			
+			HStack(spacing: 8) {
+				if pair.isHidden {
+					SecureField(
+						"Value",
+						text: $pair.value,
+						prompt: Text("Your secret value")
+					)
+					.focused($isContentFocused)
+				} else {
+					TextField(
+						"Value",
+						text: $pair.value,
+						prompt: Text("Your value")
+					)
+					.focused($isContentFocused)
+				}
+				
 				Button(action: {
-					isPresented.toggle()
+					pair.isHidden
+					? AuthenticationService.authenticate { result in
+						switch result {
+						case .success:
+							pair.isHidden.toggle()
+						case .failure(let error):
+							ToastManager.shared.show(
+								error.message,
+								type: .error
+							)
+						}
+					} : pair.isHidden.toggle()
 				}) {
-					Image(systemName: pair.icon)
-						.resizable()
-						.scaledToFit()
-						.frame(width: 40, height: 40)
-						.padding(15)
-						.glassEffect()
-						.foregroundStyle(.brown)
+					Image(
+						systemName: pair.isHidden ? "eye.slash" : "eye"
+					)
+					.foregroundStyle(.secondary)
+					.frame(width: 16, height: 16)
 				}
 				.buttonStyle(.plain)
+				.help(pair.isHidden ? "Show value" : "Hide value")
+			}
+			
+			
+			HStack {
+				Text("Icon")
+				Spacer()
+				Button(action: { isPresented.toggle() }) {
+					Label("Select", systemImage: pair.icon)
+				}
 				.help("Change icon")
-
-				VStack(alignment: .leading, spacing: 4) {
-					Text("Title")
-						.font(.system(size: 13, weight: .semibold))
-						.foregroundStyle(.secondary)
-
-					TextField("", text: $pair.key)
-						.textFieldStyle(.roundedBorder)
+			}
+			
+			VStack(alignment: .leading) {
+				Text("Notes")
+				
+				TextEditor(text: $pair.notes)
+					.frame(height: 80)
+					.scrollContentBackground(.hidden)
+					.overlay(
+						RoundedRectangle(cornerRadius: 10)
+							.stroke(
+								Color.secondary.opacity(0.25),
+								lineWidth: 1
+							)
+					)
+			}
+			
+			VStack(alignment: .leading, spacing: 8) {
+				Text("Drawers")
+					.font(.system(size: 13, weight: .semibold))
+					.foregroundStyle(.secondary)
+				
+				if drawers.isEmpty {
+					Text("No drawers available")
 						.font(.system(size: 13))
-						.focused($isNameFocused)
-				}
-				.frame(maxWidth: 280)
-
-				VStack(alignment: .leading, spacing: 4) {
-					Text("Value")
-						.font(.system(size: 13, weight: .semibold))
-						.foregroundStyle(.secondary)
-
-					HStack(spacing: 8) {
-						if pair.isHidden {
-							SecureField(
-								"",
-								text: $pair.value,
-								prompt: Text("Your secret value")
-							)
-							.textFieldStyle(.roundedBorder)
-							.font(.system(size: 13))
-							.focused($isContentFocused)
-						} else {
-							TextField(
-								"",
-								text: $pair.value,
-								prompt: Text("Your value")
-							)
-							.textFieldStyle(.roundedBorder)
-							.font(.system(size: 13))
-							.focused($isContentFocused)
-						}
-
-						Button(action: {
-							pair.isHidden
-								? AuthenticationService.authenticate { result in
-									switch result {
-									case .success:
-										pair.isHidden.toggle()
-									case .failure(let error):
-										ToastManager.shared.show(
-											error.message,
-											type: .error
-										)
-									}
-								} : pair.isHidden.toggle()
-						}) {
-							Image(
-								systemName: pair.isHidden ? "eye.slash" : "eye"
-							)
-							.foregroundStyle(.secondary)
-							.frame(width: 16, height: 16)
-						}
-						.buttonStyle(.plain)
-						.help(pair.isHidden ? "Show value" : "Hide value")
-					}
-				}
-				.frame(maxWidth: 280)
-
-				VStack(alignment: .leading, spacing: 4) {
-					Text("Notes")
-						.font(.system(size: 13, weight: .semibold))
-						.foregroundStyle(.secondary)
-
-					TextEditor(text: $pair.notes)
-						.font(.system(size: 13))
-						.frame(height: 80)
-						.scrollContentBackground(.hidden)
-						.background(.background)
-						.overlay(
-							RoundedRectangle(cornerRadius: 4)
-								.stroke(
-									Color.secondary.opacity(0.25),
-									lineWidth: 1
-								)
-						)
-				}
-				.frame(maxWidth: 280)
-
-				VStack(alignment: .leading, spacing: 8) {
-					Text("Drawers")
-						.font(.system(size: 13, weight: .semibold))
-						.foregroundStyle(.secondary)
-
-					if drawers.isEmpty {
-						Text("No drawers available")
-							.font(.system(size: 13))
-							.foregroundStyle(.tertiary)
-							.frame(maxWidth: .infinity, alignment: .center)
-							.padding(.vertical, 20)
-					} else {
-						VStack(spacing: 0) {
-							ForEach(drawers, id: \.self) { drawer in
-								HStack(spacing: 8) {
-									Image(systemName: drawer.icon)
-										.foregroundStyle(.secondary)
-										.frame(width: 16)
-
-									Text(drawer.name)
-										.font(.system(size: 13))
-
-									Spacer()
-
-									if selectedDrawers.contains(drawer.id) {
-										Image(systemName: "checkmark")
-											.foregroundStyle(accent.color)
-											.font(
-												.system(
-													size: 12,
-													weight: .semibold
-												)
+						.foregroundStyle(.tertiary)
+						.frame(maxWidth: .infinity, alignment: .center)
+						.padding(.vertical, 20)
+				} else {
+					VStack(spacing: 0) {
+						ForEach(drawers, id: \.self) { drawer in
+							HStack(spacing: 8) {
+								Image(systemName: drawer.icon)
+									.foregroundStyle(.secondary)
+									.frame(width: 16)
+								
+								Text(drawer.name)
+									.font(.system(size: 13))
+								
+								Spacer()
+								
+								if selectedDrawers.contains(drawer.id) {
+									Image(systemName: "checkmark")
+										.foregroundStyle(accent.color)
+										.font(
+											.system(
+												size: 12,
+												weight: .semibold
 											)
-									}
-								}
-								.padding(.horizontal, 8)
-								.padding(.vertical, 6)
-								.contentShape(Rectangle())
-								.background(
-									selectedDrawers.contains(drawer.id)
-										? accent.color.opacity(0.1)
-										: Color.clear
-								)
-								.onTapGesture {
-									if selectedDrawers.contains(drawer.id) {
-										selectedDrawers.remove(drawer.id)
-									} else {
-										selectedDrawers.insert(drawer.id)
-									}
-								}
-
-								if drawer != drawers.last {
-									Divider()
-										.padding(.leading, 32)
+										)
 								}
 							}
+							.padding(.horizontal, 8)
+							.padding(.vertical, 6)
+							.contentShape(Rectangle())
+							.background(
+								selectedDrawers.contains(drawer.id)
+								? accent.color.opacity(0.1)
+								: Color.clear
+							)
+							.onTapGesture {
+								if selectedDrawers.contains(drawer.id) {
+									selectedDrawers.remove(drawer.id)
+								} else {
+									selectedDrawers.insert(drawer.id)
+								}
+							}
+							
+							if drawer != drawers.last {
+								Divider()
+									.padding(.leading, 32)
+							}
 						}
-						.background(.background.opacity(0.5))
-						.clipShape(RoundedRectangle(cornerRadius: 6))
-						.overlay(
-							RoundedRectangle(cornerRadius: 6)
-								.stroke(
-									Color.secondary.opacity(0.2),
-									lineWidth: 1
-								)
-						)
 					}
+					.background(.background.opacity(0.5))
+					.clipShape(RoundedRectangle(cornerRadius: 6))
+					.overlay(
+						RoundedRectangle(cornerRadius: 6)
+							.stroke(
+								Color.secondary.opacity(0.2),
+								lineWidth: 1
+							)
+					)
 				}
-				.frame(maxWidth: 280)
 			}
-			.padding(20)
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 		}
+		.formStyle(.grouped)
 	}
 
 	private func savePair() {

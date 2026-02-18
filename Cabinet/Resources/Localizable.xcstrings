@@ -12,10 +12,24 @@
       }
     },
     "1 Minute" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 minuto"
+          }
+        }
+      }
     },
     "5 Minutes" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 minutos"
+          }
+        }
+      }
     },
     "Accent Color" : {
       "localizations" : {
@@ -23,17 +37,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Color de acento"
-          }
-        }
-      }
-    },
-    "Accent Color:" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Color de acento:"
           }
         }
       }
@@ -79,16 +82,44 @@
       }
     },
     "Appearance" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apariencia"
+          }
+        }
+      }
     },
     "Auto-Lock" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto bloqueo"
+          }
+        }
+      }
     },
     "Biometrics" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biométricos"
+          }
+        }
+      }
     },
     "Biometrics are not available on this device." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La biometría no esta disponible en este dispositivo "
+          }
+        }
+      }
     },
     "Cabinet" : {
       "localizations" : {
@@ -180,17 +211,6 @@
         }
       }
     },
-    "Done" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listo"
-          }
-        }
-      }
-    },
     "Drawer" : {
       "localizations" : {
         "es-419" : {
@@ -222,7 +242,14 @@
       }
     },
     "Enable Biometrics" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habilitar biometria"
+          }
+        }
+      }
     },
     "Favorites" : {
       "localizations" : {
@@ -254,8 +281,25 @@
         }
       }
     },
+    "Icon" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icono"
+          }
+        }
+      }
+    },
     "Immediately" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inmediatamente"
+          }
+        }
+      }
     },
     "Item" : {
       "localizations" : {
@@ -268,7 +312,14 @@
       }
     },
     "Lock After" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloquear después de"
+          }
+        }
+      }
     },
     "Locked" : {
       "localizations" : {
@@ -291,7 +342,14 @@
       }
     },
     "Never" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nunca"
+          }
+        }
+      }
     },
     "New" : {
       "localizations" : {
@@ -394,7 +452,14 @@
       }
     },
     "Require Password on Wake" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requerir contraseña al desbloquear"
+          }
+        }
+      }
     },
     "Save" : {
       "localizations" : {
@@ -417,7 +482,24 @@
       }
     },
     "Security" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguridad"
+          }
+        }
+      }
+    },
+    "Select" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleccionar"
+          }
+        }
+      }
     },
     "Select a drawer" : {
       "localizations" : {
@@ -470,7 +552,14 @@
       }
     },
     "Theme" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tema"
+          }
+        }
+      }
     },
     "This action cannot be undone." : {
       "localizations" : {
@@ -558,16 +647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Valor"
-          }
-        }
-      }
-    },
-    "What is the purpose of this drawer?" : {
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cual es el propósito de este cajón?"
           }
         }
       }
