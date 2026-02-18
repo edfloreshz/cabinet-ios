@@ -16,5 +16,11 @@ struct CabinetApp: App {
 				.modelContainer(for: [Pair.self, Drawer.self])
 				.toast()
 		}
+		
+#if os(macOS)
+		Settings {
+			SettingsView()
+		}
+#endif
 	}
 }

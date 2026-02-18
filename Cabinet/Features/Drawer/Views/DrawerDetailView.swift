@@ -19,7 +19,7 @@ struct DrawerDetailView: View {
 	@State var isPresented = false
 
 	var body: some View {
-		Form {
+		Group {
 			#if os(macOS)
 				macOSForm
 			#else
@@ -67,7 +67,7 @@ struct DrawerDetailView: View {
 	}
 
 	fileprivate var iOSForm: some View {
-		Group {
+		Form {
 			Section {
 				VStack(spacing: 12) {
 					Button(action: {
@@ -94,56 +94,44 @@ struct DrawerDetailView: View {
 				.frame(maxWidth: .infinity)
 				.listRowBackground(Color.clear)
 			}
-			Section(header: Text("Purpose")) {
-				TextField(
-					"What is the purpose of this drawer?",
-					text: $drawer.purpose,
-				)
+			Section("Purpose") {
+				TextEditor(text: $drawer.purpose)
+					.frame(height: 80)
 			}
 		}
+		.formStyle(.grouped)
 	}
 
 	fileprivate var macOSForm: some View {
-		VStack(spacing: 20) {
-			Button(action: {
-				isPresented.toggle()
-			}) {
-				Image(systemName: drawer.icon)
-					.resizable()
-					.scaledToFit()
-					.frame(width: 40, height: 40)
-					.padding(20)
-					.glassEffect()
-					.foregroundStyle(.foreground)
+		Form {
+			TextField("Name", text: $drawer.name)
+				.focused($isNameFocused)
+
+			HStack {
+				Text("Icon")
+				Spacer()
+				Button("Select", systemImage: drawer.icon) {
+					isPresented.toggle()
+				}
+				.help("Change icon")
 			}
-			.buttonStyle(.plain)
-			.help("Change icon")
 
-			VStack(alignment: .leading, spacing: 4) {
-				Text("Name")
-					.font(.system(size: 13, weight: .semibold))
-					.foregroundStyle(.secondary)
-
-				TextField("", text: $drawer.name)
-					.textFieldStyle(.roundedBorder)
-					.font(.system(size: 13))
-					.focused($isNameFocused)
-			}
-			.frame(maxWidth: 280)
-
-			VStack(alignment: .leading, spacing: 4) {
+			VStack(alignment: .leading) {
 				Text("Purpose")
-					.font(.system(size: 13, weight: .semibold))
-					.foregroundStyle(.secondary)
 
-				TextField("", text: $drawer.purpose)
-					.textFieldStyle(.roundedBorder)
-					.font(.system(size: 13))
+				TextEditor(text: $drawer.purpose)
+					.frame(height: 80)
+					.scrollContentBackground(.hidden)
+					.overlay(
+						RoundedRectangle(cornerRadius: 10)
+							.stroke(
+								Color.secondary.opacity(0.25),
+								lineWidth: 1
+							)
+					)
 			}
-			.frame(maxWidth: 280)
 		}
-		.padding(20)
-		.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+		.formStyle(.grouped)
 	}
 
 	private func saveDrawer() {
