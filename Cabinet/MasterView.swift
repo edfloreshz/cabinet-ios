@@ -48,10 +48,6 @@ struct MasterView: View {
 							) {
 								HStack {
 									filter.label
-									Spacer()
-									Text(countForFilter(filter).formatted())
-										.foregroundStyle(.secondary)
-										.font(.subheadline)
 								}
 							}
 							.tag(NavigationDestination.filter(filter))

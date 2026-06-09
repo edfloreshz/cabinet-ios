@@ -31,6 +31,17 @@
         }
       }
     },
+    "15 Minutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 minutos"
+          }
+        }
+      }
+    },
     "Accent Color" : {
       "localizations" : {
         "es-419" : {
@@ -161,6 +172,16 @@
         }
       }
     },
+    "Choose how long Cabinet can stay in the background before requiring unlock." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige cuánto tiempo puede permanecer Cabinet en segundo plano antes de requerir desbloqueo."
+          }
+        }
+      }
+    },
     "Delete" : {
       "localizations" : {
         "es-419" : {
@@ -241,12 +262,12 @@
         }
       }
     },
-    "Enable Biometrics" : {
+    "Enable %@" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Habilitar biometria"
+            "value" : "Habilitar %@"
           }
         }
       }
@@ -451,16 +472,6 @@
         }
       }
     },
-    "Require Password on Wake" : {
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requerir contraseña al desbloquear"
-          }
-        }
-      }
-    },
     "Save" : {
       "localizations" : {
         "es-419" : {
@@ -621,12 +632,12 @@
         }
       }
     },
-    "Unlock with Face ID / Touch ID to access your items." : {
+    "Unlock with %@ or your passcode to access your items." : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desbloquea con Face ID / Touch ID para acceder a tus elementos."
+            "value" : "Desbloquea con %@ o tu código de acceso para acceder a tus elementos."
           }
         }
       }
