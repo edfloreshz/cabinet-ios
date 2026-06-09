@@ -75,7 +75,8 @@ struct DetailView: View {
 							.onTapGesture {
 								if !isEditing {
 									pair.lastUsedDate = Date()
-									handleCopy(for: pair)
+									ClipboardService.shared.copy(text: pair.value)
+									ToastManager.shared.show("Copied", type: .info)
 								}
 							}
 					}
@@ -251,33 +252,6 @@ struct DetailView: View {
 		}
 	}
 
-	private func handleCopy(for pair: Pair) {
-		let performCopy = {
-			#if canImport(UIKit)
-				UIPasteboard.general.string = pair.value
-			#elseif canImport(AppKit)
-				let pb = NSPasteboard.general
-				pb.clearContents()
-				pb.setString(pair.value, forType: .string)
-			#endif
-
-			ToastManager.shared.show("Copied", type: .info)
-		}
-
-		if pair.isHidden {
-			AuthenticationService.authenticate { result in
-				switch result {
-				case .success:
-					performCopy()
-				case .failure(let error):
-					ToastManager.shared.show(error.message, type: .error)
-				}
-			}
-		} else {
-			performCopy()
-		}
-	}
-
 	fileprivate func deleteSelected() {
 		for id in selectedItems {
 			if let item = pairs.first(where: { $0.id == id }) {
@@ -298,3 +272,4 @@ struct DetailView: View {
 	)
 	.modelContainer(SampleData.shared.modelContainer)
 }
+

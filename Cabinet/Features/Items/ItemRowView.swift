@@ -41,19 +41,19 @@ struct ItemRowView: View {
 					.accessibilityHidden(true)
 			}
 			Button(action: {
-				pair.isHidden
-					? AuthenticationService.authenticate { result in
-						switch result {
-						case .success:
-							pair.isHidden.toggle()
-						case .failure(let error):
-							ToastManager.shared.show(
-								error.message,
-								type: .error
-							)
-						}
-					} : pair.isHidden.toggle()
+				ClipboardService.shared.copy(text: pair.value)
+				ToastManager.shared.show(
+					"Copied",
+					type: .info
+				)
 			}) {
+				Image(
+					systemName: "document.on.document"
+				)
+				.foregroundStyle(.secondary)
+			}
+			.buttonStyle(.plain)
+			Button(action: { pair.isHidden.toggle() }) {
 				Image(systemName: pair.isHidden ? "eye.slash" : "eye")
 					.foregroundStyle(.secondary)
 			}
@@ -160,3 +160,8 @@ struct ItemRowView: View {
 		}
 	}
 }
+
+#Preview {
+	ItemRowView(pair: Pair(key: "Test", value: "Test")).padding()
+}
+

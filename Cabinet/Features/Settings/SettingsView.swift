@@ -11,6 +11,8 @@ struct SettingsView: View {
 	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
 	@AppStorage("biometricsEnabled") private var biometricsEnabled: Bool = false
 	@AppStorage("lockTimeout") private var lockTimeout: Int = -1
+	@State private var pendingBiometricsToggle: Bool? = nil
+	@State private var isProcessingBiometrics = false
 	@State private var isAdjustingBiometrics = false
 	
 	var biometricsAvailable: Bool {
@@ -43,11 +45,42 @@ struct SettingsView: View {
 				lockTimeout = -1
 			}
 		}
-		.onChange(of: biometricsEnabled) { oldValue, newValue in
-			handleBiometricsToggle(oldValue: oldValue, newValue: newValue)
-		}
 		.onChange(of: lockTimeout) { _, newValue in
 			handleLockTimeoutChange(newValue)
+		}
+		.onChange(of: pendingBiometricsToggle) { _, newValue in
+			guard let newValue, biometricsEnabled != newValue else { return }
+			isProcessingBiometrics = true
+			if newValue == false {
+				AuthenticationService.authenticate(reason: "Disable app lock for Cabinet") { result in
+					if case .success = result {
+						biometricsEnabled = false
+						lockTimeout = -1
+						ToastManager.shared.show("Biometrics disabled. App lock is now off.", type: .info)
+					}
+					// If failed, do nothing (toggle remains unchanged)
+					isProcessingBiometrics = false
+					pendingBiometricsToggle = nil
+				}
+			} else {
+				guard biometricsAvailable else {
+					ToastManager.shared.show("\(biometryKind.displayName) is not available on this device.", type: .warning)
+					isProcessingBiometrics = false
+					pendingBiometricsToggle = nil
+					return
+				}
+				AuthenticationService.authenticate(reason: "Enable app lock for Cabinet") { result in
+					if case .success = result {
+						biometricsEnabled = true
+						if lockTimeout < 0 {
+							lockTimeout = 1
+						}
+						ToastManager.shared.show("Biometrics enabled. App lock is now on.", type: .success)
+					}
+					isProcessingBiometrics = false
+					pendingBiometricsToggle = nil
+				}
+			}
 		}
 	}
 	
@@ -79,8 +112,14 @@ struct SettingsView: View {
 			Tab("Security", systemImage: "lock.fill") {
 				Form {
 					Section("Biometrics") {
-						Toggle("Enable \(biometryKind.displayName)", isOn: $biometricsEnabled)
-							.disabled(!biometricsAvailable)
+						Toggle("Enable \(biometryKind.displayName)", isOn: Binding(
+							get: { biometricsEnabled },
+							set: { newValue in
+								guard !isProcessingBiometrics, biometricsEnabled != newValue else { return }
+								pendingBiometricsToggle = newValue
+							}
+						))
+						.disabled(!biometricsAvailable)
 						
 						if !biometricsAvailable {
 							Label(
@@ -134,8 +173,14 @@ struct SettingsView: View {
 				}
 				
 				Section("Biometrics") {
-					Toggle("Enable \(biometryKind.displayName)", isOn: $biometricsEnabled)
-						.disabled(!biometricsAvailable)
+					Toggle("Enable \(biometryKind.displayName)", isOn: Binding(
+						get: { biometricsEnabled },
+						set: { newValue in
+							guard !isProcessingBiometrics, biometricsEnabled != newValue else { return }
+							pendingBiometricsToggle = newValue
+						}
+					))
+					.disabled(!biometricsAvailable)
 					if !biometricsAvailable {
 						Label(
 							"Biometrics are not available on this device.",
@@ -168,45 +213,6 @@ struct SettingsView: View {
 		}
 	}
 	
-	private func handleBiometricsToggle(oldValue: Bool, newValue: Bool) {
-		guard !isAdjustingBiometrics, oldValue != newValue else { return }
-		
-		if !newValue {
-			lockTimeout = -1
-			return
-		}
-		
-		guard biometricsAvailable else {
-			isAdjustingBiometrics = true
-			biometricsEnabled = false
-			isAdjustingBiometrics = false
-			lockTimeout = -1
-			ToastManager.shared.show(
-				"\(biometryKind.displayName) is not available on this device.",
-				type: .warning
-			)
-			return
-		}
-		
-		AuthenticationService.authenticate(reason: "Enable app lock for Cabinet") { result in
-			switch result {
-			case .success:
-				if lockTimeout < 0 {
-					lockTimeout = 1
-				}
-			case .failure:
-				isAdjustingBiometrics = true
-				biometricsEnabled = false
-				isAdjustingBiometrics = false
-				lockTimeout = -1
-				ToastManager.shared.show(
-					"Could not enable app lock.",
-					type: .error
-				)
-			}
-		}
-	}
-	
 	private func handleLockTimeoutChange(_ value: Int) {
 		if !biometricsEnabled && value >= 0 {
 			lockTimeout = -1
@@ -217,3 +223,4 @@ struct SettingsView: View {
 #Preview {
 	SettingsView()
 }
+

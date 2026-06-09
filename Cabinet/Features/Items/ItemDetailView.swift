@@ -85,26 +85,24 @@ struct ItemDetailView: View {
 	fileprivate var iOSForm: some View {
 		Form {
 			Section {
-				VStack(spacing: 12) {
+				HStack(spacing: 12) {
+					TextField("Title", text: $pair.key)
+						.font(.system(size: 22, weight: .bold))
+						.multilineTextAlignment(.leading)
+						.focused($isNameFocused)
+					
 					Button(action: {
 						isPresented.toggle()
 					}) {
 						Image(systemName: pair.icon)
 							.resizable()
 							.scaledToFit()
-							.frame(width: 40, height: 40)
-							.padding(15)
-							.glassEffect()
-							.foregroundStyle(.brown)
+							.frame(width: 22, height: 22)
+							.foregroundStyle(accent.color)
 					}
-					
-					TextField("Title", text: $pair.key)
-						.font(.system(size: 28, weight: .bold))
-						.multilineTextAlignment(.center)
-						.focused($isNameFocused)
+					.buttonStyle(.glass)
+					.buttonBorderShape(.circle)
 				}
-				.frame(maxWidth: .infinity)
-				.listRowBackground(Color.clear)
 			}
 			
 			Section(header: Text("Value")) {
@@ -117,20 +115,7 @@ struct ItemDetailView: View {
 							.focused($isContentFocused)
 					}
 					
-					Button(action: {
-						pair.isHidden
-						? AuthenticationService.authenticate { result in
-							switch result {
-							case .success:
-								pair.isHidden.toggle()
-							case .failure(let error):
-								ToastManager.shared.show(
-									error.message,
-									type: .error
-								)
-							}
-						} : pair.isHidden.toggle()
-					}) {
+					Button(action: { pair.isHidden.toggle() }) {
 						Image(
 							systemName: pair.isHidden ? "eye.slash" : "eye"
 						)
@@ -199,20 +184,7 @@ struct ItemDetailView: View {
 					.focused($isContentFocused)
 				}
 				
-				Button(action: {
-					pair.isHidden
-					? AuthenticationService.authenticate { result in
-						switch result {
-						case .success:
-							pair.isHidden.toggle()
-						case .failure(let error):
-							ToastManager.shared.show(
-								error.message,
-								type: .error
-							)
-						}
-					} : pair.isHidden.toggle()
-				}) {
+				Button(action: { pair.isHidden.toggle() }) {
 					Image(
 						systemName: pair.isHidden ? "eye.slash" : "eye"
 					)

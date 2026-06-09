@@ -93,12 +93,10 @@ struct LockedView: View {
 		case .background:
 			guard isLockingEnabled, !isAuthenticating else { return }
 			backgroundedAt = Date()
-			isLocked = true
 		case .inactive:
 			// Lock immediately on inactive, unless an auth prompt caused this transition.
 			guard isLockingEnabled, !isAuthenticating else { return }
 			backgroundedAt = Date()
-			isLocked = true
 		case .active:
 			guard !isAuthenticating else { return }
 			if shouldRequireLockOnForeground() {
