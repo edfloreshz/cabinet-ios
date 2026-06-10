@@ -84,34 +84,31 @@ struct ItemDetailView: View {
 
 	fileprivate var iOSForm: some View {
 		Form {
-			Section {
+			Section(header: Text("Content")) {
 				HStack(spacing: 12) {
 					TextField("Title", text: $pair.key)
-						.font(.system(size: 22, weight: .bold))
+						.font(.system(size: 20, weight: .bold))
 						.multilineTextAlignment(.leading)
 						.focused($isNameFocused)
-					
-					Button(action: {
+					Button(role: .confirm, action: {
 						isPresented.toggle()
 					}) {
 						Image(systemName: pair.icon)
 							.resizable()
 							.scaledToFit()
-							.frame(width: 22, height: 22)
-							.foregroundStyle(accent.color)
+							.frame(width: 20, height: 20)
+							.padding(6)
+							.foregroundStyle(.foreground)
 					}
-					.buttonStyle(.glass)
 					.buttonBorderShape(.circle)
+					.buttonStyle(.glass)
 				}
-			}
-			
-			Section(header: Text("Value")) {
 				HStack {
 					if pair.isHidden {
 						SecureField("Your secret value", text: $pair.value)
 							.focused($isContentFocused)
 					} else {
-						TextField("Your value", text: $pair.value)
+						TextField("Content", text: $pair.value)
 							.focused($isContentFocused)
 					}
 					
@@ -179,7 +176,7 @@ struct ItemDetailView: View {
 					TextField(
 						"Value",
 						text: $pair.value,
-						prompt: Text("Your value")
+						prompt: Text("Content")
 					)
 					.focused($isContentFocused)
 				}

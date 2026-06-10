@@ -1,5 +1,5 @@
 //
-//  Authentication.swift
+//  AuthenticationService.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 25/01/26.

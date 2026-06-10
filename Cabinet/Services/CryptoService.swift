@@ -1,3 +1,10 @@
+//
+//  CryptoService.swift
+//  Cabinet
+//
+//  Created by Eduardo Flores on 09/06/26.
+//
+
 import Foundation
 import CryptoKit
 

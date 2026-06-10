@@ -1,5 +1,5 @@
 //
-//  Toast.swift
+//  ToastService.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/01/26.

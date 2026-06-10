@@ -34,7 +34,7 @@ final class Pair {
 	init(
 		id: UUID = UUID(),
 		key: String,
-		icon: String = "text.document",
+		icon: String = "photo",
 		value: String,
 		isFavorite: Bool = false,
 		isHidden: Bool = false,

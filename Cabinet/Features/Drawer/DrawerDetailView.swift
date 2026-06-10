@@ -68,31 +68,25 @@ struct DrawerDetailView: View {
 
 	fileprivate var iOSForm: some View {
 		Form {
-			Section {
-				VStack(spacing: 12) {
-					Button(action: {
+			Section("Name") {
+				HStack(spacing: 12) {
+					TextField("Name", text: $drawer.name)
+						.font(.system(size: 20, weight: .bold))
+						.multilineTextAlignment(.leading)
+						.focused($isNameFocused)
+					Button(role: .confirm, action: {
 						isPresented.toggle()
 					}) {
 						Image(systemName: drawer.icon)
 							.resizable()
 							.scaledToFit()
-							.frame(width: 40, height: 40)
-							.padding(20)
-							.glassEffect()
+							.frame(width: 20, height: 20)
+							.padding(6)
 							.foregroundStyle(.foreground)
 					}
-
-					TextField("Name", text: $drawer.name)
-						#if os(iOS) || os(iPadOS) || os(visionOS)
-							.textInputAutocapitalization(.none)
-						#endif
-						.autocorrectionDisabled()
-						.font(.system(size: 28, weight: .bold))
-						.multilineTextAlignment(.center)
-						.focused($isNameFocused)
+					.buttonBorderShape(.circle)
+					.buttonStyle(.glass)
 				}
-				.frame(maxWidth: .infinity)
-				.listRowBackground(Color.clear)
 			}
 			Section("Purpose") {
 				TextEditor(text: $drawer.purpose)
@@ -142,6 +136,6 @@ struct DrawerDetailView: View {
 
 #Preview {
 	DrawerDetailView(
-		drawer: Drawer(name: "All", icon: "tag.fill")
+		drawer: Drawer(name: "All", icon: "archivebox")
 	)
 }

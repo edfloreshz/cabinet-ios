@@ -1,3 +1,10 @@
+//
+//  LockedView.swift
+//  Cabinet
+//
+//  Created by Eduardo Flores on 09/06/26.
+//
+
 import SwiftUI
 
 struct LockedView: View {
@@ -62,9 +69,6 @@ struct LockedView: View {
 				.frame(maxWidth: .infinity, maxHeight: .infinity)
 				.padding()
 				.background(Color.clear)
-				.onAppear {
-					unlock()
-				}
 				.transition(.opacity)
 			}
 		}
