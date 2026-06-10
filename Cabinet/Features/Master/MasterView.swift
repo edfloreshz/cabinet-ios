@@ -88,11 +88,9 @@ struct MasterView: View {
 			Text("This action cannot be undone.")
 		}
 		.sheet(isPresented: $viewModel.showingSettings) {
-			NavigationStack {
-				SettingsView()
-			}
-			.tint(accent.color)
-			.presentationDetents([.medium, .large])
+			SettingsView()
+				.tint(accent.color)
+				.presentationDetents([.medium, .large])
 		}
 		.sheet(isPresented: $viewModel.showingAdd) {
 			NavigationStack {
