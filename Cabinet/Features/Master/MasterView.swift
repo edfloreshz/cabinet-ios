@@ -28,21 +28,31 @@ struct MasterView: View {
 					filteredDrawers: filteredDrawers)
 			}
 			.navigationTitle("Cabinet")
+#if os(iOS) || os(iPadOS) || os(visionOS)
 			.navigationBarTitleDisplayMode(.inline)
-			.navigationSplitViewColumnWidth(min: 310, ideal: 310)
 			.searchable(
 				text: $viewModel.searchText,
 				prompt: "Search"
 			)
+			.navigationSplitViewColumnWidth(min: 310, ideal: 310)
+#else
+			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
+#endif
 			.toolbar {
+#if os(iOS) || os(iPadOS) || os(visionOS)
 				ToolbarItem(placement: .topBarLeading) {
 					Button("Settings", systemImage: "gearshape") {
 						viewModel.showingSettings.toggle()
 					}
 				}
-				ToolbarItem(placement: .topBarTrailing) {
+				ToolbarItem(placement: .automatic) {
 					primaryAction
 				}
+#else
+				ToolbarItem(placement: .primaryAction) {
+					primaryAction
+				}
+#endif
 			}
 		} detail: {
 			if let destination = viewModel.selectedDestination {
@@ -143,7 +153,9 @@ struct MasterView: View {
 				Button("New", systemImage: "plus") {
 					viewModel.showingAdd.toggle()
 				}
+#if os(iOS) || os(iPadOS) || os(visionOS)
 				.buttonStyle(.glassProminent)
+#endif
 				.tint(accent.color)
 			}
 		}

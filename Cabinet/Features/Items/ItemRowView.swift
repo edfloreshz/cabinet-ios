@@ -14,8 +14,9 @@ struct ItemRowView: View {
 	@State private var showDeleteConfirmation = false
 
 	let pair: Pair
-	@State var editingPair: Pair?
-
+	
+	@Binding var editingPair: Pair?
+	
 	var body: some View {
 		HStack(alignment: .center, spacing: 12) {
 			Image(systemName: pair.icon)
@@ -41,11 +42,9 @@ struct ItemRowView: View {
 					.accessibilityHidden(true)
 			}
 			Button(action: {
+				pair.lastUsedDate = Date()
 				ClipboardService.shared.copy(text: pair.value)
-				ToastManager.shared.show(
-					"Copied",
-					type: .info
-				)
+				ToastManager.shared.show("Copied", type: .info)
 			}) {
 				Image(
 					systemName: "document.on.document"
@@ -150,18 +149,16 @@ struct ItemRowView: View {
 		} message: {
 			Text("This action cannot be undone.")
 		}
-		.sheet(item: $editingPair) { pair in
-			NavigationStack {
-				ItemDetailView(mode: .edit, pair: pair, onSave: {})
-			}
-			.tint(accent.color)
-			.interactiveDismissDisabled()
-			.presentationDetents([.large])
-		}
 	}
 }
 
 #Preview {
-	ItemRowView(pair: Pair(key: "Test", value: "Test")).padding()
+	
 }
 
+struct AddContainer_Previews: PreviewProvider {
+	@State static var editingPair: Pair?
+	static var previews: some View {
+		ItemRowView(pair: Pair(key: "Test", value: "Test"), editingPair: $editingPair).padding()
+	}
+}

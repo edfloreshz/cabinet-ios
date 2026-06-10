@@ -22,8 +22,10 @@ struct DetailView: View {
 	@State private var showItemDeleteConfirmation = false
 	@State private var selectedItems: Set<UUID> = []
 	@State private var showingSettings: Bool = false
-
+	@State var editingPair: Pair?
+	
 	@Query private var pairs: [Pair]
+	
 
 	var destination: NavigationDestination
 	var displayedPairs: [Pair] {
@@ -71,13 +73,9 @@ struct DetailView: View {
 			} else {
 				List(selection: $selectedItems) {
 					ForEach(displayedPairs) { pair in
-						ItemRowView(pair: pair)
+						ItemRowView(pair: pair, editingPair: $editingPair)
 							.onTapGesture {
-								if !isEditing {
-									pair.lastUsedDate = Date()
-									ClipboardService.shared.copy(text: pair.value)
-									ToastManager.shared.show("Copied", type: .info)
-								}
+								editingPair = pair
 							}
 					}
 				}
@@ -128,6 +126,14 @@ struct DetailView: View {
 					primaryAction
 				}
 			#endif
+		}
+		.sheet(item: $editingPair) { pair in
+			NavigationStack {
+				ItemDetailView(mode: .edit, pair: pair, onSave: {})
+			}
+			.tint(accent.color)
+			.interactiveDismissDisabled()
+			.presentationDetents([.large])
 		}
 		.sheet(isPresented: $showingAdd) {
 			addSheet
