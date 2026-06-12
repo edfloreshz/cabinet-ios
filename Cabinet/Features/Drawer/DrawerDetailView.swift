@@ -1,5 +1,5 @@
 //
-//  DrawerView.swift
+//  DrawerDetailView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 09/02/26.
@@ -13,7 +13,7 @@ struct DrawerDetailView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isNameFocused: Bool
-	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") private var accent: AppColor = .indigo
 
 	@Bindable var drawer: Drawer
 	@State var isPresented = false

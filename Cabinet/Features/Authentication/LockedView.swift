@@ -9,7 +9,7 @@ import SwiftUI
 
 struct LockedView: View {
 	@Environment(\.scenePhase) private var scenePhase
-	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@AppStorage("biometricsEnabled") private var biometricsEnabled: Bool = false
 	@AppStorage("lockTimeout") private var lockTimeout: Int = -1
 	
@@ -21,7 +21,7 @@ struct LockedView: View {
 	
 	var body: some View {
 		ZStack {
-			MasterView()
+			LibraryView()
 				.blur(radius: isLocked ? 18 : 0)
 				.disabled(isLocked)
 			

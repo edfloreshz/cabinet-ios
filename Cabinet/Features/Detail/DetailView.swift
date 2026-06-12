@@ -1,5 +1,5 @@
 //
-//  DrawerDetails.swift
+//  DetailView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 15/02/26.
@@ -15,7 +15,7 @@ struct DetailView: View {
 		@Environment(\.openSettings) private var openSettings
 	#endif
 
-	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var viewModel = DetailViewModel()
 	@State private var isEditing = false
 	@State private var showingAdd = false
@@ -27,7 +27,7 @@ struct DetailView: View {
 	@Query private var pairs: [Pair]
 	
 
-	var destination: NavigationDestination
+	var destination: Destination
 	var displayedPairs: [Pair] {
 		viewModel.filteredPairs(pairs, destination: destination)
 	}
@@ -274,7 +274,7 @@ struct DetailView: View {
 
 #Preview {
 	DetailView(
-		destination: NavigationDestination.drawer(Drawer.sampleData.first!)
+		destination: Destination.drawer(Drawer.sampleData.first!)
 	)
 	.modelContainer(SampleData.shared.modelContainer)
 }

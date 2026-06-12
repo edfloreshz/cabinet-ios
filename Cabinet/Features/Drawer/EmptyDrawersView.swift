@@ -1,5 +1,5 @@
 //
-//  EmptyView.swift
+//  EmptyDrawersView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/11/25.

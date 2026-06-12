@@ -1,5 +1,5 @@
 //
-//  ThemeColor.swift
+//  AppColor.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 10/02/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum ThemeColor: String, CaseIterable {
+enum AppColor: String, CaseIterable {
 	case indigo, blue, purple, pink, red, orange, yellow, green, teal, cyan
 
 	var color: Color {

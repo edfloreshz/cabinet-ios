@@ -1,5 +1,5 @@
 //
-//  ItemView.swift
+//  ItemDetailView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/11/25.
@@ -16,7 +16,7 @@ enum ViewMode {
 struct ItemDetailView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
-	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@FocusState private var isContentFocused: Bool
 	@FocusState private var isNameFocused: Bool
 	@State private var selectedDrawers: Set<UUID> = []

@@ -1,5 +1,5 @@
 //
-//  SecuritySettingsView.swift
+//  SecurityTabView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 10/06/26.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct BiometricsView: View {
-	@State private var model = SecuritySettingsModel()
+struct SecurityTabView: View {
+	@State private var model = SecurityTabViewModel()
 	
 	private let lockOptions: [(label: LocalizedStringKey, value: Int)] = [
 		("Immediately", 0),
@@ -74,5 +74,5 @@ struct BiometricsView: View {
 }
 
 #Preview {
-	BiometricsView()
+	SecurityTabView()
 }

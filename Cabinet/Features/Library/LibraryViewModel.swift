@@ -1,5 +1,5 @@
 //
-//  MasterViewModel.swift
+//  LibraryViewModel.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 09/06/26.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct MasterViewModel {
+struct LibraryViewModel {
 	var isEditing = false
 	var showingAdd = false
 	var showingSettings = false
@@ -17,7 +17,7 @@ struct MasterViewModel {
 	var drawerToDelete: Drawer? = nil
 	var selectedItems: Set<UUID> = []
 	var searchText: String = ""
-	var selectedDestination: NavigationDestination? = .filter(
+	var selectedDestination: Destination? = .filter(
 		.all
 	)
 }

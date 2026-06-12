@@ -1,5 +1,5 @@
 //
-//  AppearanceSettingsView.swift
+//  AppearanceTabView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 10/06/26.
@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct AppearanceView: View {
+struct AppearanceTabView: View {
 	@AppStorage("accentColor")
-	private var accent: ThemeColor = .indigo
+	private var accent: AppColor = .indigo
 	
 	var body: some View {
 		List {
 			Section {
 				HStack {
 					Picker("Accent Color", selection: $accent) {
-						ForEach(ThemeColor.allCases, id: \.self) { colorOption in
+						ForEach(AppColor.allCases, id: \.self) { colorOption in
 							Text(colorOption.rawValue.capitalized)
 								.tag(colorOption)
 						}
@@ -38,5 +38,5 @@ struct AppearanceView: View {
 }
 
 #Preview {
-	AppearanceView()
+	AppearanceTabView()
 }

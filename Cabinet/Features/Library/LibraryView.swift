@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  LibraryView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/11/25.
@@ -8,14 +8,14 @@
 import SwiftUI
 import SwiftData
 
-struct MasterView: View {
+struct LibraryView: View {
 	@Environment(\.modelContext) private var modelContext
-	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	
 	@Query var drawers: [Drawer]
 	@Query var pairs: [Pair]
 	
-	@State private var viewModel = MasterViewModel()
+	@State private var viewModel = LibraryViewModel()
 	
 	var body: some View {
 		NavigationSplitView {
@@ -190,17 +190,17 @@ struct SmartFilters: View {
 	var body: some View {
 		Section {
 			ForEach(Filter.allCases) { filter in
-				NavigationLink(value: NavigationDestination.filter(filter)) {
+				NavigationLink(value: Destination.filter(filter)) {
 					HStack { filter.label }
 				}
-				.tag(NavigationDestination.filter(filter))
+				.tag(Destination.filter(filter))
 			}
 		}
 	}
 }
 
 struct Drawers: View {
-	@AppStorage("accentColor") var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") var accent: AppColor = .indigo
 	@Query var drawers: [Drawer]
 	@Binding var searchText: String
 	@Binding var editingDrawer: Drawer?
@@ -217,7 +217,7 @@ struct Drawers: View {
 			} else {
 				ForEach(filteredDrawers) { drawer in
 					NavigationLink(
-						value: NavigationDestination.drawer(drawer)
+						value: Destination.drawer(drawer)
 					) {
 						Label {
 							Text(drawer.name)
@@ -226,7 +226,7 @@ struct Drawers: View {
 								.foregroundStyle(accent.color)
 						}
 					}
-					.tag(NavigationDestination.drawer(drawer))
+					.tag(Destination.drawer(drawer))
 					.contextMenu {
 						Button("Edit", systemImage: "pencil") {
 							editingDrawer = drawer
@@ -254,5 +254,5 @@ struct Drawers: View {
 }
 
 #Preview {
-	MasterView().modelContainer(SampleData.shared.modelContainer)
+	LibraryView().modelContainer(SampleData.shared.modelContainer)
 }

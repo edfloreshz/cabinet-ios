@@ -14,7 +14,7 @@ class DetailViewModel {
 	var searchText: String = ""
 	var selectedFilter: Filter = .all
 
-	func filteredPairs(_ pairs: [Pair], destination: NavigationDestination) -> [Pair] {
+	func filteredPairs(_ pairs: [Pair], destination: Destination) -> [Pair] {
 		let base = pairs
 		let searchFiltered: [Pair]
 

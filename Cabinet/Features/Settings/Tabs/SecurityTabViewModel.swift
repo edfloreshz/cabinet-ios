@@ -1,5 +1,5 @@
 //
-//  SecuritySettingsModel.swift
+//  SecurityTabViewModel.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 10/06/26.
@@ -10,7 +10,7 @@ import SwiftUI
 
 @Observable
 @MainActor
-final class SecuritySettingsModel {
+final class SecurityTabViewModel {
 	private let authenticationService: AuthenticationService.Type
 	
 	init(

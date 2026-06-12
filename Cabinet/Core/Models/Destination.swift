@@ -1,11 +1,11 @@
 //
-//  NavigationDestination.swift
+//  Destination.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 16/02/26.
 //
 
-enum NavigationDestination: Hashable {
+enum Destination: Hashable {
 	case drawer(Drawer)
 	case filter(Filter)
 	
@@ -20,7 +20,7 @@ enum NavigationDestination: Hashable {
 		}
 	}
 	
-	static func == (lhs: NavigationDestination, rhs: NavigationDestination) -> Bool {
+	static func == (lhs: Destination, rhs: Destination) -> Bool {
 		switch (lhs, rhs) {
 		case (.drawer(let lDrawer), .drawer(let rDrawer)):
 			return lDrawer.id == rDrawer.id

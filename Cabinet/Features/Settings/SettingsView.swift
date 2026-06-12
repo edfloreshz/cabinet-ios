@@ -1,5 +1,5 @@
 //
-//  Settings.swift
+//  SettingsView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 25/01/26.
@@ -11,12 +11,12 @@ import SwiftUI
 struct SettingsView: View {
 	var body: some View {
 		TabView {
-			AppearanceView()
+			AppearanceTabView()
 				.tabItem {
 					Label("Appearance", systemImage: "paintpalette.fill")
 				}
 			
-			BiometricsView()
+			SecurityTabView()
 				.tabItem {
 					Label("Security", systemImage: "lock.fill")
 				}

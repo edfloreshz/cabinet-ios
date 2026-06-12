@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ItemRowView: View {
 	@Environment(\.modelContext) private var modelContext
-	@AppStorage("accentColor") private var accent: ThemeColor = .indigo
+	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var showDeleteConfirmation = false
 
 	let pair: Pair
