@@ -18,7 +18,7 @@ enum Filter: String, CaseIterable, Identifiable {
 				Text("All")
 			} icon: {
 				Image(systemName: self.icon)
-					#if os(iOS) || os(iPadOS) || os(visionOS)
+					#if !os(macOS)
 						.foregroundStyle(self.color)
 					#endif
 			}.tag(self)
@@ -27,7 +27,7 @@ enum Filter: String, CaseIterable, Identifiable {
 				Text("Favorites")
 			} icon: {
 				Image(systemName: self.icon)
-					#if os(iOS) || os(iPadOS) || os(visionOS)
+					#if !os(macOS)
 						.foregroundStyle(self.color)
 					#endif
 			}.tag(self)
@@ -36,7 +36,7 @@ enum Filter: String, CaseIterable, Identifiable {
 				Text("Recents")
 			} icon: {
 				Image(systemName: self.icon)
-					#if os(iOS) || os(iPadOS) || os(visionOS)
+					#if !os(macOS)
 						.foregroundStyle(self.color)
 					#endif
 			}.tag(self)

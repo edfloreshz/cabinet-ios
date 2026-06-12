@@ -28,7 +28,7 @@ struct MasterView: View {
 					filteredDrawers: filteredDrawers)
 			}
 			.navigationTitle("Cabinet")
-#if os(iOS) || os(iPadOS) || os(visionOS)
+#if !os(macOS)
 			.navigationBarTitleDisplayMode(.inline)
 			.searchable(
 				text: $viewModel.searchText,
@@ -39,7 +39,7 @@ struct MasterView: View {
 			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
 #endif
 			.toolbar {
-#if os(iOS) || os(iPadOS) || os(visionOS)
+#if !os(macOS)
 				ToolbarItem(placement: .topBarLeading) {
 					Button("Settings", systemImage: "gearshape") {
 						viewModel.showingSettings.toggle()
@@ -151,7 +151,7 @@ struct MasterView: View {
 				Button("New", systemImage: "plus") {
 					viewModel.showingAdd.toggle()
 				}
-#if os(iOS) || os(iPadOS) || os(visionOS)
+#if !os(macOS)
 				.buttonStyle(.glassProminent)
 #endif
 				.tint(accent.color)

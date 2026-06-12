@@ -43,7 +43,7 @@ struct BiometricsView: View {
 				}
 			}  header: {
 				Text("Biometrics")
-#if os(iOS) || os(iPadOS) || os(visionOS)
+#if !os(macOS)
 					.padding(.top, 20)
 #endif
 			}

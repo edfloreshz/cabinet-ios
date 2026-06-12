@@ -36,7 +36,7 @@ struct ItemDetailView: View {
 			#endif
 		}
 		.navigationTitle("Item")
-#if os(iOS) || os(iPadOS) || os(visionOS)
+#if !os(macOS)
 		.navigationBarTitleDisplayMode(.inline)
 #endif
 		.scrollDismissesKeyboard(.interactively)

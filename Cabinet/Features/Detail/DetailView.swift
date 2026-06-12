@@ -83,7 +83,7 @@ struct DetailView: View {
 		}
 		.navigationTitle(navigationTitle)
 		.navigationSubtitle(navigationSubtitle)
-		#if os(iOS) || os(iPadOS) || os(visionOS)
+		#if !os(macOS)
 			.navigationBarTitleDisplayMode(.inline)
 			.environment(
 				\.editMode,
@@ -95,7 +95,7 @@ struct DetailView: View {
 			prompt: "Search"
 		)
 		.toolbar {
-			#if os(iOS) || os(iPadOS) || os(visionOS)
+			#if !os(macOS)
 				ToolbarItemGroup(placement: .topBarTrailing) {
 					editButton
 				}
@@ -208,7 +208,7 @@ struct DetailView: View {
 				Button("New", systemImage: "plus") {
 					showingAdd.toggle()
 				}
-				#if os(iOS) || os(iPadOS) || os(visionOS)
+				#if !os(macOS)
 					.buttonStyle(.glassProminent)
 				#endif
 				.tint(accent.color)

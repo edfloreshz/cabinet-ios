@@ -27,7 +27,7 @@ struct DrawerDetailView: View {
 			#endif
 		}
 		.navigationTitle("Drawer")
-		#if os(iOS) || os(iPadOS) || os(visionOS)
+		#if !os(macOS)
 			.navigationBarTitleDisplayMode(.inline)
 		#endif
 		.scrollDismissesKeyboard(.interactively)
