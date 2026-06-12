@@ -28,5 +28,12 @@ struct SettingsView: View {
 }
 
 #Preview {
-	SettingsView()
+	Color.clear
+		.sheet(isPresented: .constant(true)) {
+			NavigationStack {
+				SettingsView()
+			}
+			.presentationDetents([.large])
+			.presentationDragIndicator(.visible)
+		}
 }

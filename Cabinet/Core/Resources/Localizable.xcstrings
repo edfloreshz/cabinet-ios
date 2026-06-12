@@ -266,6 +266,26 @@
         }
       }
     },
+    "Discard changes" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar cambios"
+          }
+        }
+      }
+    },
+    "Discard changes?" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar cambios?"
+          }
+        }
+      }
+    },
     "Drawer" : {
       "localizations" : {
         "es-419" : {
@@ -362,6 +382,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Elemento"
+          }
+        }
+      }
+    },
+    "Keep editing" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar editando"
           }
         }
       }
@@ -706,6 +736,16 @@
         }
       }
     },
+    "You have unsaved changes. Are you sure you want to discard them?" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tienes cambios sin guardar. ¿Estas seguro que deseas descartarlos?"
+          }
+        }
+      }
+    },
     "Your favorites" : {
       "localizations" : {
         "es-419" : {
@@ -722,17 +762,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu valor secreto"
-          }
-        }
-      }
-    },
-    "Your value" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu valor"
           }
         }
       }

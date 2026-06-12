@@ -12,7 +12,7 @@ struct PairListItemView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var showDeleteConfirmation = false
-
+	
 	let pair: Pair
 	
 	@Binding var editingPair: Pair?
@@ -26,8 +26,8 @@ struct PairListItemView: View {
 					.foregroundStyle(.primary)
 				Text(
 					pair.isHidden
-						? String(repeating: "•", count: pair.value.count)
-						: pair.value
+					? String(repeating: "•", count: pair.value.count)
+					: pair.value
 				)
 				.font(.subheadline)
 				.foregroundStyle(.secondary)
@@ -59,7 +59,32 @@ struct PairListItemView: View {
 			.buttonStyle(.plain)
 		}
 		.contextMenu {
-			#if os(macOS)
+#if os(macOS)
+			if !pair.isHidden {
+				ShareLink(item: pair.value) {
+					Label(
+						"Share",
+						systemImage: "square.and.arrow.up.fill"
+					)
+				}
+			}
+			Button {
+				pair.isFavorite.toggle()
+			} label: {
+				Label(
+					pair.isFavorite ? "Unpin" : "Pin",
+					systemImage: pair.isFavorite
+					? "star.slash.fill" : "star.fill"
+				)
+			}
+			Button {
+				editingPair = pair
+			} label: {
+				Label("Edit", systemImage: "pencil")
+			}
+			
+#else
+			ControlGroup {
 				if !pair.isHidden {
 					ShareLink(item: pair.value) {
 						Label(
@@ -74,7 +99,7 @@ struct PairListItemView: View {
 					Label(
 						pair.isFavorite ? "Unpin" : "Pin",
 						systemImage: pair.isFavorite
-							? "star.slash.fill" : "star.fill"
+						? "star.slash.fill" : "star.fill"
 					)
 				}
 				Button {
@@ -82,33 +107,8 @@ struct PairListItemView: View {
 				} label: {
 					Label("Edit", systemImage: "pencil")
 				}
-
-			#else
-				ControlGroup {
-					if !pair.isHidden {
-						ShareLink(item: pair.value) {
-							Label(
-								"Share",
-								systemImage: "square.and.arrow.up.fill"
-							)
-						}
-					}
-					Button {
-						pair.isFavorite.toggle()
-					} label: {
-						Label(
-							pair.isFavorite ? "Unpin" : "Pin",
-							systemImage: pair.isFavorite
-								? "star.slash.fill" : "star.fill"
-						)
-					}
-					Button {
-						editingPair = pair
-					} label: {
-						Label("Edit", systemImage: "pencil")
-					}
-				}
-			#endif
+			}
+#endif
 			Button(role: .destructive) {
 				showDeleteConfirmation = true
 			} label: {
@@ -123,7 +123,7 @@ struct PairListItemView: View {
 			) {
 				pair.isFavorite.toggle()
 			}.tint(.yellow)
-
+			
 			ShareLink(item: pair.value) {
 				Label("Share", systemImage: "square.and.arrow.up.fill")
 			}
@@ -132,7 +132,7 @@ struct PairListItemView: View {
 			Button("Delete", systemImage: "trash") {
 				showDeleteConfirmation = true
 			}.tint(.red)
-
+			
 			Button("Edit", systemImage: "pencil") {
 				editingPair = pair
 			}.tint(.blue)
@@ -153,12 +153,10 @@ struct PairListItemView: View {
 }
 
 #Preview {
-	
-}
-
-struct AddContainer_Previews: PreviewProvider {
-	@State static var editingPair: Pair?
-	static var previews: some View {
-		PairListItemView(pair: Pair(key: "Test", value: "Test"), editingPair: $editingPair).padding()
-	}
+	@Previewable @State var editingPair: Pair? = nil
+	PairListItemView(
+		pair: Pair(key: "Test", value: "Test"),
+		editingPair: $editingPair
+	)
+	.padding()
 }

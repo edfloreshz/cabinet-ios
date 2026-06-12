@@ -4,7 +4,6 @@
 //
 //  Created by Eduardo Flores on 26/11/25.
 //
-
 import SFSymbolsPicker
 import SwiftData
 import SwiftUI
@@ -20,20 +19,34 @@ struct PairFormView: View {
 	@FocusState private var isContentFocused: Bool
 	@FocusState private var isNameFocused: Bool
 	@State private var selectedDrawers: Set<UUID> = []
-	@State var isPresented = false
+	@State private var isPresented = false
+	@State private var showDiscardAlert = false
 	@Query private var drawers: [Drawer]
-
+	
 	let mode: ViewMode
-	@State var pair: Pair
+	let pair: Pair
 	let onSave: () -> Void
-
+	
+	@State private var formData: PairFormData
+	
+	init(mode: ViewMode, pair: Pair, onSave: @escaping () -> Void) {
+		self.mode = mode
+		self.pair = pair
+		self.onSave = onSave
+		self._formData = State(initialValue: PairFormData(from: pair))
+	}
+	
+	private var isDirty: Bool {
+		formData != PairFormData(from: pair)
+	}
+	
 	var body: some View {
 		Group {
-			#if os(macOS)
-				macOSForm
-			#else
-				iOSForm
-			#endif
+#if os(macOS)
+			macOSForm
+#else
+			iOSForm
+#endif
 		}
 		.navigationTitle("Item")
 #if !os(macOS)
@@ -42,7 +55,9 @@ struct PairFormView: View {
 		.scrollDismissesKeyboard(.interactively)
 		.toolbar {
 			ToolbarItem(placement: .cancellationAction) {
-				Button("Cancel", systemImage: "xmark") { dismiss() }
+				Button("Cancel", systemImage: "xmark") {
+					handleCancel()
+				}
 			}
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Save", systemImage: "checkmark") {
@@ -53,24 +68,33 @@ struct PairFormView: View {
 				.tint(accent.color)
 				.buttonStyle(.glassProminent)
 				.disabled(
-					pair.key.trimmingCharacters(in: .whitespacesAndNewlines)
-						.isEmpty
+					formData.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 				)
 			}
 		}
-		.sheet(
-			isPresented: $isPresented,
-			content: {
-				SymbolsPicker(
-					selection: $pair.icon,
-					title: "Pick a symbol",
-					autoDismiss: true
-				)
+		.sheet(isPresented: $isPresented) {
+			SymbolsPicker(
+				selection: $formData.icon,
+				title: "Pick a symbol",
+				autoDismiss: true
+			)
+		}
+		.interactiveDismissDisabled(isDirty)
+		.confirmationDialog(
+			"Discard changes?",
+			isPresented: $showDiscardAlert,
+			titleVisibility: .visible
+		) {
+			Button("Discard changes", role: .destructive) {
+				dismiss()
 			}
-		)
+			Button("Keep editing", role: .cancel) { }
+		} message: {
+			Text("You have unsaved changes. Are you sure you want to discard them?")
+		}
 		.onAppear {
 			selectedDrawers = Set(pair.drawers)
-
+			
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 				switch mode {
 				case .edit:
@@ -81,19 +105,21 @@ struct PairFormView: View {
 			}
 		}
 	}
-
-	fileprivate var iOSForm: some View {
+	
+	// MARK: - Forms
+	
+	private var iOSForm: some View {
 		Form {
 			Section(header: Text("Content")) {
 				HStack(spacing: 12) {
-					TextField("Title", text: $pair.key)
+					TextField("Title", text: $formData.key)
 						.font(.system(size: 20, weight: .bold))
 						.multilineTextAlignment(.leading)
 						.focused($isNameFocused)
 					Button(role: .confirm, action: {
 						isPresented.toggle()
 					}) {
-						Image(systemName: pair.icon)
+						Image(systemName: formData.icon)
 							.resizable()
 							.scaledToFit()
 							.frame(width: 20, height: 20)
@@ -104,19 +130,17 @@ struct PairFormView: View {
 					.buttonStyle(.glass)
 				}
 				HStack {
-					if pair.isHidden {
-						SecureField("Your secret value", text: $pair.value)
+					if formData.isHidden {
+						SecureField("Your secret value", text: $formData.value)
 							.focused($isContentFocused)
 					} else {
-						TextField("Content", text: $pair.value)
+						TextField("Content", text: $formData.value)
 							.focused($isContentFocused)
 					}
 					
-					Button(action: { pair.isHidden.toggle() }) {
-						Image(
-							systemName: pair.isHidden ? "eye.slash" : "eye"
-						)
-						.foregroundStyle(.secondary)
+					Button(action: { formData.isHidden.toggle() }) {
+						Image(systemName: formData.isHidden ? "eye.slash" : "eye")
+							.foregroundStyle(.secondary)
 					}
 					.buttonStyle(.plain)
 				}
@@ -125,7 +149,7 @@ struct PairFormView: View {
 			Section(header: Text("Notes")) {
 				TextField(
 					"Type remarks or notes here",
-					text: $pair.notes,
+					text: $formData.notes,
 					axis: .vertical
 				)
 				.lineLimit(3...5)
@@ -158,62 +182,55 @@ struct PairFormView: View {
 			}
 		}
 	}
-
-	fileprivate var macOSForm: some View {
+	
+	private var macOSForm: some View {
 		Form {
-			TextField("Title", text: $pair.key)
+			TextField("Title", text: $formData.key)
 				.focused($isNameFocused)
 			
 			HStack(spacing: 8) {
-				if pair.isHidden {
+				if formData.isHidden {
 					SecureField(
 						"Value",
-						text: $pair.value,
+						text: $formData.value,
 						prompt: Text("Your secret value")
 					)
 					.focused($isContentFocused)
 				} else {
 					TextField(
 						"Value",
-						text: $pair.value,
+						text: $formData.value,
 						prompt: Text("Content")
 					)
 					.focused($isContentFocused)
 				}
 				
-				Button(action: { pair.isHidden.toggle() }) {
-					Image(
-						systemName: pair.isHidden ? "eye.slash" : "eye"
-					)
-					.foregroundStyle(.secondary)
-					.frame(width: 16, height: 16)
+				Button(action: { formData.isHidden.toggle() }) {
+					Image(systemName: formData.isHidden ? "eye.slash" : "eye")
+						.foregroundStyle(.secondary)
+						.frame(width: 16, height: 16)
 				}
 				.buttonStyle(.plain)
-				.help(pair.isHidden ? "Show value" : "Hide value")
+				.help(formData.isHidden ? "Show value" : "Hide value")
 			}
-			
 			
 			HStack {
 				Text("Icon")
 				Spacer()
 				Button(action: { isPresented.toggle() }) {
-					Label("Select", systemImage: pair.icon)
+					Label("Select", systemImage: formData.icon)
 				}
 				.help("Change icon")
 			}
 			
 			VStack(alignment: .leading) {
 				Text("Notes")
-				
-				TextEditor(text: $pair.notes)
+				TextEditor(text: $formData.notes)
 					.frame(height: 80)
 					.scrollContentBackground(.hidden)
 					.overlay(
 						RoundedRectangle(cornerRadius: 10)
-							.stroke(
-								Color.secondary.opacity(0.25),
-								lineWidth: 1
-							)
+							.stroke(Color.secondary.opacity(0.25), lineWidth: 1)
 					)
 			}
 			
@@ -235,21 +252,13 @@ struct PairFormView: View {
 								Image(systemName: drawer.icon)
 									.foregroundStyle(.secondary)
 									.frame(width: 16)
-								
 								Text(drawer.name)
 									.font(.system(size: 13))
-								
 								Spacer()
-								
 								if selectedDrawers.contains(drawer.id) {
 									Image(systemName: "checkmark")
 										.foregroundStyle(accent.color)
-										.font(
-											.system(
-												size: 12,
-												weight: .semibold
-											)
-										)
+										.font(.system(size: 12, weight: .semibold))
 								}
 							}
 							.padding(.horizontal, 8)
@@ -278,24 +287,45 @@ struct PairFormView: View {
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.overlay(
 						RoundedRectangle(cornerRadius: 6)
-							.stroke(
-								Color.secondary.opacity(0.2),
-								lineWidth: 1
-							)
+							.stroke(Color.secondary.opacity(0.2), lineWidth: 1)
 					)
 				}
 			}
 		}
 		.formStyle(.grouped)
 	}
-
+	
+	// MARK: - Actions
+	
+	private func handleCancel() {
+		if isDirty {
+			showDiscardAlert = true
+		} else {
+			dismiss()
+		}
+	}
+	
 	private func savePair() {
+		pair.key = formData.key
+		pair.value = formData.value
+		pair.notes = formData.notes
+		pair.icon = formData.icon
+		pair.isHidden = formData.isHidden
 		pair.drawers = Array(selectedDrawers)
-		modelContext.insert(pair)
+		
+		if mode == .new {
+			modelContext.insert(pair)
+		}
+		
 		try? modelContext.save()
 	}
 }
 
 #Preview {
-	PairFormView(mode: .new, pair: Pair.sampleData[0], onSave: {})
+	Color.clear.sheet(isPresented: .constant(true)) {
+		NavigationStack {
+			PairFormView(mode: .new, pair: Pair.sampleData[0], onSave: {})
+		}
+		.presentationDetents([.large])
+	}
 }

@@ -13,6 +13,11 @@ import SwiftData
 class PairListViewModel {
 	var searchText: String = ""
 	var selectedFilter: Filter = .all
+	var isEditing = false
+	var showingAdd = false
+	var showItemDeleteConfirmation = false
+	var selectedItems: Set<UUID> = []
+	var editingPair: Pair?
 
 	func filteredPairs(_ pairs: [Pair], destination: Destination) -> [Pair] {
 		let base = pairs

@@ -17,12 +17,6 @@ struct PairListView: View {
 
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var viewModel = PairListViewModel()
-	@State private var isEditing = false
-	@State private var showingAdd = false
-	@State private var showItemDeleteConfirmation = false
-	@State private var selectedItems: Set<UUID> = []
-	@State private var showingSettings: Bool = false
-	@State var editingPair: Pair?
 	
 	@Query private var pairs: [Pair]
 	
@@ -83,11 +77,11 @@ struct PairListView: View {
 				.multilineTextAlignment(.center)
 				.padding()
 			} else {
-				List(selection: $selectedItems) {
+				List(selection: $viewModel.selectedItems) {
 					ForEach(displayedPairs) { pair in
-						PairListItemView(pair: pair, editingPair: $editingPair)
+						PairListItemView(pair: pair, editingPair: $viewModel.editingPair)
 							.onTapGesture {
-								editingPair = pair
+								viewModel.editingPair = pair
 							}
 					}
 				}
@@ -99,7 +93,7 @@ struct PairListView: View {
 			.navigationBarTitleDisplayMode(.inline)
 			.environment(
 				\.editMode,
-				.constant(isEditing ? .active : .inactive)
+				 .constant(viewModel.isEditing ? .active : .inactive)
 			)
 		#endif
 		.searchable(
@@ -139,7 +133,7 @@ struct PairListView: View {
 				}
 			#endif
 		}
-		.sheet(item: $editingPair) { pair in
+		.sheet(item: $viewModel.editingPair) { pair in
 			NavigationStack {
 				PairFormView(mode: .edit, pair: pair, onSave: {})
 			}
@@ -147,15 +141,8 @@ struct PairListView: View {
 			.interactiveDismissDisabled()
 			.presentationDetents([.large])
 		}
-		.sheet(isPresented: $showingAdd) {
+		.sheet(isPresented: $viewModel.showingAdd) {
 			addSheet
-		}
-		.sheet(isPresented: $showingSettings) {
-			NavigationStack {
-				SettingsView()
-			}
-			.tint(accent.color)
-			.presentationDetents([.medium, .large])
 		}
 		.onChange(of: destination) {
 			if case .drawer(_) = destination {
@@ -173,7 +160,7 @@ struct PairListView: View {
 		}
 	}
 
-	fileprivate var addSheet: some View {
+	private var addSheet: some View {
 		let pair = Pair(key: "", value: "", drawers: selectedDrawers)
 
 		if viewModel.selectedFilter == .favorites {
@@ -193,7 +180,7 @@ struct PairListView: View {
 		.interactiveDismissDisabled()
 	}
 
-	fileprivate var filterPickerMenu: some View {
+	private var filterPickerMenu: some View {
 		Menu {
 			Picker("Filter", selection: $viewModel.selectedFilter) {
 				ForEach(Filter.allCases, id: \.self) { filter in
@@ -208,17 +195,17 @@ struct PairListView: View {
 		}
 	}
 
-	fileprivate var primaryAction: some View {
+	private var primaryAction: some View {
 		Group {
-			if isEditing {
+			if viewModel.isEditing {
 				Button("Delete", systemImage: "trash", role: .destructive) {
-					showItemDeleteConfirmation.toggle()
+					viewModel.showItemDeleteConfirmation.toggle()
 				}
 				.tint(.red)
-				.disabled(selectedItems.isEmpty)
+				.disabled(viewModel.selectedItems.isEmpty)
 			} else {
 				Button("New", systemImage: "plus") {
-					showingAdd.toggle()
+					viewModel.showingAdd.toggle()
 				}
 				#if !os(macOS)
 					.buttonStyle(.glassProminent)
@@ -228,7 +215,7 @@ struct PairListView: View {
 		}
 		.confirmationDialog(
 			"Delete selected items?",
-			isPresented: $showItemDeleteConfirmation,
+			isPresented: $viewModel.showItemDeleteConfirmation,
 			titleVisibility: .visible
 		) {
 			Button("Delete", role: .destructive) {
@@ -239,47 +226,47 @@ struct PairListView: View {
 		}
 	}
 
-	fileprivate var editButton: some View {
+	private var editButton: some View {
 		return Group {
-			if isEditing {
+			if viewModel.isEditing {
 				Button(
-					selectedItems.count == displayedPairs.count
+					viewModel.selectedItems.count == displayedPairs.count
 						? "Deselect All" : "Select All"
 				) {
-					if selectedItems.count == displayedPairs.count {
-						selectedItems.removeAll()
+					if viewModel.selectedItems.count == displayedPairs.count {
+						viewModel.selectedItems.removeAll()
 					} else {
-						selectedItems = Set(displayedPairs.map { $0.id })
+						viewModel.selectedItems = Set(displayedPairs.map { $0.id })
 					}
 				}
 			}
 			if !displayedPairs.isEmpty {
 				Button(
 					"Edit",
-					systemImage: isEditing ? "checkmark" : "pencil",
-					role: isEditing ? .confirm : .close
+					systemImage: viewModel.isEditing ? "checkmark" : "pencil",
+					role: viewModel.isEditing ? .confirm : .close
 				) {
 					withAnimation {
-						isEditing.toggle()
-						if !isEditing {
-							selectedItems.removeAll()
+						viewModel.isEditing.toggle()
+						if !viewModel.isEditing {
+							viewModel.selectedItems.removeAll()
 						}
 					}
-				}.tint(isEditing ? accent.color : nil)
+				}.tint(viewModel.isEditing ? accent.color : nil)
 			}
 		}
 	}
 
-	fileprivate func deleteSelected() {
-		for id in selectedItems {
+	private func deleteSelected() {
+		for id in viewModel.selectedItems {
 			if let item = pairs.first(where: { $0.id == id }) {
 				modelContext.delete(item)
 			}
 		}
 
 		withAnimation {
-			selectedItems.removeAll()
-			isEditing = false
+			viewModel.selectedItems.removeAll()
+			viewModel.isEditing = false
 		}
 	}
 }

@@ -19,53 +19,9 @@ struct LibraryView: View {
 	
 	var body: some View {
 		NavigationSplitView {
-			List(selection: $viewModel.selectedDestination) {
-				SmartFilters()
-				Drawers(
-					searchText: $viewModel.searchText,
-					editingDrawer: $viewModel.editingDrawer,
-					drawerToDelete: $viewModel.drawerToDelete,
-					filteredDrawers: filteredDrawers)
-			}
-			.navigationTitle("Cabinet")
-#if !os(macOS)
-			.navigationBarTitleDisplayMode(.inline)
-			.searchable(
-				text: $viewModel.searchText,
-				prompt: "Search"
-			)
-			.navigationSplitViewColumnWidth(min: 310, ideal: 310)
-#else
-			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
-#endif
-			.toolbar {
-#if !os(macOS)
-				ToolbarItem(placement: .topBarLeading) {
-					Button("Settings", systemImage: "gearshape") {
-						viewModel.showingSettings.toggle()
-					}
-				}
-				ToolbarItem(placement: .automatic) {
-					primaryAction
-				}
-#else
-				ToolbarItem(placement: .primaryAction) {
-					primaryAction
-				}
-#endif
-			}
+			sidebar
 		} detail: {
-			if let destination = viewModel.selectedDestination {
-				PairListView(destination: destination)
-			} else {
-				ContentUnavailableView(
-					"Select a drawer",
-					systemImage: "archivebox",
-					description: Text(
-						"Choose a drawer from the sidebar to view its contents"
-					)
-				)
-			}
+			detail
 		}
 		.confirmationDialog(
 			"Delete '\(viewModel.drawerToDelete?.name ?? "")'?",
@@ -88,9 +44,11 @@ struct LibraryView: View {
 			Text("This action cannot be undone.")
 		}
 		.sheet(isPresented: $viewModel.showingSettings) {
-			SettingsView()
-				.tint(accent.color)
-				.presentationDetents([.medium, .large])
+			NavigationStack {
+				SettingsView()
+			}
+			.tint(accent.color)
+			.presentationDetents([.large])
 		}
 		.sheet(isPresented: $viewModel.showingAdd) {
 			NavigationStack {
@@ -110,36 +68,59 @@ struct LibraryView: View {
 		}
 	}
 	
-	var filteredDrawers: [Drawer] {
-		if viewModel.searchText.isEmpty {
-			return drawers
+	// MARK: - Subviews
+	
+	private var sidebar: some View {
+		List(selection: $viewModel.selectedDestination) {
+			SmartFiltersListView()
+			DrawersListView(
+				searchText: $viewModel.searchText,
+				editingDrawer: $viewModel.editingDrawer,
+				drawerToDelete: $viewModel.drawerToDelete,
+				filteredDrawers: viewModel.filteredDrawers(drawers)
+			)
 		}
-		
-		return drawers.filter {
-			$0.name.lowercased().contains(viewModel.searchText.lowercased())
+		.navigationTitle("Cabinet")
+#if !os(macOS)
+		.navigationBarTitleDisplayMode(.inline)
+		.searchable(text: $viewModel.searchText, prompt: "Search")
+		.navigationSplitViewColumnWidth(min: 310, ideal: 310)
+#else
+		.navigationSplitViewColumnWidth(min: 230, ideal: 230)
+#endif
+		.toolbar {
+#if !os(macOS)
+			ToolbarItem(placement: .topBarLeading) {
+				Button("Settings", systemImage: "gearshape") {
+					viewModel.showingSettings.toggle()
+				}
+			}
+			ToolbarItem(placement: .automatic) {
+				primaryAction
+			}
+#else
+			ToolbarItem(placement: .primaryAction) {
+				primaryAction
+			}
+#endif
 		}
 	}
 	
-	func countForFilter(_ filter: Filter) -> Int {
-		switch filter {
-		case .all:
-			return pairs.count
-		case .favorites:
-			return pairs.filter { $0.isFavorite }.count
-		case .recents:
-			let sevenDaysAgo = Calendar.current.date(
-				byAdding: .day,
-				value: -7,
-				to: Date()
-			)!
-			return pairs.filter {
-				$0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo
-			}.count
-			
+	private var detail: some View {
+		Group {
+			if let destination = viewModel.selectedDestination {
+				PairListView(destination: destination)
+			} else {
+				ContentUnavailableView(
+					"Select a drawer",
+					systemImage: "archivebox",
+					description: Text("Choose a drawer from the sidebar to view its contents")
+				)
+			}
 		}
 	}
 	
-	fileprivate var primaryAction: some View {
+	private var primaryAction: some View {
 		Group {
 			if viewModel.isEditing {
 				Button("Delete", systemImage: "trash", role: .destructive) {
@@ -163,22 +144,21 @@ struct LibraryView: View {
 			titleVisibility: .visible
 		) {
 			Button("Delete", role: .destructive) {
-				deleteSelected()
+				deleteSelectedItems()
 			}
 		} message: {
-			Text(
-				"This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized."
-			)
+			Text("This action cannot be undone. Items in this drawer will not be deleted, but will no longer be categorized.")
 		}
 	}
 	
-	fileprivate func deleteSelected() {
+	// MARK: - Actions
+	
+	private func deleteSelectedItems() {
 		for id in viewModel.selectedItems {
 			if let item = drawers.first(where: { $0.id == id }) {
 				modelContext.delete(item)
 			}
 		}
-		
 		withAnimation {
 			viewModel.selectedItems.removeAll()
 			viewModel.isEditing = false
@@ -186,85 +166,7 @@ struct LibraryView: View {
 	}
 }
 
-struct SmartFilters: View {
-	var body: some View {
-		Section {
-			ForEach(Filter.allCases) { filter in
-				NavigationLink(value: Destination.filter(filter)) {
-					HStack { filter.label }
-				}
-				.tag(Destination.filter(filter))
-			}
-		}
-	}
-}
-
-struct Drawers: View {
-	@AppStorage("accentColor") var accent: AppColor = .indigo
-	@Query var drawers: [Drawer]
-	@Binding var searchText: String
-	@Binding var editingDrawer: Drawer?
-	@Binding var drawerToDelete: Drawer?
-	var filteredDrawers: [Drawer]
-	
-	var body: some View {
-		Section(header: Text("Drawers").fontWeight(.bold)) {
-			if filteredDrawers.isEmpty {
-				VStack(spacing: 16) {
-					Image(systemName: !searchText.isEmpty ? "magnifyingglass" : "archivebox")
-						.font(.system(size: 48))
-						.foregroundStyle(.secondary)
-					Text(!searchText.isEmpty ? "No matches" : "No drawers yet")
-						.font(.title3)
-						.bold()
-					Text(
-						!searchText.isEmpty
-						? "Try a different search term." : "Add your first drawer."
-					)
-					.foregroundStyle(.secondary)
-				}
-				.frame(maxWidth: .infinity, maxHeight: .infinity)
-				.multilineTextAlignment(.center)
-				.padding()
-			} else {
-				ForEach(filteredDrawers) { drawer in
-					NavigationLink(
-						value: Destination.drawer(drawer)
-					) {
-						Label {
-							Text(drawer.name)
-						} icon: {
-							Image(systemName: drawer.icon)
-								.foregroundStyle(accent.color)
-						}
-					}
-					.tag(Destination.drawer(drawer))
-					.contextMenu {
-						Button("Edit", systemImage: "pencil") {
-							editingDrawer = drawer
-						}
-						Button("Delete", systemImage: "trash") {
-							drawerToDelete = drawer
-						}
-					}
-					.swipeActions(
-						edge: .trailing,
-						allowsFullSwipe: true
-					) {
-						Button("Delete", systemImage: "trash") {
-							drawerToDelete = drawer
-						}.tint(.red)
-						
-						Button("Edit", systemImage: "pencil") {
-							editingDrawer = drawer
-						}.tint(.blue)
-					}
-				}
-			}
-		}
-	}
-}
-
 #Preview {
-	LibraryView().modelContainer(SampleData.shared.modelContainer)
+	LibraryView()
+		.modelContainer(SampleData.shared.modelContainer)
 }
