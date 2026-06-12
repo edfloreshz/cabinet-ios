@@ -21,6 +21,7 @@ struct PairFormView: View {
 	@State private var selectedDrawers: Set<UUID> = []
 	@State private var isPresented = false
 	@State private var showDiscardAlert = false
+	@State private var isAddDrawerPresented = false
 	@Query private var drawers: [Drawer]
 	
 	let mode: ViewMode
@@ -78,6 +79,14 @@ struct PairFormView: View {
 				title: "Pick a symbol",
 				autoDismiss: true
 			)
+		}
+		.sheet(isPresented: $isAddDrawerPresented) {
+			NavigationStack {
+				DrawerFormView(drawer: Drawer(name: ""))
+					.presentationSizing(.fitted)
+			}
+			.presentationDetents([.large])
+			.interactiveDismissDisabled()
 		}
 		.interactiveDismissDisabled(isDirty)
 		.confirmationDialog(
@@ -156,9 +165,20 @@ struct PairFormView: View {
 			}
 			
 			Section(header: Text("Drawers")) {
+				Button(role: .confirm, action: {
+					isAddDrawerPresented.toggle()
+				}) {
+					Label {
+						Text("Add drawer")
+					} icon: {
+						Image(systemName: "plus")
+							.foregroundStyle(accent.color)
+					}.tint(accent.color)
+				}
 				if drawers.isEmpty {
 					Text("No drawers available")
 				} else {
+					
 					List(drawers, id: \.self) { drawer in
 						HStack {
 							Image(systemName: drawer.icon)
