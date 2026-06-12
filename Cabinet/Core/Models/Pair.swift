@@ -19,6 +19,7 @@ final class Pair {
 	var notes: String
 	var lastUsedDate: Date?
 	var encryptedValue: Data
+	var image: String?
 
 	var value: String {
 		get {
@@ -39,7 +40,9 @@ final class Pair {
 		isFavorite: Bool = false,
 		isHidden: Bool = false,
 		drawers: [UUID] = [],
-		notes: String = ""
+		lastUsedDate: Date? = nil,
+		notes: String = "",
+		image: String? = nil
 	) {
 		self.id = id
 		self.key = key
@@ -48,7 +51,8 @@ final class Pair {
 		self.isHidden = isHidden
 		self.drawers = drawers
 		self.notes = notes
-		self.lastUsedDate = nil
+		self.lastUsedDate = lastUsedDate
 		self.encryptedValue = (try? CryptoService.encryptString(value)) ?? Data()
+		self.image = image
 	}
 }

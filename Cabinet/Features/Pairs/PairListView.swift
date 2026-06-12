@@ -129,7 +129,7 @@ struct PairListView: View {
 				.tint(.red)
 				.disabled(viewModel.selectedItems.isEmpty)
 			} else {
-				Button("New", systemImage: "plus") {
+				Button("New", systemImage: "square.and.pencil") {
 					viewModel.showingAdd.toggle()
 				}
 #if !os(macOS)
@@ -190,7 +190,6 @@ struct PairListView: View {
 					filter.label
 				}
 			}
-			.pickerStyle(.inline)
 		} label: {
 			Label(
 				viewModel.selectedFilter.rawValue.capitalized,
@@ -245,7 +244,7 @@ struct PairListView: View {
 			.navigationTitle("Cabinet")
 			.navigationDestination(isPresented: .constant(true)) {
 				PairListView(
-					destination: Destination.drawer(Drawer.sampleData.first!)
+					destination: Destination.filter(.all)
 				)
 				.modelContainer(PreviewData.shared.modelContainer)
 			}

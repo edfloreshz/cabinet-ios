@@ -15,7 +15,7 @@ class PairListViewModel {
 	var selectedItems: Set<UUID> = []
 	var searchText: String = ""
 	var selectedFilter: Filter = .all
-	
+
 	func filteredPairs(_ pairs: [Pair], destination: Destination) -> [Pair] {
 		var result = pairs
 		

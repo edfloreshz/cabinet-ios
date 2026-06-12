@@ -162,6 +162,16 @@
         }
       }
     },
+    "Categories" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categorias"
+          }
+        }
+      }
+    },
     "Change icon" : {
       "localizations" : {
         "es-419" : {

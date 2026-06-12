@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SmartFiltersListView: View {
 	var body: some View {
-		Section {
+		Section("Categories") {
 			ForEach(Filter.allCases) { filter in
 				NavigationLink(value: Destination.filter(filter)) {
 					HStack { filter.label }
