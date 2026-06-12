@@ -7,7 +7,7 @@
 import SwiftUI
 
 @Observable
-class PairListViewModel {
+class PairContainerViewModel {
 	var isEditing = false
 	var showingAdd = false
 	var showItemDeleteConfirmation = false
@@ -15,7 +15,9 @@ class PairListViewModel {
 	var selectedItems: Set<UUID> = []
 	var searchText: String = ""
 	var selectedFilter: Filter = .all
-
+	var currentLayout: LayoutType = .list
+	var showLayoutOptions: Bool = false
+	
 	func filteredPairs(_ pairs: [Pair], destination: Destination) -> [Pair] {
 		var result = pairs
 		

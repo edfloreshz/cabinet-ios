@@ -7,61 +7,87 @@
 import SwiftData
 import SwiftUI
 
-struct PairListView: View {
+struct PairContainerView: View {
 #if os(macOS)
 	@Environment(\.openSettings) private var openSettings
 #endif
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
-	@State private var viewModel = PairListViewModel()
+	@State private var viewModel = PairContainerViewModel()
 	
 	@Query private var pairs: [Pair]
 	
 	var destination: Destination
 	
-	var displayedPairs: [Pair] {
+	private var displayedPairs: [Pair] {
 		viewModel.filteredPairs(pairs, destination: destination)
 	}
 	
 	var body: some View {
-		Group {
-			if displayedPairs.isEmpty {
-				emptyState
-			} else {
-				pairList
+		NavigationStack {
+			VStack(spacing: 0) {
+				if displayedPairs.isEmpty {
+					emptyState
+				} else {
+					contentView
+				}
 			}
-		}
-		.navigationTitle(viewModel.navigationTitle(for: destination))
-		.navigationSubtitle(viewModel.navigationSubtitle(for: destination))
+			.safeAreaInset(edge: .top) {
+				if !viewModel.isEditing && viewModel.showLayoutOptions {
+					VStack(spacing: 0) {
+						layoutPickerMenu
+							.padding(.horizontal)
+							.padding(.bottom, 8)
+							.transition(.move(edge: .top).combined(with: .opacity))
+						Divider()
+					}
+					.background(.ultraThinMaterial)
+				}
+			}
+			.animation(.smooth(duration: 0.25), value: viewModel.isEditing)
+			.animation(.smooth(duration: 0.25), value: viewModel.showLayoutOptions)
+			.animation(.easeInOut(duration: 0.2), value: viewModel.currentLayout)
+			.navigationTitle(viewModel.navigationTitle(for: destination))
+			.navigationSubtitle(viewModel.navigationSubtitle(for: destination))
 #if !os(macOS)
-		.navigationBarTitleDisplayMode(.inline)
-		.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
+			.navigationBarTitleDisplayMode(.inline)
+			.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
 #endif
-		.searchable(text: $viewModel.searchText, prompt: "Search")
-		.toolbar { toolbar }
-		.sheet(item: $viewModel.editingPair) { pair in
-			editSheet(for: pair)
-		}
-		.sheet(isPresented: $viewModel.showingAdd) {
-			addSheet
-		}
-		.onChange(of: destination) {
-			if case .drawer(_) = destination {
-				viewModel.selectedFilter = .all
+			.searchable(text: $viewModel.searchText, prompt: "Search")
+			.toolbar { toolbar }
+			.sheet(item: $viewModel.editingPair) { pair in
+				editSheet(for: pair)
+			}
+			.sheet(isPresented: $viewModel.showingAdd) {
+				addSheet
+			}
+			.onChange(of: destination) {
+				if case .drawer = destination {
+					viewModel.selectedFilter = .all
+				}
 			}
 		}
 	}
 	
 	// MARK: - Content
 	
-	private var pairList: some View {
-		List(selection: $viewModel.selectedItems) {
-			ForEach(displayedPairs) { pair in
-				PairListItemView(pair: pair, editingPair: $viewModel.editingPair)
-					.onTapGesture {
-						viewModel.editingPair = pair
-					}
-			}
+	@ViewBuilder
+	private var contentView: some View {
+		switch viewModel.currentLayout {
+		case .list:
+			PairListLayoutView(
+				pairs: displayedPairs,
+				selectedItems: $viewModel.selectedItems,
+				editingPair: $viewModel.editingPair
+			)
+		case .grid:
+			PairGridLayoutView(
+				pairs: displayedPairs,
+				isEditing: viewModel.isEditing,
+				selectedItems: $viewModel.selectedItems,
+				editingPair: $viewModel.editingPair
+			)
+			.background(Color(uiColor: .systemGroupedBackground))
 		}
 	}
 	
@@ -86,6 +112,19 @@ struct PairListView: View {
 	@ToolbarContentBuilder
 	private var toolbar: some ToolbarContent {
 #if !os(macOS)
+		if !viewModel.isEditing {
+			ToolbarItem(placement: .topBarTrailing) {
+				Button {
+					withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+						viewModel.showLayoutOptions.toggle()
+					}
+				} label: {
+					Image(systemName: viewModel.showLayoutOptions ? "slider.horizontal.2.square" : "slider.horizontal.3")
+				}
+				.tint(viewModel.showLayoutOptions ? accent.color : .primary)
+			}
+			ToolbarSpacer(placement: .topBarTrailing)
+		}
 		ToolbarItemGroup(placement: .topBarTrailing) {
 			editButton
 		}
@@ -106,8 +145,10 @@ struct PairListView: View {
 				openSettings()
 			}
 		}
-		ToolbarSpacer()
-		if case .drawer(_) = destination {
+		ToolbarItem(placement: .automatic) {
+			layoutPickerMenu
+		}
+		if case .drawer = destination {
 			ToolbarItem(placement: .automatic) {
 				filterPickerMenu
 			}
@@ -129,7 +170,7 @@ struct PairListView: View {
 				.tint(.red)
 				.disabled(viewModel.selectedItems.isEmpty)
 			} else {
-				Button("New", systemImage: "square.and.pencil") {
+				Button("New", systemImage: "plus") {
 					viewModel.showingAdd.toggle()
 				}
 #if !os(macOS)
@@ -161,15 +202,15 @@ struct PairListView: View {
 					if viewModel.selectedItems.count == displayedPairs.count {
 						viewModel.selectedItems.removeAll()
 					} else {
-						viewModel.selectedItems = Set(displayedPairs.map { $0.id })
+						viewModel.selectedItems = Set(displayedPairs.map(\.id))
 					}
 				}
 			}
+			
 			if !displayedPairs.isEmpty {
 				Button(
-					"Edit",
-					systemImage: viewModel.isEditing ? "checkmark" : "pencil",
-					role: viewModel.isEditing ? .confirm : .close
+					viewModel.isEditing ? "Done" : "Edit",
+					systemImage: viewModel.isEditing ? "checkmark" : "pencil"
 				) {
 					withAnimation {
 						viewModel.isEditing.toggle()
@@ -198,6 +239,17 @@ struct PairListView: View {
 		}
 	}
 	
+	private var layoutPickerMenu: some View {
+		Picker("Layout", selection: $viewModel.currentLayout) {
+			ForEach(LayoutType.allCases, id: \.self) { layout in
+				Label(
+					layout.title,
+					systemImage: layout.symbolName
+				)
+			}
+		}.pickerStyle(.segmented)
+	}
+	
 	// MARK: - Sheets
 	
 	private func editSheet(for pair: Pair) -> some View {
@@ -214,6 +266,7 @@ struct PairListView: View {
 		if viewModel.selectedFilter == .favorites {
 			pair.isFavorite = true
 		}
+		
 		return NavigationStack {
 			PairFormView(mode: .new, pair: pair, onSave: {
 				viewModel.selectedFilter = .all
@@ -231,6 +284,7 @@ struct PairListView: View {
 				modelContext.delete(item)
 			}
 		}
+		
 		withAnimation {
 			viewModel.selectedItems.removeAll()
 			viewModel.isEditing = false
@@ -240,13 +294,7 @@ struct PairListView: View {
 
 #Preview {
 	NavigationStack {
-		Color.clear
-			.navigationTitle("Cabinet")
-			.navigationDestination(isPresented: .constant(true)) {
-				PairListView(
-					destination: Destination.filter(.all)
-				)
-				.modelContainer(PreviewData.shared.modelContainer)
-			}
+		PairContainerView(destination: .drawer(Drawer.sampleData.first!))
 	}
+	.modelContainer(PreviewData.shared.modelContainer)
 }

@@ -348,4 +348,5 @@ struct PairFormView: View {
 		}
 		.presentationDetents([.large])
 	}
+	.modelContainer(PreviewData.shared.modelContainer)
 }

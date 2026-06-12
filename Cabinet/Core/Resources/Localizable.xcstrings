@@ -306,6 +306,16 @@
         }
       }
     },
+    "Done" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        }
+      }
+    },
     "Drawer" : {
       "localizations" : {
         "es-419" : {
@@ -412,6 +422,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuar editando"
+          }
+        }
+      }
+    },
+    "Layout" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estructura"
           }
         }
       }

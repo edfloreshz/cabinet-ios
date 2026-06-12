@@ -71,7 +71,14 @@ struct LibraryView: View {
 	
 	private var sidebar: some View {
 		List(selection: $viewModel.selectedDestination) {
-			SmartFiltersListView()
+			Section("Categories") {
+				ForEach(Filter.allCases) { filter in
+					NavigationLink(value: Destination.filter(filter)) {
+						HStack { filter.label }
+					}
+					.tag(Destination.filter(filter))
+				}
+			}
 			DrawersListView(
 				searchText: $viewModel.searchText,
 				editingDrawer: $viewModel.editingDrawer,
@@ -108,7 +115,7 @@ struct LibraryView: View {
 	private var detail: some View {
 		Group {
 			if let destination = viewModel.selectedDestination {
-				PairListView(destination: destination)
+				PairContainerView(destination: destination)
 			} else {
 				ContentUnavailableView(
 					"Select a drawer",
