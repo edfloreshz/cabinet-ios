@@ -21,9 +21,11 @@ final class Drawer: Identifiable {
 		self.icon = icon
 		self.purpose = purpose
 	}
-
-	static let sampleData: [Drawer] = [
-		Drawer(name: "School", icon: "graduationcap.fill", purpose: "School stuff"),
-		Drawer(name: "Bank", icon: "dollarsign.bank.building.fill", purpose: "Bank stuff"),
-	]
+	
+	init(id: UUID, name: String, icon: String = "archivebox", purpose: String = "") {
+		self.id = id
+		self.name = name
+		self.icon = icon
+		self.purpose = purpose
+	}
 }

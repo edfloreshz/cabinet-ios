@@ -9,8 +9,8 @@ import Foundation
 import SwiftData
 
 @MainActor
-class SampleData {
-	static let shared = SampleData()
+class PreviewData {
+	static let shared = PreviewData()
 	let modelContainer: ModelContainer
 	var context: ModelContext {
 		modelContainer.mainContext
@@ -32,7 +32,11 @@ class SampleData {
 				for: schema,
 				configurations: [modelConfiguration]
 			)
-		
+			
+			for drawer in Drawer.sampleData {
+				context.insert(drawer)
+			}
+			
 			for pair in Pair.sampleData {
 				context.insert(pair)
 			}

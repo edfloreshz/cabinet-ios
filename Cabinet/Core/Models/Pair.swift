@@ -51,18 +51,4 @@ final class Pair {
 		self.lastUsedDate = nil
 		self.encryptedValue = (try? CryptoService.encryptString(value)) ?? Data()
 	}
-	
-	static let sampleData: [Pair] = [
-		Pair(key: "RFC", value: "DHRF990011Y3D", isFavorite: true),
-		Pair(key: "Email", value: "name@gmail.com"),
-		Pair(
-			key: "Bank Account",
-			value: "12390520234",
-			isHidden: true
-		),
-		Pair(
-			key: "School ID",
-			value: "12345435312"
-		),
-	]
 }

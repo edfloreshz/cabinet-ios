@@ -19,7 +19,6 @@ struct PairListView: View {
 	@State private var viewModel = PairListViewModel()
 	
 	@Query private var pairs: [Pair]
-	
 
 	var destination: Destination
 	var displayedPairs: [Pair] {
@@ -272,9 +271,14 @@ struct PairListView: View {
 }
 
 #Preview {
-	PairListView(
-		destination: Destination.drawer(Drawer.sampleData.first!)
-	)
-	.modelContainer(SampleData.shared.modelContainer)
+	NavigationStack {
+		Color.clear
+			.navigationTitle("Cabinet")
+			.navigationDestination(isPresented: .constant(true)) {
+				PairListView(
+					destination: Destination.drawer(Drawer.sampleData.first!)
+				)
+				.modelContainer(PreviewData.shared.modelContainer)
+			}
+	}
 }
-

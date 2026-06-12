@@ -11,11 +11,10 @@ import SwiftData
 struct LibraryView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
-	
+	@State private var viewModel = LibraryViewModel()
+
 	@Query var drawers: [Drawer]
 	@Query var pairs: [Pair]
-	
-	@State private var viewModel = LibraryViewModel()
 	
 	var body: some View {
 		NavigationSplitView {
@@ -168,5 +167,5 @@ struct LibraryView: View {
 
 #Preview {
 	LibraryView()
-		.modelContainer(SampleData.shared.modelContainer)
+		.modelContainer(PreviewData.shared.modelContainer)
 }
