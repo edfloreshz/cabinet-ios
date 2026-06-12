@@ -11,7 +11,7 @@ struct DrawerFormData: Equatable {
 	var name: String
 	var icon: String
 	var purpose: String
-	
+
 	init(from drawer: Drawer) {
 		self.name = drawer.name
 		self.icon = drawer.icon

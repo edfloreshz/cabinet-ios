@@ -8,7 +8,7 @@
 enum Destination: Hashable {
 	case drawer(Drawer)
 	case filter(Filter)
-	
+
 	func hash(into hasher: inout Hasher) {
 		switch self {
 		case .drawer(let drawer):
@@ -19,7 +19,7 @@ enum Destination: Hashable {
 			hasher.combine(filter.rawValue)
 		}
 	}
-	
+
 	static func == (lhs: Destination, rhs: Destination) -> Bool {
 		switch (lhs, rhs) {
 		case (.drawer(let lDrawer), .drawer(let rDrawer)):

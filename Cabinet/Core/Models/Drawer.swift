@@ -21,7 +21,7 @@ final class Drawer: Identifiable {
 		self.icon = icon
 		self.purpose = purpose
 	}
-	
+
 	init(id: UUID, name: String, icon: String = "archivebox", purpose: String = "") {
 		self.id = id
 		self.name = name

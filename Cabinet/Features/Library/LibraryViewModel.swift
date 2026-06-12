@@ -18,14 +18,14 @@ class LibraryViewModel {
 	var selectedItems: Set<UUID> = []
 	var searchText: String = ""
 	var selectedDestination: Destination? = .filter(.all)
-	
+
 	func filteredDrawers(_ drawers: [Drawer]) -> [Drawer] {
 		guard !searchText.isEmpty else { return drawers }
 		return drawers.filter {
 			$0.name.lowercased().contains(searchText.lowercased())
 		}
 	}
-	
+
 	func countForFilter(_ filter: Filter, pairs: [Pair]) -> Int {
 		switch filter {
 		case .all:

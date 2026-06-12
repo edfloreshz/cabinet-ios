@@ -10,7 +10,7 @@ import SwiftUI
 struct AppearanceTabView: View {
 	@AppStorage("accentColor")
 	private var accent: AppColor = .indigo
-	
+
 	var body: some View {
 		List {
 			Section {

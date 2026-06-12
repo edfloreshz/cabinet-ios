@@ -50,22 +50,22 @@ struct PairContainerView: View {
 			.navigationTitle(viewModel.navigationTitle(for: destination))
 			.navigationSubtitle(viewModel.navigationSubtitle(for: destination))
 #if !os(macOS)
-			.navigationBarTitleDisplayMode(.inline)
-			.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
+				.navigationBarTitleDisplayMode(.inline)
+				.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
 #endif
-			.searchable(text: $viewModel.searchText, prompt: "Search")
-			.toolbar { toolbar }
-			.sheet(item: $viewModel.editingPair) { pair in
-				editSheet(for: pair)
-			}
-			.sheet(isPresented: $viewModel.showingAdd) {
-				addSheet
-			}
-			.onChange(of: destination) {
-				if case .drawer = destination {
-					viewModel.selectedFilter = .all
+				.searchable(text: $viewModel.searchText, prompt: "Search")
+				.toolbar { toolbar }
+				.sheet(item: $viewModel.editingPair) { pair in
+					editSheet(for: pair)
 				}
-			}
+				.sheet(isPresented: $viewModel.showingAdd) {
+					addSheet
+				}
+				.onChange(of: destination) {
+					if case .drawer = destination {
+						viewModel.selectedFilter = .all
+					}
+				}
 		}
 	}
 	
@@ -128,7 +128,7 @@ struct PairContainerView: View {
 		ToolbarItemGroup(placement: .topBarTrailing) {
 			editButton
 		}
-		if case .drawer(_) = destination {
+		if case .drawer = destination {
 			ToolbarItem(placement: .bottomBar) {
 				filterPickerMenu
 			}
@@ -197,7 +197,7 @@ struct PairContainerView: View {
 			if viewModel.isEditing {
 				Button(
 					viewModel.selectedItems.count == displayedPairs.count
-					? "Deselect All" : "Select All"
+						? "Deselect All" : "Select All"
 				) {
 					if viewModel.selectedItems.count == displayedPairs.count {
 						viewModel.selectedItems.removeAll()

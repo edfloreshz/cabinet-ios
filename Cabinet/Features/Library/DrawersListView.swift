@@ -5,12 +5,6 @@
 //  Created by Eduardo Flores on 11/06/26.
 //
 
-//
-//  Drawers.swift
-//  Cabinet
-//
-//  Created by Eduardo Flores on 09/06/26.
-//
 import SwiftUI
 
 struct DrawersListView: View {

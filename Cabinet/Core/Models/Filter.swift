@@ -9,7 +9,9 @@ import SwiftUI
 
 enum Filter: String, CaseIterable, Identifiable {
 	case all, favorites, recents
-	var id: Self { self }
+	var id: Self {
+		self
+	}
 
 	var label: some View {
 		switch self {
@@ -18,27 +20,27 @@ enum Filter: String, CaseIterable, Identifiable {
 				Text("All")
 			} icon: {
 				Image(systemName: self.icon)
-					#if !os(macOS)
-						.foregroundStyle(self.color)
-					#endif
+				#if !os(macOS)
+					.foregroundStyle(self.color)
+				#endif
 			}.tag(self)
 		case .favorites:
 			Label {
 				Text("Favorites")
 			} icon: {
 				Image(systemName: self.icon)
-					#if !os(macOS)
-						.foregroundStyle(self.color)
-					#endif
+				#if !os(macOS)
+					.foregroundStyle(self.color)
+				#endif
 			}.tag(self)
 		case .recents:
 			Label {
 				Text("Recents")
 			} icon: {
 				Image(systemName: self.icon)
-					#if !os(macOS)
-						.foregroundStyle(self.color)
-					#endif
+				#if !os(macOS)
+					.foregroundStyle(self.color)
+				#endif
 			}.tag(self)
 		}
 	}

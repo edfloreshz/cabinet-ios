@@ -11,7 +11,9 @@ enum LayoutType: String, CaseIterable, Identifiable {
 	case list
 	case grid
 
-	var id: Self { self }
+	var id: Self {
+		self
+	}
 
 	var title: String {
 		switch self {

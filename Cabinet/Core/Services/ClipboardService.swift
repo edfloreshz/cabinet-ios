@@ -6,14 +6,14 @@
 //
 
 #if canImport(UIKit)
-import UIKit
+	import UIKit
 #elseif canImport(AppKit)
-import AppKit
+	import AppKit
 #endif
 
 class ClipboardService {
 	static let shared = ClipboardService()
-	
+
 	func copy(text: String) {
 		#if canImport(UIKit)
 			UIPasteboard.general.string = text

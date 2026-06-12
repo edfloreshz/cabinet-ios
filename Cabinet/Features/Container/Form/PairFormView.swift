@@ -4,6 +4,7 @@
 //
 //  Created by Eduardo Flores on 26/11/25.
 //
+
 import SFSymbolsPicker
 import SwiftData
 import SwiftUI
@@ -51,68 +52,68 @@ struct PairFormView: View {
 		}
 		.navigationTitle("Item")
 #if !os(macOS)
-		.navigationBarTitleDisplayMode(.inline)
+			.navigationBarTitleDisplayMode(.inline)
 #endif
-		.scrollDismissesKeyboard(.interactively)
-		.toolbar {
-			ToolbarItem(placement: .cancellationAction) {
-				Button("Cancel", systemImage: "xmark") {
-					handleCancel()
+			.scrollDismissesKeyboard(.interactively)
+			.toolbar {
+				ToolbarItem(placement: .cancellationAction) {
+					Button("Cancel", systemImage: "xmark") {
+						handleCancel()
+					}
+				}
+				ToolbarItem(placement: .confirmationAction) {
+					Button("Save", systemImage: "checkmark") {
+						savePair()
+						onSave()
+						dismiss()
+					}
+					.tint(accent.color)
+					.buttonStyle(.glassProminent)
+					.disabled(
+						formData.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+					)
 				}
 			}
-			ToolbarItem(placement: .confirmationAction) {
-				Button("Save", systemImage: "checkmark") {
-					savePair()
-					onSave()
-					dismiss()
-				}
-				.tint(accent.color)
-				.buttonStyle(.glassProminent)
-				.disabled(
-					formData.key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+			.sheet(isPresented: $isPresented) {
+				SymbolsPicker(
+					selection: $formData.icon,
+					title: "Pick a symbol",
+					autoDismiss: true
 				)
 			}
-		}
-		.sheet(isPresented: $isPresented) {
-			SymbolsPicker(
-				selection: $formData.icon,
-				title: "Pick a symbol",
-				autoDismiss: true
-			)
-		}
-		.sheet(isPresented: $isAddDrawerPresented) {
-			NavigationStack {
-				DrawerFormView(drawer: Drawer(name: ""))
-					.presentationSizing(.fitted)
+			.sheet(isPresented: $isAddDrawerPresented) {
+				NavigationStack {
+					DrawerFormView(drawer: Drawer(name: ""))
+						.presentationSizing(.fitted)
+				}
+				.presentationDetents([.large])
+				.interactiveDismissDisabled()
 			}
-			.presentationDetents([.large])
-			.interactiveDismissDisabled()
-		}
-		.interactiveDismissDisabled(isDirty)
-		.confirmationDialog(
-			"Discard changes?",
-			isPresented: $showDiscardAlert,
-			titleVisibility: .visible
-		) {
-			Button("Discard changes", role: .destructive) {
-				dismiss()
+			.interactiveDismissDisabled(isDirty)
+			.confirmationDialog(
+				"Discard changes?",
+				isPresented: $showDiscardAlert,
+				titleVisibility: .visible
+			) {
+				Button("Discard changes", role: .destructive) {
+					dismiss()
+				}
+				Button("Keep editing", role: .cancel) {}
+			} message: {
+				Text("You have unsaved changes. Are you sure you want to discard them?")
 			}
-			Button("Keep editing", role: .cancel) { }
-		} message: {
-			Text("You have unsaved changes. Are you sure you want to discard them?")
-		}
-		.onAppear {
-			selectedDrawers = Set(pair.drawers)
+			.onAppear {
+				selectedDrawers = Set(pair.drawers)
 			
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-				switch mode {
-				case .edit:
-					isContentFocused = true
-				case .new:
-					isNameFocused = true
+				DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+					switch mode {
+					case .edit:
+						isContentFocused = true
+					case .new:
+						isNameFocused = true
+					}
 				}
 			}
-		}
 	}
 	
 	// MARK: - Forms
@@ -161,7 +162,7 @@ struct PairFormView: View {
 					text: $formData.notes,
 					axis: .vertical
 				)
-				.lineLimit(3...5)
+				.lineLimit(3 ... 5)
 			}
 			
 			Section(header: Text("Drawers")) {
@@ -178,7 +179,6 @@ struct PairFormView: View {
 				if drawers.isEmpty {
 					Text("No drawers available")
 				} else {
-					
 					List(drawers, id: \.self) { drawer in
 						HStack {
 							Image(systemName: drawer.icon)
@@ -286,8 +286,8 @@ struct PairFormView: View {
 							.contentShape(Rectangle())
 							.background(
 								selectedDrawers.contains(drawer.id)
-								? accent.color.opacity(0.1)
-								: Color.clear
+									? accent.color.opacity(0.1)
+									: Color.clear
 							)
 							.onTapGesture {
 								if selectedDrawers.contains(drawer.id) {

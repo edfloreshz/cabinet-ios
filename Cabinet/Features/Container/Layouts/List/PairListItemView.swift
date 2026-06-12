@@ -26,8 +26,8 @@ struct PairListItemView: View {
 					.foregroundStyle(.primary)
 				Text(
 					pair.isHidden
-					? String(repeating: "•", count: pair.value.count)
-					: pair.value
+						? String(repeating: "•", count: pair.value.count)
+						: pair.value
 				)
 				.font(.subheadline)
 				.foregroundStyle(.secondary)
@@ -74,7 +74,7 @@ struct PairListItemView: View {
 				Label(
 					pair.isFavorite ? "Unpin" : "Pin",
 					systemImage: pair.isFavorite
-					? "star.slash.fill" : "star.fill"
+						? "star.slash.fill" : "star.fill"
 				)
 			}
 			Button {
@@ -99,7 +99,7 @@ struct PairListItemView: View {
 					Label(
 						pair.isFavorite ? "Unpin" : "Pin",
 						systemImage: pair.isFavorite
-						? "star.slash.fill" : "star.fill"
+							? "star.slash.fill" : "star.fill"
 					)
 				}
 				Button {

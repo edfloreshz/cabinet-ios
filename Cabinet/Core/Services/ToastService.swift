@@ -38,8 +38,7 @@ struct ToastService: Equatable {
 		}
 	}
 
-	init(message: String, type: ToastType = .info, duration: TimeInterval = 3.0)
-	{
+	init(message: String, type: ToastType = .info, duration: TimeInterval = 3.0) {
 		self.message = message
 		self.type = type
 		self.duration = duration

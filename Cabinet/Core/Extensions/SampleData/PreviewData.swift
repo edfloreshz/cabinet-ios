@@ -32,11 +32,11 @@ class PreviewData {
 				for: schema,
 				configurations: [modelConfiguration]
 			)
-			
+
 			for drawer in Drawer.sampleData {
 				context.insert(drawer)
 			}
-			
+
 			for pair in Pair.sampleData {
 				context.insert(pair)
 			}

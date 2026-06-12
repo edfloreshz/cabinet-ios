@@ -6,8 +6,6 @@
 //
 import SwiftUI
 
-import SwiftUI
-
 struct SettingsView: View {
 	var body: some View {
 		TabView {
@@ -15,7 +13,7 @@ struct SettingsView: View {
 				.tabItem {
 					Label("Appearance", systemImage: "paintpalette.fill")
 				}
-			
+
 			SecurityTabView()
 				.tabItem {
 					Label("Security", systemImage: "lock.fill")

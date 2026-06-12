@@ -6,8 +6,8 @@
 //
 
 import LocalAuthentication
-import SwiftUI
 import os
+import SwiftUI
 
 class AuthenticationService {
 	static let logger = Logger(

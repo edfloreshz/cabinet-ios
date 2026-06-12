@@ -12,7 +12,7 @@ struct PairListLayoutView: View {
 	let pairs: [Pair]
 	@Binding var selectedItems: Set<UUID>
 	@Binding var editingPair: Pair?
-	
+
 	var body: some View {
 		List(selection: $selectedItems) {
 			ForEach(pairs) { pair in
@@ -28,7 +28,7 @@ struct PairListLayoutView: View {
 #Preview {
 	@Previewable @State var selectedItems: Set<UUID> = []
 	@Previewable @State var editingPair: Pair? = nil
-	
+
 	NavigationStack {
 		PairListLayoutView(
 			pairs: Pair.sampleData,

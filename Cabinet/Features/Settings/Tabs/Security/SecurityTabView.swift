@@ -30,7 +30,7 @@ struct SecurityTabView: View {
 				)
 				.disabled(
 					!model.biometricsAvailable ||
-					model.isProcessing
+						model.isProcessing
 				)
 				
 				if !model.biometricsAvailable {
@@ -41,7 +41,7 @@ struct SecurityTabView: View {
 					.font(.caption)
 					.foregroundStyle(.secondary)
 				}
-			}  header: {
+			} header: {
 				Text("Biometrics")
 #if !os(macOS)
 					.padding(.top, 20)

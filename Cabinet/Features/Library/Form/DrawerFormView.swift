@@ -4,6 +4,7 @@
 //
 //  Created by Eduardo Flores on 09/02/26.
 //
+
 import SFSymbolsPicker
 import SwiftData
 import SwiftUI
@@ -38,52 +39,52 @@ struct DrawerFormView: View {
 		}
 		.navigationTitle("Drawer")
 #if !os(macOS)
-		.navigationBarTitleDisplayMode(.inline)
+			.navigationBarTitleDisplayMode(.inline)
 #endif
-		.scrollDismissesKeyboard(.interactively)
-		.toolbar {
-			ToolbarItem(placement: .cancellationAction) {
-				Button("Cancel", systemImage: "xmark") {
-					handleCancel()
+			.scrollDismissesKeyboard(.interactively)
+			.toolbar {
+				ToolbarItem(placement: .cancellationAction) {
+					Button("Cancel", systemImage: "xmark") {
+						handleCancel()
+					}
+				}
+				ToolbarItem(placement: .confirmationAction) {
+					Button("Save", systemImage: "checkmark") {
+						saveDrawer()
+						dismiss()
+					}
+					.tint(accent.color)
+					.buttonStyle(.glassProminent)
+					.disabled(
+						formData.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+					)
 				}
 			}
-			ToolbarItem(placement: .confirmationAction) {
-				Button("Save", systemImage: "checkmark") {
-					saveDrawer()
-					dismiss()
-				}
-				.tint(accent.color)
-				.buttonStyle(.glassProminent)
-				.disabled(
-					formData.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+			.sheet(isPresented: $isPresented) {
+				SymbolsPicker(
+					selection: $formData.icon,
+					title: "Pick a symbol",
+					autoDismiss: true
 				)
 			}
-		}
-		.sheet(isPresented: $isPresented) {
-			SymbolsPicker(
-				selection: $formData.icon,
-				title: "Pick a symbol",
-				autoDismiss: true
-			)
-		}
-		.interactiveDismissDisabled(isDirty)
-		.confirmationDialog(
-			"Discard changes?",
-			isPresented: $showDiscardAlert,
-			titleVisibility: .visible
-		) {
-			Button("Discard changes", role: .destructive) {
-				dismiss()
+			.interactiveDismissDisabled(isDirty)
+			.confirmationDialog(
+				"Discard changes?",
+				isPresented: $showDiscardAlert,
+				titleVisibility: .visible
+			) {
+				Button("Discard changes", role: .destructive) {
+					dismiss()
+				}
+				Button("Keep editing", role: .cancel) {}
+			} message: {
+				Text("You have unsaved changes. Are you sure you want to discard them?")
 			}
-			Button("Keep editing", role: .cancel) { }
-		} message: {
-			Text("You have unsaved changes. Are you sure you want to discard them?")
-		}
-		.onAppear {
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-				isNameFocused = true
+			.onAppear {
+				DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+					isNameFocused = true
+				}
 			}
-		}
 	}
 	
 	// MARK: - Forms

@@ -5,8 +5,8 @@
 //  Created by Eduardo Flores on 26/11/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct LibraryView: View {
 	@Environment(\.modelContext) private var modelContext
@@ -88,28 +88,28 @@ struct LibraryView: View {
 		}
 		.navigationTitle("Cabinet")
 #if !os(macOS)
-		.navigationBarTitleDisplayMode(.inline)
-		.searchable(text: $viewModel.searchText, prompt: "Search")
-		.navigationSplitViewColumnWidth(min: 310, ideal: 310)
+			.navigationBarTitleDisplayMode(.inline)
+			.searchable(text: $viewModel.searchText, prompt: "Search")
+			.navigationSplitViewColumnWidth(min: 310, ideal: 310)
 #else
-		.navigationSplitViewColumnWidth(min: 230, ideal: 230)
+			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
 #endif
-		.toolbar {
+			.toolbar {
 #if !os(macOS)
-			ToolbarItem(placement: .topBarLeading) {
-				Button("Settings", systemImage: "gearshape") {
-					viewModel.showingSettings.toggle()
+				ToolbarItem(placement: .topBarLeading) {
+					Button("Settings", systemImage: "gearshape") {
+						viewModel.showingSettings.toggle()
+					}
 				}
-			}
-			ToolbarItem(placement: .automatic) {
-				primaryAction
-			}
+				ToolbarItem(placement: .automatic) {
+					primaryAction
+				}
 #else
-			ToolbarItem(placement: .primaryAction) {
-				primaryAction
-			}
+				ToolbarItem(placement: .primaryAction) {
+					primaryAction
+				}
 #endif
-		}
+			}
 	}
 	
 	private var detail: some View {

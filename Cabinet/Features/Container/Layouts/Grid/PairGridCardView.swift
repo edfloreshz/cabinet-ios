@@ -94,7 +94,7 @@ struct PairGridCardView: View {
 				Label(
 					pair.isFavorite ? "Unpin" : "Pin",
 					systemImage: pair.isFavorite
-					? "star.slash.fill" : "star.fill"
+						? "star.slash.fill" : "star.fill"
 				)
 			}
 			Button(action: onEdit) {
@@ -117,7 +117,7 @@ struct PairGridCardView: View {
 					Label(
 						pair.isFavorite ? "Unpin" : "Pin",
 						systemImage: pair.isFavorite
-						? "star.slash.fill" : "star.fill"
+							? "star.slash.fill" : "star.fill"
 					)
 				}
 				Button(action: onEdit) {
