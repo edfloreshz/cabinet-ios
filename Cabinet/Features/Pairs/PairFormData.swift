@@ -26,7 +26,6 @@ struct PairFormData: Equatable {
 		self.drawers = pair.drawers
 	}
 	
-	// Drawer order is not significant; compare as sets.
 	static func == (lhs: PairFormData, rhs: PairFormData) -> Bool {
 		lhs.key == rhs.key &&
 		lhs.value == rhs.value &&

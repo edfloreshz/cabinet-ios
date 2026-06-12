@@ -2,68 +2,82 @@
 //  PairListViewModel.swift
 //  Cabinet
 //
-//  Created by Eduardo Flores on 11/02/26.
+//  Created by Eduardo Flores on 15/02/26.
 //
-
-import Foundation
-import Observation
-import SwiftData
+import SwiftUI
 
 @Observable
 class PairListViewModel {
-	var searchText: String = ""
-	var selectedFilter: Filter = .all
 	var isEditing = false
 	var showingAdd = false
 	var showItemDeleteConfirmation = false
-	var selectedItems: Set<UUID> = []
 	var editingPair: Pair?
-
+	var selectedItems: Set<UUID> = []
+	var searchText: String = ""
+	var selectedFilter: Filter = .all
+	
 	func filteredPairs(_ pairs: [Pair], destination: Destination) -> [Pair] {
-		let base = pairs
-		let searchFiltered: [Pair]
-
-		if searchText.isEmpty {
-			searchFiltered = base
-		} else {
-			let term = searchText.lowercased()
-			searchFiltered = base.filter {
-				$0.key.lowercased().contains(term)
-					|| $0.value.lowercased().contains(term)
-					|| $0.notes.lowercased().contains(term)
-			}
-		}
-
-		var destinationFiltered: [Pair] = searchFiltered
-
+		var result = pairs
+		
 		switch destination {
 		case .drawer(let drawer):
-			destinationFiltered = searchFiltered.filter { pair in
-				pair.drawers.contains(drawer.id)
+			result = result.filter { $0.drawers.contains(drawer.id) }
+			switch selectedFilter {
+			case .all: break
+			case .favorites:
+				result = result.filter { $0.isFavorite }
+			case .recents:
+				let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+				result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
 			}
 		case .filter(let filter):
-			selectedFilter = filter
-		}
-		
-		let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-		
-		var filtered: [Pair]
-		
-		switch selectedFilter {
-		case .all:
-			filtered = destinationFiltered
-		case .favorites:
-			filtered = destinationFiltered.filter { $0.isFavorite }
-		case .recents:
-			filtered = destinationFiltered.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
-		}
-
-		return filtered.sorted { lhs, rhs in
-			if lhs.isFavorite != rhs.isFavorite {
-				return lhs.isFavorite && !rhs.isFavorite
+			switch filter {
+			case .all: break
+			case .favorites:
+				result = result.filter { $0.isFavorite }
+			case .recents:
+				let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+				result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
 			}
-			return lhs.key.localizedCaseInsensitiveCompare(rhs.key)
-				== .orderedAscending
+		}
+		
+		if !searchText.isEmpty {
+			result = result.filter {
+				$0.key.lowercased().contains(searchText.lowercased())
+			}
+		}
+		
+		return result
+	}
+	
+	func navigationTitle(for destination: Destination) -> String {
+		switch destination {
+		case .drawer(let drawer): return drawer.name.capitalized
+		case .filter(let filter):
+			switch filter {
+			case .all: return "All"
+			case .favorites: return "Favorites"
+			case .recents: return "Recents"
+			}
+		}
+	}
+	
+	func navigationSubtitle(for destination: Destination) -> String {
+		switch destination {
+		case .drawer(let drawer): return drawer.purpose
+		case .filter(let filter):
+			switch filter {
+			case .all: return "All your items"
+			case .favorites: return "Your favorites"
+			case .recents: return "Recently copied"
+			}
+		}
+	}
+	
+	func selectedDrawers(for destination: Destination) -> [UUID] {
+		switch destination {
+		case .drawer(let drawer): return [drawer.id]
+		case .filter: return []
 		}
 	}
 }

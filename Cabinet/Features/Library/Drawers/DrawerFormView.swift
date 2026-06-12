@@ -11,8 +11,8 @@ import SwiftUI
 struct DrawerFormView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
-	@FocusState private var isNameFocused: Bool
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
+	@FocusState private var isNameFocused: Bool
 	@State private var isPresented = false
 	@State private var showDiscardAlert = false
 	@State private var formData: DrawerFormData
