@@ -1,5 +1,5 @@
 //
-//  ItemRowView.swift
+//  PairListItemView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/11/25.
@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct ItemRowView: View {
+struct PairListItemView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var showDeleteConfirmation = false
@@ -159,6 +159,6 @@ struct ItemRowView: View {
 struct AddContainer_Previews: PreviewProvider {
 	@State static var editingPair: Pair?
 	static var previews: some View {
-		ItemRowView(pair: Pair(key: "Test", value: "Test"), editingPair: $editingPair).padding()
+		PairListItemView(pair: Pair(key: "Test", value: "Test"), editingPair: $editingPair).padding()
 	}
 }

@@ -56,7 +56,7 @@ struct LibraryView: View {
 			}
 		} detail: {
 			if let destination = viewModel.selectedDestination {
-				DetailView(destination: destination)
+				PairListView(destination: destination)
 			} else {
 				ContentUnavailableView(
 					"Select a drawer",
@@ -94,7 +94,7 @@ struct LibraryView: View {
 		}
 		.sheet(isPresented: $viewModel.showingAdd) {
 			NavigationStack {
-				DrawerDetailView(drawer: Drawer(name: ""))
+				DrawerFormView(drawer: Drawer(name: ""))
 					.presentationSizing(.fitted)
 			}
 			.presentationDetents([.large])
@@ -102,7 +102,7 @@ struct LibraryView: View {
 		}
 		.sheet(item: $viewModel.editingDrawer) { drawer in
 			NavigationStack {
-				DrawerDetailView(drawer: drawer)
+				DrawerFormView(drawer: drawer)
 					.presentationSizing(.fitted)
 			}
 			.presentationDetents([.large])
@@ -210,10 +210,22 @@ struct Drawers: View {
 	var body: some View {
 		Section(header: Text("Drawers").fontWeight(.bold)) {
 			if filteredDrawers.isEmpty {
-				EmptyDrawersView(
-					searching: !searchText.isEmpty,
-					accentColor: accent.color
-				)
+				VStack(spacing: 16) {
+					Image(systemName: !searchText.isEmpty ? "magnifyingglass" : "archivebox")
+						.font(.system(size: 48))
+						.foregroundStyle(.secondary)
+					Text(!searchText.isEmpty ? "No matches" : "No drawers yet")
+						.font(.title3)
+						.bold()
+					Text(
+						!searchText.isEmpty
+						? "Try a different search term." : "Add your first drawer."
+					)
+					.foregroundStyle(.secondary)
+				}
+				.frame(maxWidth: .infinity, maxHeight: .infinity)
+				.multilineTextAlignment(.center)
+				.padding()
 			} else {
 				ForEach(filteredDrawers) { drawer in
 					NavigationLink(

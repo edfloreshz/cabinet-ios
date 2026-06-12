@@ -1,5 +1,5 @@
 //
-//  DetailView.swift
+//  PairListView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 15/02/26.
@@ -8,7 +8,7 @@
 import SwiftData
 import SwiftUI
 
-struct DetailView: View {
+struct PairListView: View {
 	@Environment(\.modelContext) private var modelContext
 
 	#if os(macOS)
@@ -16,7 +16,7 @@ struct DetailView: View {
 	#endif
 
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
-	@State private var viewModel = DetailViewModel()
+	@State private var viewModel = PairListViewModel()
 	@State private var isEditing = false
 	@State private var showingAdd = false
 	@State private var showItemDeleteConfirmation = false
@@ -66,14 +66,26 @@ struct DetailView: View {
 	var body: some View {
 		Group {
 			if displayedPairs.isEmpty {
-				EmptyItemsView(
-					searching: !viewModel.searchText.isEmpty,
-					accentColor: accent.color
-				)
+				VStack(spacing: 16) {
+					Image(systemName: !viewModel.searchText.isEmpty ? "magnifyingglass" : "archivebox")
+						.font(.system(size: 48))
+						.foregroundStyle(.secondary)
+					Text(!viewModel.searchText.isEmpty ? "No matches" : "No items yet")
+						.font(.title3)
+						.bold()
+					Text(
+						!viewModel.searchText.isEmpty
+						? "Try a different search term." : "Add your first item."
+					)
+					.foregroundStyle(.secondary)
+				}
+				.frame(maxWidth: .infinity, maxHeight: .infinity)
+				.multilineTextAlignment(.center)
+				.padding()
 			} else {
 				List(selection: $selectedItems) {
 					ForEach(displayedPairs) { pair in
-						ItemRowView(pair: pair, editingPair: $editingPair)
+						PairListItemView(pair: pair, editingPair: $editingPair)
 							.onTapGesture {
 								editingPair = pair
 							}
@@ -129,7 +141,7 @@ struct DetailView: View {
 		}
 		.sheet(item: $editingPair) { pair in
 			NavigationStack {
-				ItemDetailView(mode: .edit, pair: pair, onSave: {})
+				PairFormView(mode: .edit, pair: pair, onSave: {})
 			}
 			.tint(accent.color)
 			.interactiveDismissDisabled()
@@ -169,7 +181,7 @@ struct DetailView: View {
 		}
 
 		return NavigationStack {
-			ItemDetailView(
+			PairFormView(
 				mode: .new,
 				pair: pair,
 				onSave: {
@@ -273,7 +285,7 @@ struct DetailView: View {
 }
 
 #Preview {
-	DetailView(
+	PairListView(
 		destination: Destination.drawer(Drawer.sampleData.first!)
 	)
 	.modelContainer(SampleData.shared.modelContainer)

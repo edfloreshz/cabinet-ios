@@ -1,5 +1,5 @@
 //
-//  ItemDetailView.swift
+//  PairFormView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 26/11/25.
@@ -13,7 +13,7 @@ enum ViewMode {
 	case new, edit
 }
 
-struct ItemDetailView: View {
+struct PairFormView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
@@ -297,5 +297,5 @@ struct ItemDetailView: View {
 }
 
 #Preview {
-	ItemDetailView(mode: .new, pair: Pair.sampleData[0], onSave: {})
+	PairFormView(mode: .new, pair: Pair.sampleData[0], onSave: {})
 }

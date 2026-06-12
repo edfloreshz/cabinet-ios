@@ -1,5 +1,5 @@
 //
-//  DrawerDetailView.swift
+//  DrawerFormView.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 09/02/26.
@@ -9,7 +9,7 @@ import SFSymbolsPicker
 import SwiftData
 import SwiftUI
 
-struct DrawerDetailView: View {
+struct DrawerFormView: View {
 	@Environment(\.modelContext) private var modelContext
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isNameFocused: Bool
@@ -135,7 +135,7 @@ struct DrawerDetailView: View {
 }
 
 #Preview {
-	DrawerDetailView(
+	DrawerFormView(
 		drawer: Drawer(name: "All", icon: "archivebox")
 	)
 }
