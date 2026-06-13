@@ -19,7 +19,6 @@ class LockedViewModel {
 		biometricsEnabled && lockTimeout >= 0
 	}
 	
-	// Mirrors @AppStorage — inject or observe these from outside if needed
 	var biometricsEnabled: Bool = false
 	var lockTimeout: Int = -1
 	

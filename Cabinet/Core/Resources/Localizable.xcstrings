@@ -52,16 +52,6 @@
         }
       }
     },
-    "Add drawer" : {
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Añadir cajon"
-          }
-        }
-      }
-    },
     "Add your first drawer." : {
       "localizations" : {
         "es-419" : {
@@ -362,6 +352,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Filtrar"
+          }
+        }
+      }
+    },
+    "Header" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portada"
+          }
+        }
+      }
+    },
+    "Icon" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icono"
           }
         }
       }

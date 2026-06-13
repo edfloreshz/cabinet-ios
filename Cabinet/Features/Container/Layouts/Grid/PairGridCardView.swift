@@ -48,27 +48,26 @@ struct PairGridCardView: View {
 			.padding(.top, 16)
 			.padding(.bottom, cardBottomPadding)
 			
-			if let image = pair.image {
-				AsyncImage(url: URL(string: image)) { phase in
-					switch phase {
-					case .success(let image):
-						image
-							.resizable()
-							.scaledToFill()
-					default:
-						Color.secondary.opacity(0.15)
-					}
+			if let imageData = pair.image, let uiImage = UIImage(data: imageData) {
+				Section {
+					Image(uiImage: uiImage)
+						.resizable()
+						.scaledToFill()
+						.frame(maxWidth: .infinity)
+						.frame(height: 220)
+						.clipped()
+						.listRowInsets(EdgeInsets())
+						.frame(maxWidth: .infinity)
+						.clipShape(
+							UnevenRoundedRectangle(
+								topLeadingRadius: 35,
+								bottomLeadingRadius: 0,
+								bottomTrailingRadius: 0,
+								topTrailingRadius: 35
+							)
+						)
+						.padding(.horizontal, 12)
 				}
-				.frame(maxWidth: .infinity)
-				.clipShape(
-					UnevenRoundedRectangle(
-						topLeadingRadius: 35,
-						bottomLeadingRadius: 0,
-						bottomTrailingRadius: 0,
-						topTrailingRadius: 35
-					)
-				)
-				.padding(.horizontal, 12)
 			}
 		}
 		.background(Color(uiColor: .secondarySystemGroupedBackground))

@@ -7,19 +7,20 @@
 
 import Foundation
 import SwiftData
+import UIKit
 
 @Model
 final class Pair {
 	@Attribute(.unique) var id: UUID
 	var key: String
-	var icon: String
+	var icon: String?
 	var isFavorite: Bool
 	var isHidden: Bool
 	var drawers: [UUID]
 	var notes: String
 	var lastUsedDate: Date?
 	var encryptedValue: Data
-	var image: String?
+	var image: Data?
 
 	var value: String {
 		get {
@@ -31,18 +32,23 @@ final class Pair {
 			}
 		}
 	}
+	
+	var backgroundImage: UIImage? {
+		guard let data = image else { return nil }
+		return UIImage(data: data)
+	}
 
 	init(
 		id: UUID = UUID(),
 		key: String,
-		icon: String = "photo",
+		icon: String? = nil,
 		value: String,
 		isFavorite: Bool = false,
 		isHidden: Bool = false,
 		drawers: [UUID] = [],
 		lastUsedDate: Date? = nil,
 		notes: String = "",
-		image: String? = nil
+		image: Data? = nil
 	) {
 		self.id = id
 		self.key = key

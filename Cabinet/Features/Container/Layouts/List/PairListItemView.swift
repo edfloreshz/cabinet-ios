@@ -19,7 +19,9 @@ struct PairListItemView: View {
 	
 	var body: some View {
 		HStack(alignment: .center, spacing: 12) {
-			Image(systemName: pair.icon)
+			if let icon = pair.icon {
+				Image(systemName: icon)
+			}
 			VStack(alignment: .leading, spacing: 2) {
 				Text(pair.key)
 					.font(.body.weight(.medium))

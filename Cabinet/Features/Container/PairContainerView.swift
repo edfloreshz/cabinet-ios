@@ -10,6 +10,8 @@ import SwiftUI
 struct PairContainerView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
+	@Namespace private var namespace
+
 	@State private var viewModel = PairContainerViewModel()
 	
 	@Query private var pairs: [Pair]
@@ -151,6 +153,7 @@ struct PairContainerView: View {
 				}
 				.buttonStyle(.glassProminent)
 				.tint(accent.color)
+				.matchedTransitionSource(id: "add-pair-transition", in: namespace)
 			}
 		}
 		.confirmationDialog(
@@ -230,7 +233,6 @@ struct PairContainerView: View {
 		NavigationStack {
 			PairFormView(mode: .edit, pair: pair, onSave: {})
 		}
-		.tint(accent.color)
 		.interactiveDismissDisabled()
 		.presentationDetents([.large])
 	}
@@ -248,6 +250,7 @@ struct PairContainerView: View {
 		}
 		.presentationDetents([.large])
 		.interactiveDismissDisabled()
+		.navigationTransition(.zoom(sourceID: "add-pair-transition", in: namespace))
 	}
 	
 	// MARK: - Actions

@@ -48,7 +48,7 @@ struct LibraryView: View {
 				SettingsView()
 			}
 			.tint(accent.color)
-			.presentationDetents([.large])
+			.presentationDetents([.medium, .large])
 		}
 		.sheet(isPresented: $viewModel.showingAdd) {
 			NavigationStack {
