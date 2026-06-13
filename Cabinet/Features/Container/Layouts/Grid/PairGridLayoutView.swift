@@ -18,13 +18,13 @@ struct PairGridLayoutView: View {
 	@Binding var editingPair: Pair?
 	
 	private let columns = [
-		GridItem(.flexible(), spacing: 16, alignment: .top),
-		GridItem(.flexible(), spacing: 16, alignment: .top)
+		GridItem(.flexible(), spacing: 20, alignment: .top),
+		GridItem(.flexible(), spacing: 20, alignment: .top)
 	]
 	
 	var body: some View {
 		ScrollView {
-			LazyVGrid(columns: columns, spacing: 16) {
+			LazyVGrid(columns: columns, spacing: 20) {
 				ForEach(pairs) { pair in
 					PairGridCardView(
 						pair: pair,
