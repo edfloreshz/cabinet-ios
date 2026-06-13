@@ -79,29 +79,6 @@ struct PairGridCardView: View {
 		.contentShape(cardShape)
 		.onTapGesture(perform: onTap)
 		.contextMenu {
-#if os(macOS)
-			if !pair.isHidden {
-				ShareLink(item: pair.value) {
-					Label(
-						"Share",
-						systemImage: "square.and.arrow.up.fill"
-					)
-				}
-			}
-			Button {
-				pair.isFavorite.toggle()
-			} label: {
-				Label(
-					pair.isFavorite ? "Unpin" : "Pin",
-					systemImage: pair.isFavorite
-						? "star.slash.fill" : "star.fill"
-				)
-			}
-			Button(action: onEdit) {
-				Label("Edit", systemImage: "pencil")
-			}
-			
-#else
 			ControlGroup {
 				if !pair.isHidden {
 					ShareLink(item: pair.value) {
@@ -117,14 +94,13 @@ struct PairGridCardView: View {
 					Label(
 						pair.isFavorite ? "Unpin" : "Pin",
 						systemImage: pair.isFavorite
-							? "star.slash.fill" : "star.fill"
+						? "star.slash.fill" : "star.fill"
 					)
 				}
 				Button(action: onEdit) {
 					Label("Edit", systemImage: "pencil")
 				}
 			}
-#endif
 			Button(role: .destructive) {
 				onDeleteRequest()
 			} label: {

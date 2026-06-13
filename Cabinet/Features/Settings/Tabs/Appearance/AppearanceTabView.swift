@@ -28,10 +28,7 @@ struct AppearanceTabView: View {
 						.frame(width: 14, height: 14)
 				}
 			} header: {
-				Text("Theme")
-#if !os(macOS)
-					.padding(.top, 20)
-#endif
+				Text("Theme").padding(.top, 20)
 			}
 		}
 	}

@@ -30,17 +30,35 @@ struct DrawerFormView: View {
 	}
 	
 	var body: some View {
-		Group {
-#if os(macOS)
-			macOSForm
-#else
-			iOSForm
-#endif
+		Form {
+			Section("Name") {
+				HStack(spacing: 12) {
+					TextField("Name", text: $formData.name)
+						.font(.system(size: 20, weight: .bold))
+						.multilineTextAlignment(.leading)
+						.focused($isNameFocused)
+					Button(role: .confirm, action: {
+						isPresented.toggle()
+					}) {
+						Image(systemName: formData.icon)
+							.resizable()
+							.scaledToFit()
+							.frame(width: 20, height: 20)
+							.padding(6)
+							.foregroundStyle(.foreground)
+					}
+					.buttonBorderShape(.circle)
+					.buttonStyle(.glass)
+				}
+			}
+			Section("Purpose") {
+				TextEditor(text: $formData.purpose)
+					.frame(height: 80)
+			}
 		}
+		.formStyle(.grouped)
 		.navigationTitle("Drawer")
-#if !os(macOS)
 			.navigationBarTitleDisplayMode(.inline)
-#endif
 			.scrollDismissesKeyboard(.interactively)
 			.toolbar {
 				ToolbarItem(placement: .cancellationAction) {
@@ -86,77 +104,7 @@ struct DrawerFormView: View {
 				}
 			}
 	}
-	
-	// MARK: - Forms
-	
-	private var iOSForm: some View {
-		Form {
-			Section("Name") {
-				HStack(spacing: 12) {
-					TextField("Name", text: $formData.name)
-						.font(.system(size: 20, weight: .bold))
-						.multilineTextAlignment(.leading)
-						.focused($isNameFocused)
-					Button(role: .confirm, action: {
-						isPresented.toggle()
-					}) {
-						Image(systemName: formData.icon)
-							.resizable()
-							.scaledToFit()
-							.frame(width: 20, height: 20)
-							.padding(6)
-							.foregroundStyle(.foreground)
-					}
-					.buttonBorderShape(.circle)
-					.buttonStyle(.glass)
-				}
-			}
-			Section("Purpose") {
-				TextEditor(text: $formData.purpose)
-					.frame(height: 80)
-			}
-		}
-		.formStyle(.grouped)
-	}
-	
-	private var macOSForm: some View {
-		Form {
-			LabeledContent("Name") {
-				TextField("", text: $formData.name)
-					.focused($isNameFocused)
-			}
-			
-			LabeledContent("Icon") {
-				Button(role: .confirm, action: {
-					isPresented.toggle()
-				}) {
-					Image(systemName: formData.icon)
-						.scaledToFit()
-						.padding(2)
-						.foregroundStyle(.foreground)
-				}
-				.buttonStyle(.glass)
-				.help("Change icon")
-			}
-			
-			LabeledContent("Purpose") {
-				TextEditor(text: $formData.purpose)
-					.padding(5)
-					.font(.system(size: 12))
-					.lineSpacing(2)
-					.frame(height: 80)
-					.scrollContentBackground(.hidden)
-					.overlay(
-						RoundedRectangle(cornerRadius: 6)
-							.stroke(Color.secondary.opacity(0.25), lineWidth: 1)
-					)
-			}
-		}
-		.frame(minWidth: 400)
-		.padding()
-		.formStyle(.automatic)
-	}
-	
+
 	// MARK: - Actions
 	
 	private func handleCancel() {

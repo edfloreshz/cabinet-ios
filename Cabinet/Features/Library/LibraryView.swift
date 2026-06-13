@@ -11,6 +11,7 @@ import SwiftUI
 struct LibraryView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
+	@Namespace private var namespace
 	@State private var viewModel = LibraryViewModel()
 
 	@Query var drawers: [Drawer]
@@ -56,6 +57,7 @@ struct LibraryView: View {
 			}
 			.presentationDetents([.large])
 			.interactiveDismissDisabled()
+			.navigationTransition(.zoom(sourceID: "add-drawer-transition", in: namespace))
 		}
 		.sheet(item: $viewModel.editingDrawer) { drawer in
 			NavigationStack {
@@ -87,15 +89,10 @@ struct LibraryView: View {
 			)
 		}
 		.navigationTitle("Cabinet")
-#if !os(macOS)
 			.navigationBarTitleDisplayMode(.inline)
 			.searchable(text: $viewModel.searchText, prompt: "Search")
 			.navigationSplitViewColumnWidth(min: 310, ideal: 310)
-#else
-			.navigationSplitViewColumnWidth(min: 230, ideal: 230)
-#endif
 			.toolbar {
-#if !os(macOS)
 				ToolbarItem(placement: .topBarLeading) {
 					Button("Settings", systemImage: "gearshape") {
 						viewModel.showingSettings.toggle()
@@ -104,11 +101,7 @@ struct LibraryView: View {
 				ToolbarItem(placement: .automatic) {
 					primaryAction
 				}
-#else
-				ToolbarItem(placement: .primaryAction) {
-					primaryAction
-				}
-#endif
+				.matchedTransitionSource(id: "add-drawer-transition", in: namespace)
 			}
 	}
 	
@@ -138,9 +131,7 @@ struct LibraryView: View {
 				Button("New", systemImage: "plus") {
 					viewModel.showingAdd.toggle()
 				}
-#if !os(macOS)
 				.buttonStyle(.glassProminent)
-#endif
 				.tint(accent.color)
 			}
 		}

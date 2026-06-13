@@ -59,31 +59,6 @@ struct PairListItemView: View {
 			.buttonStyle(.plain)
 		}
 		.contextMenu {
-#if os(macOS)
-			if !pair.isHidden {
-				ShareLink(item: pair.value) {
-					Label(
-						"Share",
-						systemImage: "square.and.arrow.up.fill"
-					)
-				}
-			}
-			Button {
-				pair.isFavorite.toggle()
-			} label: {
-				Label(
-					pair.isFavorite ? "Unpin" : "Pin",
-					systemImage: pair.isFavorite
-						? "star.slash.fill" : "star.fill"
-				)
-			}
-			Button {
-				editingPair = pair
-			} label: {
-				Label("Edit", systemImage: "pencil")
-			}
-			
-#else
 			ControlGroup {
 				if !pair.isHidden {
 					ShareLink(item: pair.value) {
@@ -99,7 +74,7 @@ struct PairListItemView: View {
 					Label(
 						pair.isFavorite ? "Unpin" : "Pin",
 						systemImage: pair.isFavorite
-							? "star.slash.fill" : "star.fill"
+						? "star.slash.fill" : "star.fill"
 					)
 				}
 				Button {
@@ -108,7 +83,6 @@ struct PairListItemView: View {
 					Label("Edit", systemImage: "pencil")
 				}
 			}
-#endif
 			Button(role: .destructive) {
 				showDeleteConfirmation = true
 			} label: {

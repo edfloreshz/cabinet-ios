@@ -19,9 +19,6 @@ struct SettingsView: View {
 					Label("Security", systemImage: "lock.fill")
 				}
 		}
-#if os(macOS)
-		.frame(maxWidth: 500)
-#endif
 	}
 }
 

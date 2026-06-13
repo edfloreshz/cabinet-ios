@@ -42,10 +42,7 @@ struct SecurityTabView: View {
 					.foregroundStyle(.secondary)
 				}
 			} header: {
-				Text("Biometrics")
-#if !os(macOS)
-					.padding(.top, 20)
-#endif
+				Text("Biometrics").padding(.top, 20)
 			}
 			
 			Section("Auto-Lock") {

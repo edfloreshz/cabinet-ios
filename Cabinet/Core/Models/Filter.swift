@@ -20,27 +20,21 @@ enum Filter: String, CaseIterable, Identifiable {
 				Text("All")
 			} icon: {
 				Image(systemName: self.icon)
-				#if !os(macOS)
 					.foregroundStyle(self.color)
-				#endif
 			}.tag(self)
 		case .favorites:
 			Label {
 				Text("Favorites")
 			} icon: {
 				Image(systemName: self.icon)
-				#if !os(macOS)
 					.foregroundStyle(self.color)
-				#endif
 			}.tag(self)
 		case .recents:
 			Label {
 				Text("Recents")
 			} icon: {
 				Image(systemName: self.icon)
-				#if !os(macOS)
 					.foregroundStyle(self.color)
-				#endif
 			}.tag(self)
 		}
 	}

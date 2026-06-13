@@ -8,9 +8,6 @@ import SwiftData
 import SwiftUI
 
 struct PairContainerView: View {
-#if os(macOS)
-	@Environment(\.openSettings) private var openSettings
-#endif
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var viewModel = PairContainerViewModel()
@@ -49,23 +46,21 @@ struct PairContainerView: View {
 			.animation(.easeInOut(duration: 0.2), value: viewModel.currentLayout)
 			.navigationTitle(viewModel.navigationTitle(for: destination))
 			.navigationSubtitle(viewModel.navigationSubtitle(for: destination))
-#if !os(macOS)
-				.navigationBarTitleDisplayMode(.inline)
-				.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
-#endif
-				.searchable(text: $viewModel.searchText, prompt: "Search")
-				.toolbar { toolbar }
-				.sheet(item: $viewModel.editingPair) { pair in
-					editSheet(for: pair)
+			.navigationBarTitleDisplayMode(.inline)
+			.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
+			.searchable(text: $viewModel.searchText, prompt: "Search")
+			.toolbar { toolbar }
+			.sheet(item: $viewModel.editingPair) { pair in
+				editSheet(for: pair)
+			}
+			.sheet(isPresented: $viewModel.showingAdd) {
+				addSheet
+			}
+			.onChange(of: destination) {
+				if case .drawer = destination {
+					viewModel.selectedFilter = .all
 				}
-				.sheet(isPresented: $viewModel.showingAdd) {
-					addSheet
-				}
-				.onChange(of: destination) {
-					if case .drawer = destination {
-						viewModel.selectedFilter = .all
-					}
-				}
+			}
 		}
 	}
 	
@@ -111,7 +106,6 @@ struct PairContainerView: View {
 	
 	@ToolbarContentBuilder
 	private var toolbar: some ToolbarContent {
-#if !os(macOS)
 		if !viewModel.isEditing {
 			ToolbarItem(placement: .topBarTrailing) {
 				Button {
@@ -139,24 +133,6 @@ struct PairContainerView: View {
 		ToolbarItem(placement: .bottomBar) {
 			primaryAction
 		}
-#else
-		ToolbarItem(placement: .automatic) {
-			Button("Settings", systemImage: "gearshape") {
-				openSettings()
-			}
-		}
-		ToolbarItem(placement: .automatic) {
-			layoutPickerMenu
-		}
-		if case .drawer = destination {
-			ToolbarItem(placement: .automatic) {
-				filterPickerMenu
-			}
-		}
-		ToolbarItem(placement: .automatic) {
-			primaryAction
-		}
-#endif
 	}
 	
 	// MARK: - Toolbar Items
@@ -173,9 +149,7 @@ struct PairContainerView: View {
 				Button("New", systemImage: "plus") {
 					viewModel.showingAdd.toggle()
 				}
-#if !os(macOS)
 				.buttonStyle(.glassProminent)
-#endif
 				.tint(accent.color)
 			}
 		}
