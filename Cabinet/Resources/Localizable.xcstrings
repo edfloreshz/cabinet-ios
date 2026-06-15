@@ -466,22 +466,22 @@
         }
       }
     },
+    "No drawers" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay cajones"
+          }
+        }
+      }
+    },
     "No drawers available" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hay cajones disponibles"
-          }
-        }
-      }
-    },
-    "No drawers yet" : {
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aun no hay cajones"
           }
         }
       }

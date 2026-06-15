@@ -7,7 +7,7 @@
 import SwiftUI
 
 @Observable
-class PairContainerViewModel {
+class ContentViewModel {
 	var isEditing = false
 	var showingAdd = false
 	var showItemDeleteConfirmation = false
@@ -18,28 +18,30 @@ class PairContainerViewModel {
 	var currentLayout: LayoutType = .list
 	var showLayoutOptions: Bool = false
 	
-	func filteredPairs(_ pairs: [Pair], destination: Destination) -> [Pair] {
+	func filteredPairs(_ pairs: [Pair], destination: Destination?) -> [Pair] {
 		var result = pairs
 		
-		switch destination {
-		case .drawer(let drawer):
-			result = result.filter { $0.drawers.contains(drawer.id) }
-			switch selectedFilter {
-			case .all: break
-			case .favorites:
-				result = result.filter { $0.isFavorite }
-			case .recents:
-				let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-				result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
-			}
-		case .filter(let filter):
-			switch filter {
-			case .all: break
-			case .favorites:
-				result = result.filter { $0.isFavorite }
-			case .recents:
-				let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-				result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
+		if let destination = destination {
+			switch destination {
+			case .drawer(let drawer):
+				result = result.filter { $0.drawers.contains(drawer.id) }
+				switch selectedFilter {
+				case .all: break
+				case .favorites:
+					result = result.filter { $0.isFavorite }
+				case .recents:
+					let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+					result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
+				}
+			case .filter(let filter):
+				switch filter {
+				case .all: break
+				case .favorites:
+					result = result.filter { $0.isFavorite }
+				case .recents:
+					let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+					result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
+				}
 			}
 		}
 		
@@ -76,10 +78,14 @@ class PairContainerViewModel {
 		}
 	}
 	
-	func selectedDrawers(for destination: Destination) -> [UUID] {
-		switch destination {
-		case .drawer(let drawer): return [drawer.id]
-		case .filter: return []
+	func selectedDrawers(for destination: Destination?) -> [UUID] {
+		if let destination = destination {
+			switch destination {
+			case .drawer(let drawer): return [drawer.id]
+			case .filter: return []
+			}
+		} else {
+			return []
 		}
 	}
 }

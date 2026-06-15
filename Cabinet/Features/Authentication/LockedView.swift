@@ -16,7 +16,7 @@ struct LockedView: View {
 	
 	var body: some View {
 		ZStack {
-			LibraryView()
+			MasterView()
 				.blur(radius: model.isLocked ? 18 : 0)
 				.disabled(model.isLocked)
 			

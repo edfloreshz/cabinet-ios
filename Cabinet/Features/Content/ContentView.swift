@@ -7,62 +7,67 @@
 import SwiftData
 import SwiftUI
 
-struct PairContainerView: View {
+struct ContentView: View {
 	@Environment(\.modelContext) private var modelContext
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@Namespace private var namespace
 
-	@State private var viewModel = PairContainerViewModel()
+	@State private var viewModel = ContentViewModel()
 	
 	@Query private var pairs: [Pair]
 	
-	var destination: Destination
+	@Binding var selectedDestination: Destination?
 	
 	private var displayedPairs: [Pair] {
-		viewModel.filteredPairs(pairs, destination: destination)
+		viewModel.filteredPairs(pairs, destination: selectedDestination)
 	}
 	
 	var body: some View {
-		NavigationStack {
-			VStack(spacing: 0) {
-				if displayedPairs.isEmpty {
-					emptyState
-				} else {
-					contentView
-				}
-			}
-			.safeAreaInset(edge: .top) {
-				if !viewModel.isEditing && viewModel.showLayoutOptions {
-					VStack(spacing: 0) {
-						layoutPickerMenu
-							.padding(.horizontal)
-							.padding(.bottom, 8)
-							.transition(.move(edge: .top).combined(with: .opacity))
-						Divider()
+		if let destination = selectedDestination {
+			NavigationStack {
+				VStack(spacing: 0) {
+					if displayedPairs.isEmpty {
+						emptyState
+					} else {
+						contentView
 					}
-					.background(.ultraThinMaterial)
+				}
+				.safeAreaInset(edge: .top) {
+					if !viewModel.isEditing && viewModel.showLayoutOptions {
+						VStack(spacing: 0) {
+							layoutPickerMenu
+								.padding(.horizontal)
+								.padding(.bottom, 8)
+								.transition(.move(edge: .top).combined(with: .opacity))
+							Divider()
+						}
+						.background(.ultraThinMaterial)
+					}
+				}
+				.navigationTitle(viewModel.navigationTitle(for: destination))
+				.navigationSubtitle(viewModel.navigationSubtitle(for: destination))
+				.navigationBarTitleDisplayMode(.inline)
+				.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
+				.searchable(text: $viewModel.searchText, prompt: "Search")
+				.toolbar { toolbar }
+				.sheet(item: $viewModel.editingPair) { pair in
+					editSheet(for: pair)
+				}
+				.sheet(isPresented: $viewModel.showingAdd) {
+					addSheet
+				}
+				.onChange(of: destination) {
+					if case .drawer = destination {
+						viewModel.selectedFilter = .all
+					}
 				}
 			}
-			.animation(.smooth(duration: 0.25), value: viewModel.isEditing)
-			.animation(.smooth(duration: 0.25), value: viewModel.showLayoutOptions)
-			.animation(.easeInOut(duration: 0.2), value: viewModel.currentLayout)
-			.navigationTitle(viewModel.navigationTitle(for: destination))
-			.navigationSubtitle(viewModel.navigationSubtitle(for: destination))
-			.navigationBarTitleDisplayMode(.inline)
-			.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
-			.searchable(text: $viewModel.searchText, prompt: "Search")
-			.toolbar { toolbar }
-			.sheet(item: $viewModel.editingPair) { pair in
-				editSheet(for: pair)
-			}
-			.sheet(isPresented: $viewModel.showingAdd) {
-				addSheet
-			}
-			.onChange(of: destination) {
-				if case .drawer = destination {
-					viewModel.selectedFilter = .all
-				}
-			}
+		} else {
+			ContentUnavailableView(
+				"Select a drawer",
+				systemImage: "archivebox",
+				description: Text("Choose a drawer from the sidebar to view its contents")
+			)
 		}
 	}
 	
@@ -124,7 +129,7 @@ struct PairContainerView: View {
 		ToolbarItemGroup(placement: .topBarTrailing) {
 			editButton
 		}
-		if case .drawer = destination {
+		if case .drawer = selectedDestination {
 			ToolbarItem(placement: .bottomBar) {
 				filterPickerMenu
 			}
@@ -238,7 +243,7 @@ struct PairContainerView: View {
 	}
 	
 	private var addSheet: some View {
-		let pair = Pair(key: "", value: "", drawers: viewModel.selectedDrawers(for: destination))
+		let pair = Pair(key: "", value: "", drawers: viewModel.selectedDrawers(for: selectedDestination))
 		if viewModel.selectedFilter == .favorites {
 			pair.isFavorite = true
 		}
@@ -269,9 +274,18 @@ struct PairContainerView: View {
 	}
 }
 
-#Preview {
+#Preview("Selected") {
+	@Previewable @State var selectedDestination: Destination? = .drawer(Drawer.sampleData.first!)
+	
 	NavigationStack {
-		PairContainerView(destination: .drawer(Drawer.sampleData.first!))
+		ContentView(selectedDestination: $selectedDestination)
+	}
+	.modelContainer(PreviewData.shared.modelContainer)
+}
+
+#Preview("Unselected") {
+	NavigationStack {
+		ContentView(selectedDestination: .constant(nil))
 	}
 	.modelContainer(PreviewData.shared.modelContainer)
 }

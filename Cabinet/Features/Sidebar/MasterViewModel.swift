@@ -1,5 +1,5 @@
 //
-//  LibraryViewModel.swift
+//  SidebarViewModel.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 09/06/26.
@@ -8,16 +8,13 @@
 import SwiftUI
 
 @Observable
-class LibraryViewModel {
+class SidebarViewModel {
 	var isEditing = false
 	var showingAdd = false
 	var showingSettings = false
 	var showDrawerDeleteConfirmation = false
-	var editingDrawer: Drawer?
-	var drawerToDelete: Drawer?
 	var selectedItems: Set<UUID> = []
 	var searchText: String = ""
-	var selectedDestination: Destination? = .filter(.all)
 
 	func filteredDrawers(_ drawers: [Drawer]) -> [Drawer] {
 		guard !searchText.isEmpty else { return drawers }
