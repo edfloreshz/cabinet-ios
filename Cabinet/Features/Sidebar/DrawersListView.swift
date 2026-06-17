@@ -37,7 +37,7 @@ struct DrawersListView: View {
 								.foregroundStyle(accent.color)
 						}
 					}
-					.tag(Destination.drawer(drawer))
+					.tag(drawer.id)
 					.contextMenu {
 						Button("Edit", systemImage: "pencil") {
 							editingDrawer = drawer
