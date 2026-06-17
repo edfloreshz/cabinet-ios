@@ -4,6 +4,7 @@
 //
 //  Created by Eduardo Flores on 15/02/26.
 //
+
 import SwiftData
 import SwiftUI
 
@@ -27,18 +28,49 @@ struct ContentView: View {
 			NavigationStack {
 				VStack(spacing: 0) {
 					if displayedPairs.isEmpty {
-						emptyState
+						if !viewModel.searchText.isEmpty {
+							ContentUnavailableView.search(text: viewModel.searchText)
+						} else {
+							ContentUnavailableView(
+								"No items yet",
+								systemImage: "text.document",
+								description: Text("Add your first item.")
+							)
+						}
 					} else {
-						contentView
+						switch viewModel.currentLayout {
+						case .list:
+							PairListLayoutView(
+								pairs: displayedPairs,
+								selectedItems: $viewModel.selectedItems,
+								editingPair: $viewModel.editingPair
+							)
+						case .grid:
+							PairGridLayoutView(
+								pairs: displayedPairs,
+								isEditing: viewModel.isEditing,
+								selectedItems: $viewModel.selectedItems,
+								editingPair: $viewModel.editingPair
+							)
+							.background(Color(uiColor: .systemGroupedBackground))
+						}
 					}
 				}
 				.safeAreaInset(edge: .top) {
 					if !viewModel.isEditing && viewModel.showLayoutOptions {
 						VStack(spacing: 0) {
-							layoutPickerMenu
-								.padding(.horizontal)
-								.padding(.bottom, 8)
-								.transition(.move(edge: .top).combined(with: .opacity))
+							Picker("Layout", selection: $viewModel.currentLayout) {
+								ForEach(LayoutType.allCases, id: \.self) { layout in
+									Label(
+										layout.title,
+										systemImage: layout.symbolName
+									)
+								}
+							}
+							.pickerStyle(.segmented)
+							.padding(.horizontal)
+							.padding(.bottom, 8)
+							.transition(.move(edge: .top).combined(with: .opacity))
 							Divider()
 						}
 						.background(.ultraThinMaterial)
@@ -49,9 +81,14 @@ struct ContentView: View {
 				.navigationBarTitleDisplayMode(.inline)
 				.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
 				.searchable(text: $viewModel.searchText, prompt: "Search")
-				.toolbar { toolbar }
+				.toolbar { contentTopToolbar }
+				.toolbar { contentBottomToolbar }
 				.sheet(item: $viewModel.editingPair) { pair in
-					editSheet(for: pair)
+					NavigationStack {
+						PairFormView(mode: .edit, pair: pair, onSave: {})
+					}
+					.interactiveDismissDisabled()
+					.presentationDetents([.large])
 				}
 				.sheet(isPresented: $viewModel.showingAdd) {
 					addSheet
@@ -112,7 +149,7 @@ struct ContentView: View {
 	// MARK: - Toolbar
 	
 	@ToolbarContentBuilder
-	private var toolbar: some ToolbarContent {
+	private var contentTopToolbar: some ToolbarContent {
 		if !viewModel.isEditing {
 			ToolbarItem(placement: .topBarTrailing) {
 				Button {
@@ -127,32 +164,82 @@ struct ContentView: View {
 			ToolbarSpacer(placement: .topBarTrailing)
 		}
 		ToolbarItemGroup(placement: .topBarTrailing) {
-			editButton
-		}
-		if case .drawer = selectedDestination {
-			ToolbarItem(placement: .bottomBar) {
-				filterPickerMenu
+			Group {
+				if viewModel.isEditing {
+					Button(
+						viewModel.selectedItems.count == displayedPairs.count
+							? "Deselect All" : "Select All"
+					) {
+						if viewModel.selectedItems.count == displayedPairs.count {
+							viewModel.selectedItems.removeAll()
+						} else {
+							viewModel.selectedItems = Set(displayedPairs.map(\.id))
+						}
+					}
+				}
+				
+				if !displayedPairs.isEmpty {
+					Button(
+						viewModel.isEditing ? "Done" : "Edit",
+						systemImage: viewModel.isEditing ? "checkmark" : "pencil"
+					) {
+						withAnimation {
+							viewModel.isEditing.toggle()
+							if !viewModel.isEditing {
+								viewModel.selectedItems.removeAll()
+							}
+						}
+					}
+					.tint(viewModel.isEditing ? accent.color : nil)
+				}
 			}
-			ToolbarSpacer(placement: .bottomBar)
-		}
-		DefaultToolbarItem(kind: .search, placement: .bottomBar)
-		ToolbarSpacer(placement: .bottomBar)
-		ToolbarItem(placement: .bottomBar) {
-			primaryAction
 		}
 	}
 	
-	// MARK: - Toolbar Items
-	
-	private var primaryAction: some View {
-		Group {
-			if viewModel.isEditing {
+	@ToolbarContentBuilder
+	private var contentBottomToolbar: some ToolbarContent {
+		if case .drawer = selectedDestination {
+			ToolbarItem(placement: .bottomBar) {
+				Menu {
+					Picker("Filter", selection: $viewModel.selectedFilter) {
+						ForEach(Filter.allCases, id: \.self) { filter in
+							filter.label
+						}
+					}
+				} label: {
+					Label(
+						viewModel.selectedFilter.rawValue.capitalized,
+						systemImage: "line.3.horizontal.decrease"
+					)
+				}
+			}
+			ToolbarSpacer(placement: .bottomBar)
+		}
+		
+		DefaultToolbarItem(kind: .search, placement: .bottomBar)
+		ToolbarSpacer(placement: .bottomBar)
+		
+		if viewModel.isEditing {
+			ToolbarItem(placement: .bottomBar) {
 				Button("Delete", systemImage: "trash", role: .destructive) {
 					viewModel.showItemDeleteConfirmation.toggle()
 				}
 				.tint(.red)
 				.disabled(viewModel.selectedItems.isEmpty)
-			} else {
+				.confirmationDialog(
+					"Delete selected items?",
+					isPresented: $viewModel.showItemDeleteConfirmation,
+					titleVisibility: .visible
+				) {
+					Button("Delete", role: .destructive) {
+						deleteSelected()
+					}
+				} message: {
+					Text("This action cannot be undone.")
+				}
+			}
+		} else {
+			ToolbarItem(placement: .bottomBar) {
 				Button("New", systemImage: "plus") {
 					viewModel.showingAdd.toggle()
 				}
@@ -161,87 +248,10 @@ struct ContentView: View {
 				.matchedTransitionSource(id: "add-pair-transition", in: namespace)
 			}
 		}
-		.confirmationDialog(
-			"Delete selected items?",
-			isPresented: $viewModel.showItemDeleteConfirmation,
-			titleVisibility: .visible
-		) {
-			Button("Delete", role: .destructive) {
-				deleteSelected()
-			}
-		} message: {
-			Text("This action cannot be undone.")
-		}
-	}
-	
-	private var editButton: some View {
-		Group {
-			if viewModel.isEditing {
-				Button(
-					viewModel.selectedItems.count == displayedPairs.count
-						? "Deselect All" : "Select All"
-				) {
-					if viewModel.selectedItems.count == displayedPairs.count {
-						viewModel.selectedItems.removeAll()
-					} else {
-						viewModel.selectedItems = Set(displayedPairs.map(\.id))
-					}
-				}
-			}
-			
-			if !displayedPairs.isEmpty {
-				Button(
-					viewModel.isEditing ? "Done" : "Edit",
-					systemImage: viewModel.isEditing ? "checkmark" : "pencil"
-				) {
-					withAnimation {
-						viewModel.isEditing.toggle()
-						if !viewModel.isEditing {
-							viewModel.selectedItems.removeAll()
-						}
-					}
-				}
-				.tint(viewModel.isEditing ? accent.color : nil)
-			}
-		}
-	}
-	
-	private var filterPickerMenu: some View {
-		Menu {
-			Picker("Filter", selection: $viewModel.selectedFilter) {
-				ForEach(Filter.allCases, id: \.self) { filter in
-					filter.label
-				}
-			}
-		} label: {
-			Label(
-				viewModel.selectedFilter.rawValue.capitalized,
-				systemImage: "line.3.horizontal.decrease"
-			)
-		}
-	}
-	
-	private var layoutPickerMenu: some View {
-		Picker("Layout", selection: $viewModel.currentLayout) {
-			ForEach(LayoutType.allCases, id: \.self) { layout in
-				Label(
-					layout.title,
-					systemImage: layout.symbolName
-				)
-			}
-		}.pickerStyle(.segmented)
 	}
 	
 	// MARK: - Sheets
-	
-	private func editSheet(for pair: Pair) -> some View {
-		NavigationStack {
-			PairFormView(mode: .edit, pair: pair, onSave: {})
-		}
-		.interactiveDismissDisabled()
-		.presentationDetents([.large])
-	}
-	
+
 	private var addSheet: some View {
 		let pair = Pair(key: "", value: "", drawers: viewModel.selectedDrawers(for: selectedDestination))
 		if viewModel.selectedFilter == .favorites {

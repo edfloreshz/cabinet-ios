@@ -35,63 +35,8 @@ struct SidebarView: View {
 		.searchable(text: $viewModel.searchText, prompt: "Search")
 		.navigationSplitViewColumnWidth(min: 310, ideal: 310)
 		.environment(\.editMode, .constant(viewModel.isEditing ? .active : .inactive))
-		.toolbar {
-			ToolbarItem(placement: .topBarLeading) {
-				Button("Settings", systemImage: "gearshape") {
-					viewModel.showingSettings.toggle()
-				}
-			}
-			
-			if viewModel.isEditing {
-				ToolbarItem(placement: .topBarTrailing) {
-					Button(
-						viewModel.selectedItems.count == drawers.count
-						? "Deselect All" : "Select All"
-					) {
-						if viewModel.selectedItems.count == drawers.count {
-							viewModel.selectedItems.removeAll()
-						} else {
-							viewModel.selectedItems = Set(drawers.map(\.id))
-						}
-					}
-				}
-				ToolbarSpacer(placement: .topBarTrailing)
-			}
-			
-			if !drawers.isEmpty {
-				ToolbarItem(placement: .topBarTrailing) {
-					Button(
-						viewModel.isEditing ? "Done" : "Edit",
-						systemImage: viewModel.isEditing ? "checkmark" : "pencil"
-					) {
-						withAnimation {
-							viewModel.isEditing.toggle()
-							if !viewModel.isEditing {
-								viewModel.selectedItems.removeAll()
-							}
-						}
-					}
-					.tint(viewModel.isEditing ? accent.color : nil)
-				}
-			}
-		}
-		.toolbar {
-			DefaultToolbarItem(kind: .search, placement: .bottomBar)
-			ToolbarSpacer(placement: .bottomBar)
-			
-			if viewModel.isEditing {
-				DeleteToolbarItemView(viewModel: $viewModel)
-			} else {
-				ToolbarItem(placement: .bottomBar) {
-					Button("New", systemImage: "plus") {
-						viewModel.showingAdd.toggle()
-					}
-					.buttonStyle(.glassProminent)
-					.tint(accent.color)
-				}
-				.matchedTransitionSource(id: "add-drawer-transition", in: namespace)
-			}
-		}
+		.toolbar { sidebarTopToolbar }
+		.toolbar { sidebarBottomToolbar }
 		.sheet(isPresented: $viewModel.showingSettings) {
 			NavigationStack {
 				SettingsView()
@@ -107,6 +52,67 @@ struct SidebarView: View {
 			.presentationDetents([.large])
 			.interactiveDismissDisabled()
 			.navigationTransition(.zoom(sourceID: "add-drawer-transition", in: namespace))
+		}
+	}
+	
+	@ToolbarContentBuilder
+	private var sidebarBottomToolbar: some ToolbarContent {
+		DefaultToolbarItem(kind: .search, placement: .bottomBar)
+		ToolbarSpacer(placement: .bottomBar)
+		
+		if viewModel.isEditing {
+			DeleteToolbarItemView(viewModel: $viewModel)
+		} else {
+			ToolbarItem(placement: .bottomBar) {
+				Button("New", systemImage: "plus") {
+					viewModel.showingAdd.toggle()
+				}
+				.buttonStyle(.glassProminent)
+				.tint(accent.color)
+			}
+			.matchedTransitionSource(id: "add-drawer-transition", in: namespace)
+		}
+	}
+		
+	@ToolbarContentBuilder
+	private var sidebarTopToolbar: some ToolbarContent {
+		ToolbarItem(placement: .topBarLeading) {
+			Button("Settings", systemImage: "gearshape") {
+				viewModel.showingSettings.toggle()
+			}
+		}
+		
+		if viewModel.isEditing {
+			ToolbarItem(placement: .topBarTrailing) {
+				Button(
+					viewModel.selectedItems.count == drawers.count
+					? "Deselect All" : "Select All"
+				) {
+					if viewModel.selectedItems.count == drawers.count {
+						viewModel.selectedItems.removeAll()
+					} else {
+						viewModel.selectedItems = Set(drawers.map(\.id))
+					}
+				}
+			}
+			ToolbarSpacer(placement: .topBarTrailing)
+		}
+		
+		if !drawers.isEmpty {
+			ToolbarItem(placement: .topBarTrailing) {
+				Button(
+					viewModel.isEditing ? "Done" : "Edit",
+					systemImage: viewModel.isEditing ? "checkmark" : "pencil"
+				) {
+					withAnimation {
+						viewModel.isEditing.toggle()
+						if !viewModel.isEditing {
+							viewModel.selectedItems.removeAll()
+						}
+					}
+				}
+				.tint(viewModel.isEditing ? accent.color : nil)
+			}
 		}
 	}
 }
