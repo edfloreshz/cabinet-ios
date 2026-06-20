@@ -6,19 +6,54 @@
 //
 import SwiftUI
 
-struct SettingsView: View {
-	var body: some View {
-		TabView {
-			AppearanceTabView()
-				.tabItem {
-					Label("Appearance", systemImage: "paintpalette.fill")
-				}
+private enum SettingsTab: String, CaseIterable, Identifiable {
+	case appearance
+	case security
 
-			SecurityTabView()
-				.tabItem {
-					Label("Security", systemImage: "lock.fill")
-				}
+	var id: Self { self }
+
+	var title: String {
+		switch self {
+		case .appearance:
+			return "Appearance"
+		case .security:
+			return "Security"
 		}
+	}
+
+	var systemImage: String {
+		switch self {
+		case .appearance:
+			return "paintpalette.fill"
+		case .security:
+			return "lock.fill"
+		}
+	}
+}
+
+struct SettingsView: View {
+	@State private var selectedTab: SettingsTab = .appearance
+
+	var body: some View {
+		VStack(spacing: 18) {
+			TabView(selection: $selectedTab) {
+				AppearanceTabView()
+					.tag(SettingsTab.appearance)
+					.tabItem {
+						Label(SettingsTab.appearance.title,
+							  systemImage: SettingsTab.appearance.systemImage)
+					}
+				SecurityTabView()
+					.tag(SettingsTab.security)
+					.tabItem {
+						Label(SettingsTab.security.title,
+							  systemImage: SettingsTab.security.systemImage)
+					}
+			}
+		}
+		.navigationTitle("Settings")
+		.navigationBarTitleDisplayMode(.inline)
+		.background(Color(uiColor: .systemGroupedBackground))
 	}
 }
 
@@ -28,7 +63,7 @@ struct SettingsView: View {
 			NavigationStack {
 				SettingsView()
 			}
-			.presentationDetents([.large])
+			.presentationDetents([.medium, .large])
 			.presentationDragIndicator(.visible)
 		}
 }

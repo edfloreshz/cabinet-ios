@@ -42,7 +42,7 @@ struct SecurityTabView: View {
 					.foregroundStyle(.secondary)
 				}
 			} header: {
-				Text("Biometrics").padding(.top, 20)
+				Label("Security", systemImage: "lock.fill")
 			}
 			
 			Section("Auto-Lock") {
@@ -67,6 +67,9 @@ struct SecurityTabView: View {
 				}
 			}
 		}
+		.listStyle(.insetGrouped)
+		.scrollContentBackground(.hidden)
+		.background(Color(uiColor: .systemGroupedBackground))
 	}
 }
 

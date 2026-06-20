@@ -28,9 +28,12 @@ struct AppearanceTabView: View {
 						.frame(width: 14, height: 14)
 				}
 			} header: {
-				Text("Theme").padding(.top, 20)
+				Label("Appearance", systemImage: "paintpalette.fill")
 			}
 		}
+		.listStyle(.insetGrouped)
+		.scrollContentBackground(.hidden)
+		.background(Color(uiColor: .systemGroupedBackground))
 	}
 }
 

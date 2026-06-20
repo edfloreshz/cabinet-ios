@@ -49,6 +49,7 @@ struct SidebarView: View {
 			}
 			.tint(accent.color)
 			.presentationDetents([.medium, .large])
+			.presentationBackground(.regularMaterial)
 		}
 		.sheet(isPresented: $viewModel.showingAdd) {
 			NavigationStack {

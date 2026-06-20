@@ -626,16 +626,6 @@
         }
       }
     },
-    "Theme" : {
-      "localizations" : {
-        "es-419" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tema"
-          }
-        }
-      }
-    },
     "This action cannot be undone." : {
       "localizations" : {
         "es-419" : {
