@@ -7,20 +7,36 @@
 import SwiftUI
 
 @Observable
-class LockedViewModel {
+@MainActor
+final class LockedViewModel {
+	private let authenticationService: AuthenticationServicing
+	private let settingsStore: SecuritySettingsStore
+
 	var isLocked = false
 	var isAuthenticating = false
 	var didAttemptInitialUnlock = false
 	var backgroundedAt: Date?
 	
-	let biometryKind = AuthenticationService.biometryKind()
-	
-	var isLockingEnabled: Bool {
-		biometricsEnabled && lockTimeout >= 0
+	init() {
+		self.authenticationService = AuthenticationService.shared
+		self.settingsStore = .shared
+	}
+
+	init(
+		authenticationService: AuthenticationServicing,
+		settingsStore: SecuritySettingsStore
+	) {
+		self.authenticationService = authenticationService
+		self.settingsStore = settingsStore
+	}
+
+	var biometryKind: AuthenticationService.BiometryKind {
+		authenticationService.biometryKind()
 	}
 	
-	var biometricsEnabled: Bool = false
-	var lockTimeout: Int = -1
+	var isLockingEnabled: Bool {
+		settingsStore.isLockingEnabled
+	}
 	
 	func handleScenePhaseChange(_ phase: ScenePhase) {
 		switch phase {
@@ -41,10 +57,10 @@ class LockedViewModel {
 		guard isLockingEnabled else { return false }
 		guard let backgroundedAt else { return false }
 		
-		if lockTimeout == 0 { return true }
+		if settingsStore.lockTimeout == 0 { return true }
 		
 		let elapsed = Date().timeIntervalSince(backgroundedAt)
-		return elapsed >= TimeInterval(lockTimeout * 60)
+		return elapsed >= TimeInterval(settingsStore.lockTimeout * 60)
 	}
 	
 	func attemptInitialUnlockIfNeeded() {
@@ -66,17 +82,19 @@ class LockedViewModel {
 		guard !isAuthenticating else { return }
 		isAuthenticating = true
 		
-		AuthenticationService.authenticate(reason: "Unlock Cabinet") { [weak self] result in
+		authenticationService.authenticate(reason: "Unlock Cabinet") { [weak self] result in
 			guard let self else { return }
-			isAuthenticating = false
-			switch result {
-			case .success:
-				withAnimation(.easeInOut(duration: 0.2)) {
-					self.isLocked = false
+			Task { @MainActor in
+				self.isAuthenticating = false
+				switch result {
+				case .success:
+					withAnimation(.easeInOut(duration: 0.2)) {
+						self.isLocked = false
+					}
+					self.backgroundedAt = nil
+				case .failure:
+					self.isLocked = true
 				}
-				self.backgroundedAt = nil
-			case .failure:
-				self.isLocked = true
 			}
 		}
 	}

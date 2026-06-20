@@ -13,7 +13,7 @@ struct SidebarView: View {
 	@Namespace private var namespace
 	@Binding var selectedDestination: Destination?
 	
-	@Query private var drawers: [Drawer]
+	@Query(sort: \Drawer.name) private var drawers: [Drawer]
 	@State private var viewModel = SidebarViewModel()
 	
 	var body: some View {
@@ -21,12 +21,18 @@ struct SidebarView: View {
 			if viewModel.isEditing {
 				List(selection: $viewModel.selectedItems) {
 					CategoriesListView()
-					DrawersListView(viewModel: $viewModel)
+					DrawersListView(
+						viewModel: $viewModel,
+						selectedDestination: $selectedDestination
+					)
 				}
 			} else {
 				List(selection: $selectedDestination) {
 					CategoriesListView()
-					DrawersListView(viewModel: $viewModel)
+					DrawersListView(
+						viewModel: $viewModel,
+						selectedDestination: $selectedDestination
+					)
 				}
 			}
 		}
@@ -47,7 +53,6 @@ struct SidebarView: View {
 		.sheet(isPresented: $viewModel.showingAdd) {
 			NavigationStack {
 				DrawerFormView(drawer: Drawer(name: ""))
-					.presentationSizing(.fitted)
 			}
 			.presentationDetents([.large])
 			.interactiveDismissDisabled()
@@ -61,7 +66,10 @@ struct SidebarView: View {
 		ToolbarSpacer(placement: .bottomBar)
 		
 		if viewModel.isEditing {
-			DeleteToolbarItemView(viewModel: $viewModel)
+			DeleteToolbarItemView(
+				viewModel: $viewModel,
+				selectedDestination: $selectedDestination
+			)
 		} else {
 			ToolbarItem(placement: .bottomBar) {
 				Button("New", systemImage: "plus") {

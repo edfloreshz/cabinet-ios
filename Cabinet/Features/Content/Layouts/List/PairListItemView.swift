@@ -10,14 +10,16 @@ import SwiftUI
 
 struct PairListItemView: View {
 	@Environment(\.modelContext) private var modelContext
-	@AppStorage("accentColor") private var accent: AppColor = .indigo
 	@State private var showDeleteConfirmation = false
+	@State private var isRevealed = false
 	
 	let pair: Pair
 	
 	@Binding var editingPair: Pair?
 	
 	var body: some View {
+		let secret = resolvedSecret
+
 		HStack(alignment: .center, spacing: 12) {
 			if let icon = pair.icon {
 				Image(systemName: icon)
@@ -26,11 +28,7 @@ struct PairListItemView: View {
 				Text(pair.key)
 					.font(.body.weight(.medium))
 					.foregroundStyle(.primary)
-				Text(
-					pair.isHidden
-						? String(repeating: "•", count: pair.value.count)
-						: pair.value
-				)
+				Text(displayValue(using: secret))
 				.font(.subheadline)
 				.foregroundStyle(.secondary)
 				.lineLimit(1)
@@ -44,9 +42,7 @@ struct PairListItemView: View {
 					.accessibilityHidden(true)
 			}
 			Button(action: {
-				pair.lastUsedDate = Date()
-				ClipboardService.shared.copy(text: pair.value)
-				ToastManager.shared.show("Copied", type: .info)
+				copySecret(using: secret)
 			}) {
 				Image(
 					systemName: "document.on.document"
@@ -54,16 +50,18 @@ struct PairListItemView: View {
 				.foregroundStyle(.secondary)
 			}
 			.buttonStyle(.plain)
-			Button(action: { pair.isHidden.toggle() }) {
-				Image(systemName: pair.isHidden ? "eye.slash" : "eye")
-					.foregroundStyle(.secondary)
+			if pair.isHidden {
+				Button(action: { isRevealed.toggle() }) {
+					Image(systemName: isRevealed ? "eye" : "eye.slash")
+						.foregroundStyle(.secondary)
+				}
+				.buttonStyle(.plain)
 			}
-			.buttonStyle(.plain)
 		}
 		.contextMenu {
 			ControlGroup {
-				if !pair.isHidden {
-					ShareLink(item: pair.value) {
+				if case .success(let value) = secret, !pair.isHidden {
+					ShareLink(item: value) {
 						Label(
 							"Share",
 							systemImage: "square.and.arrow.up.fill"
@@ -100,8 +98,10 @@ struct PairListItemView: View {
 				pair.isFavorite.toggle()
 			}.tint(.yellow)
 			
-			ShareLink(item: pair.value) {
-				Label("Share", systemImage: "square.and.arrow.up.fill")
+			if case .success(let value) = secret, !pair.isHidden {
+				ShareLink(item: value) {
+					Label("Share", systemImage: "square.and.arrow.up.fill")
+				}
 			}
 		}
 		.swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -119,11 +119,60 @@ struct PairListItemView: View {
 			titleVisibility: .visible
 		) {
 			Button("Delete", role: .destructive) {
-				modelContext.delete(pair)
+				deletePair()
 			}
 			Button("Cancel", role: .cancel) {}
 		} message: {
 			Text("This action cannot be undone.")
+		}
+	}
+
+	private var resolvedSecret: Result<String, PairSecretAccessError> {
+		Result { try pair.secretValue() }
+			.mapError { _ in .decryptionFailed }
+	}
+
+	private var shouldMaskSecret: Bool {
+		pair.isHidden && !isRevealed
+	}
+
+	private func displayValue(using secret: Result<String, PairSecretAccessError>) -> String {
+		switch secret {
+		case .success(let value):
+			if shouldMaskSecret {
+				return String(repeating: "•", count: max(value.count, 8))
+			}
+			return value
+		case .failure:
+			return "Secret unavailable"
+		}
+	}
+
+	private func copySecret(using secret: Result<String, PairSecretAccessError>) {
+		switch secret {
+		case .success(let value):
+			pair.lastUsedDate = Date()
+			ClipboardService.shared.copy(text: value)
+			ToastManager.shared.show("Copied", type: .info)
+		case .failure(let error):
+			ToastManager.shared.show(
+				error.localizedDescription,
+				type: .error,
+				duration: 2.2
+			)
+		}
+	}
+
+	private func deletePair() {
+		do {
+			modelContext.delete(pair)
+			try modelContext.save()
+		} catch {
+			ToastManager.shared.show(
+				"Couldn't delete this item.",
+				type: .error,
+				duration: 2.2
+			)
 		}
 	}
 }
@@ -131,7 +180,7 @@ struct PairListItemView: View {
 #Preview {
 	@Previewable @State var editingPair: Pair? = nil
 	PairListItemView(
-		pair: Pair(key: "Test", value: "Test"),
+		pair: Pair.sampleData[0],
 		editingPair: $editingPair
 	)
 	.padding()

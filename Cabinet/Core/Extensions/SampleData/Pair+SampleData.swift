@@ -8,84 +8,90 @@
 import Foundation
 
 extension Pair {
-	static var sampleData: [Pair] {
-		let development = Drawer.sampleData[0]
-		let databases = Drawer.sampleData[1]
-		let social = Drawer.sampleData[2]
-		let wifi = Drawer.sampleData[3]
-		let work = Drawer.sampleData[4]
-		let finance = Drawer.sampleData[5]
-		let design = Drawer.sampleData[6]
-		let server = Drawer.sampleData[7]
+	static func sampleData(drawers: [Drawer]) -> [Pair] {
+		guard drawers.count >= 8 else { return [] }
+
+		let development = drawers[0]
+		let databases = drawers[1]
+		let social = drawers[2]
+		let wifi = drawers[3]
+		let work = drawers[4]
+		let finance = drawers[5]
+		let design = drawers[6]
+		let server = drawers[7]
 
 		return [
-			Pair(
+			try! Pair.create(
 				key: "GitHub Token",
 				value: "ghp_1234567890abcdefghijklmnopqrstuvwxyz",
 				isFavorite: true,
-				drawers: [development.id],
+				drawers: [development],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "Database URL",
 				value: "postgresql://user:password@localhost:5432/mydb",
-				drawers: [databases.id],
+				drawers: [databases],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "API Key",
 				value: "sk-proj-abc123def456ghi789jkl012mno345pqr678",
 				isHidden: true,
-				drawers: [development.id],
+				drawers: [development],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "SSH Passphrase",
 				value: "correct-horse-battery-staple",
 				isHidden: true,
-				drawers: [server.id],
+				drawers: [server],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "App Store Connect",
 				value: "eduardo@example.com",
-				drawers: [work.id],
+				drawers: [work],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "Wi-Fi Password",
 				value: "MySecureNetwork2026!",
 				isHidden: true,
-				drawers: [wifi.id],
+				drawers: [wifi],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "Figma Token",
 				value: "figd_abcdefghijklmnopqrstuvwxyz123456",
-				drawers: [design.id],
+				drawers: [design],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "2FA Backup Code",
 				value: "1234-5678-9012-3456",
 				isHidden: true,
-				drawers: [work.id, finance.id],
+				drawers: [work, finance],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "Twitter API Key",
 				value: "tw-abc123def456ghi789jkl",
 				isHidden: true,
-				drawers: [social.id, development.id],
+				drawers: [social, development],
 				lastUsedDate: Date()
 			),
-			Pair(
+			try! Pair.create(
 				key: "Postgres Password",
 				value: "superSecretDBPass!99",
 				isHidden: true,
-				drawers: [databases.id],
+				drawers: [databases],
 				lastUsedDate: Date()
 			)
 		]
+	}
+
+	static var sampleData: [Pair] {
+		sampleData(drawers: Drawer.sampleData)
 	}
 }

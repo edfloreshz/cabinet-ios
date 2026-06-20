@@ -22,6 +22,7 @@ struct PairGridCardView: View {
 	
 	var body: some View {
 		let cardBottomPadding = pair.image == nil ? 16.0 : 0
+		let secret = resolvedSecret
 		
 		VStack(alignment: .leading, spacing: 6) {
 			VStack(alignment: .leading, spacing: 6) {
@@ -35,7 +36,7 @@ struct PairGridCardView: View {
 					.frame(maxWidth: .infinity, alignment: .leading)
 				
 				if pair.image == nil {
-					Text(pair.isHidden ? maskedValue : pair.value)
+						Text(displayValue(using: secret))
 						.multilineTextAlignment(.leading)
 						.font(.system(size: 12))
 						.foregroundStyle(.secondary)
@@ -79,8 +80,8 @@ struct PairGridCardView: View {
 		.onTapGesture(perform: onTap)
 		.contextMenu {
 			ControlGroup {
-				if !pair.isHidden {
-					ShareLink(item: pair.value) {
+				if case .success(let value) = secret, !pair.isHidden {
+					ShareLink(item: value) {
 						Label(
 							"Share",
 							systemImage: "square.and.arrow.up.fill"
@@ -131,8 +132,21 @@ struct PairGridCardView: View {
 		}
 	}
 	
-	private var maskedValue: String {
-		String(repeating: "•", count: max(pair.value.count, 8))
+	private var resolvedSecret: Result<String, PairSecretAccessError> {
+		Result { try pair.secretValue() }
+			.mapError { _ in .decryptionFailed }
+	}
+
+	private func displayValue(using secret: Result<String, PairSecretAccessError>) -> String {
+		switch secret {
+		case .success(let value):
+			if pair.isHidden {
+				return String(repeating: "•", count: max(value.count, 8))
+			}
+			return value
+		case .failure:
+			return "Secret unavailable"
+		}
 	}
 }
 

@@ -15,6 +15,7 @@ final class Drawer: Identifiable {
 	var name: String
 	var icon: String
 	var purpose: String
+	@Relationship(inverse: \Pair.drawers) var pairs: [Pair] = []
 
 	init(name: String, icon: String = "archivebox", purpose: String = "") {
 		self.name = name

@@ -1,5 +1,5 @@
 //
-//  PairListViewModel.swift
+//  ContentViewModel.swift
 //  Cabinet
 //
 //  Created by Eduardo Flores on 15/02/26.
@@ -7,7 +7,8 @@
 import SwiftUI
 
 @Observable
-class ContentViewModel {
+@MainActor
+final class ContentViewModel {
 	var isEditing = false
 	var showingAdd = false
 	var showItemDeleteConfirmation = false
@@ -24,24 +25,12 @@ class ContentViewModel {
 		if let destination = destination {
 			switch destination {
 			case .drawer(let drawer):
-				result = result.filter { $0.drawers.contains(drawer.id) }
-				switch selectedFilter {
-				case .all: break
-				case .favorites:
-					result = result.filter { $0.isFavorite }
-				case .recents:
-					let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-					result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
+				result = result.filter { pair in
+					pair.drawers.contains(where: { $0.id == drawer.id })
 				}
+				result = apply(selectedFilter, to: result)
 			case .filter(let filter):
-				switch filter {
-				case .all: break
-				case .favorites:
-					result = result.filter { $0.isFavorite }
-				case .recents:
-					let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-					result = result.filter { $0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo }
-				}
+				result = apply(filter, to: result)
 			}
 		}
 		
@@ -78,14 +67,36 @@ class ContentViewModel {
 		}
 	}
 	
-	func selectedDrawers(for destination: Destination?) -> [UUID] {
+	func selectedDrawers(for destination: Destination?) -> [Drawer] {
 		if let destination = destination {
 			switch destination {
-			case .drawer(let drawer): return [drawer.id]
+			case .drawer(let drawer): return [drawer]
 			case .filter: return []
 			}
 		} else {
 			return []
 		}
+	}
+
+	private func apply(_ filter: Filter, to pairs: [Pair]) -> [Pair] {
+		switch filter {
+		case .all:
+			return pairs
+		case .favorites:
+			return pairs.filter(\.isFavorite)
+		case .recents:
+			return pairs.filter(isRecent)
+		}
+	}
+
+	private func isRecent(_ pair: Pair) -> Bool {
+		guard
+			let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()),
+			let lastUsedDate = pair.lastUsedDate
+		else {
+			return false
+		}
+
+		return lastUsedDate >= sevenDaysAgo
 	}
 }

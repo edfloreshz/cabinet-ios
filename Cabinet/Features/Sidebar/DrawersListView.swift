@@ -13,9 +13,10 @@ struct DrawersListView: View {
 	@AppStorage("accentColor") var accent: AppColor = .indigo
 	
 	@Binding var viewModel: SidebarViewModel
+	@Binding var selectedDestination: Destination?
 	@State var editingDrawer: Drawer?
 	@State var drawerToDelete: Drawer?
-	@Query var drawers: [Drawer]
+	@Query(sort: \Drawer.name) var drawers: [Drawer]
 
 	var body: some View {
 		Section(header: Text("Drawers").fontWeight(.bold)) {
@@ -78,8 +79,7 @@ struct DrawersListView: View {
 		) {
 			Button("Delete", role: .destructive) {
 				if let drawer = drawerToDelete {
-					modelContext.delete(drawer)
-					drawerToDelete = nil
+					delete(drawer: drawer)
 				}
 			}
 			Button("Cancel", role: .cancel) {
@@ -103,6 +103,24 @@ struct DrawersListView: View {
 			viewModel.isEditing = false
 		}
 	}
+
+	private func delete(drawer: Drawer) {
+		do {
+			if selectedDestination == .drawer(drawer) {
+				selectedDestination = .filter(.all)
+			}
+
+			modelContext.delete(drawer)
+			try modelContext.save()
+			drawerToDelete = nil
+		} catch {
+			ToastManager.shared.show(
+				"Couldn't delete this drawer.",
+				type: .error,
+				duration: 2.2
+			)
+		}
+	}
 }
 
 @MainActor
@@ -119,7 +137,10 @@ let previewContainer: ModelContainer = {
 	@Previewable @State var selectedDestination: Destination? = .drawer(Drawer.sampleData.first!)
 	
 	List(selection: $selectedDestination) {
-		DrawersListView(viewModel: $viewModel)
+		DrawersListView(
+			viewModel: $viewModel,
+			selectedDestination: $selectedDestination
+		)
 	}
 	.modelContainer(previewContainer)
 }
@@ -132,7 +153,10 @@ let previewContainer: ModelContainer = {
 	
 	
 	List(selection: $selectedDestination) {
-		DrawersListView(viewModel: $viewModel)
+		DrawersListView(
+			viewModel: $viewModel,
+			selectedDestination: $selectedDestination
+		)
 	}
 	.modelContainer(container)
 }

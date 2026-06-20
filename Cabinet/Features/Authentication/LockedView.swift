@@ -9,10 +9,9 @@ import SwiftUI
 struct LockedView: View {
 	@Environment(\.scenePhase) private var scenePhase
 	@AppStorage("accentColor") private var accent: AppColor = .indigo
-	@AppStorage("biometricsEnabled") private var biometricsEnabled: Bool = false
-	@AppStorage("lockTimeout") private var lockTimeout: Int = -1
 	
 	@State private var model = LockedViewModel()
+	@State private var securitySettings = SecuritySettingsStore.shared
 	
 	var body: some View {
 		ZStack {
@@ -68,20 +67,16 @@ struct LockedView: View {
 		}
 		.animation(.easeInOut(duration: 0.2), value: model.isLocked)
 		.onAppear {
-			model.biometricsEnabled = biometricsEnabled
-			model.lockTimeout = lockTimeout
 			model.applySecuritySettingsChange()
 			model.attemptInitialUnlockIfNeeded()
 		}
 		.onChange(of: scenePhase) { _, newPhase in
 			model.handleScenePhaseChange(newPhase)
 		}
-		.onChange(of: biometricsEnabled) { _, newValue in
-			model.biometricsEnabled = newValue
+		.onChange(of: securitySettings.biometricsEnabled) { _, _ in
 			model.applySecuritySettingsChange()
 		}
-		.onChange(of: lockTimeout) { _, newValue in
-			model.lockTimeout = newValue
+		.onChange(of: securitySettings.lockTimeout) { _, _ in
 			model.applySecuritySettingsChange()
 		}
 	}

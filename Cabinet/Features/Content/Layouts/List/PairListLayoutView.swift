@@ -10,6 +10,7 @@ import SwiftUI
 
 struct PairListLayoutView: View {
 	let pairs: [Pair]
+	let isEditing: Bool
 	@Binding var selectedItems: Set<UUID>
 	@Binding var editingPair: Pair?
 
@@ -18,6 +19,7 @@ struct PairListLayoutView: View {
 			ForEach(pairs) { pair in
 				PairListItemView(pair: pair, editingPair: $editingPair)
 					.onTapGesture {
+						guard !isEditing else { return }
 						editingPair = pair
 					}
 			}
@@ -32,6 +34,7 @@ struct PairListLayoutView: View {
 	NavigationStack {
 		PairListLayoutView(
 			pairs: Pair.sampleData,
+			isEditing: false,
 			selectedItems: $selectedItems,
 			editingPair: $editingPair
 		)

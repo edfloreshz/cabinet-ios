@@ -10,39 +10,88 @@ import SwiftUI
 
 @Observable
 @MainActor
+final class SecuritySettingsStore {
+	static let shared = SecuritySettingsStore()
+
+	private enum Keys {
+		static let biometricsEnabled = "biometricsEnabled"
+		static let lockTimeout = "lockTimeout"
+	}
+
+	private let defaults: UserDefaults
+
+	var biometricsEnabled: Bool {
+		didSet {
+			defaults.set(biometricsEnabled, forKey: Keys.biometricsEnabled)
+		}
+	}
+
+	var lockTimeout: Int {
+		didSet {
+			defaults.set(lockTimeout, forKey: Keys.lockTimeout)
+		}
+	}
+
+	var isLockingEnabled: Bool {
+		biometricsEnabled && lockTimeout >= 0
+	}
+
+	init(defaults: UserDefaults = .standard) {
+		self.defaults = defaults
+		self.biometricsEnabled = defaults.bool(forKey: Keys.biometricsEnabled)
+		self.lockTimeout = defaults.object(forKey: Keys.lockTimeout) as? Int ?? -1
+	}
+
+	func setBiometricsEnabled(_ enabled: Bool) {
+		biometricsEnabled = enabled
+
+		if !enabled {
+			lockTimeout = -1
+		} else if lockTimeout < 0 {
+			lockTimeout = 1
+		}
+	}
+
+	func setLockTimeout(_ timeout: Int) {
+		lockTimeout = biometricsEnabled ? timeout : -1
+	}
+}
+
+@Observable
+@MainActor
 final class SecurityTabViewModel {
-	private let authenticationService: AuthenticationService.Type
+	private let authenticationService: AuthenticationServicing
+	private let settingsStore: SecuritySettingsStore
 	
+	init() {
+		self.authenticationService = AuthenticationService.shared
+		self.settingsStore = .shared
+
+		if !biometricsAvailable {
+			settingsStore.setBiometricsEnabled(false)
+		}
+	}
+
 	init(
-		authenticationService: AuthenticationService.Type = AuthenticationService.self
+		authenticationService: AuthenticationServicing,
+		settingsStore: SecuritySettingsStore
 	) {
 		self.authenticationService = authenticationService
+		self.settingsStore = settingsStore
 		
 		if !biometricsAvailable {
-			biometricsEnabled = false
-			lockTimeout = -1
+			settingsStore.setBiometricsEnabled(false)
 		}
 	}
 	
 	// MARK: - Settings
 	
 	var biometricsEnabled: Bool {
-		get {
-			UserDefaults.standard.bool(forKey: "biometricsEnabled")
-		}
-		set {
-			UserDefaults.standard.set(newValue, forKey: "biometricsEnabled")
-		}
+		settingsStore.biometricsEnabled
 	}
 	
 	var lockTimeout: Int {
-		get {
-			let value = UserDefaults.standard.object(forKey: "lockTimeout") as? Int
-			return value ?? -1
-		}
-		set {
-			UserDefaults.standard.set(newValue, forKey: "lockTimeout")
-		}
+		settingsStore.lockTimeout
 	}
 	
 	// MARK: - State
@@ -75,12 +124,7 @@ final class SecurityTabViewModel {
 	}
 	
 	func updateLockTimeout(_ timeout: Int) {
-		guard biometricsEnabled else {
-			lockTimeout = -1
-			return
-		}
-		
-		lockTimeout = timeout
+		settingsStore.setLockTimeout(timeout)
 	}
 	
 	// MARK: - Private
@@ -108,11 +152,7 @@ final class SecurityTabViewModel {
 					return
 				}
 				
-				self.biometricsEnabled = true
-				
-				if self.lockTimeout < 0 {
-					self.lockTimeout = 1
-				}
+				self.settingsStore.setBiometricsEnabled(true)
 				
 				ToastManager.shared.show(
 					"Biometrics enabled. App lock is now on.",
@@ -135,8 +175,7 @@ final class SecurityTabViewModel {
 					return
 				}
 				
-				self.biometricsEnabled = false
-				self.lockTimeout = -1
+				self.settingsStore.setBiometricsEnabled(false)
 				
 				ToastManager.shared.show(
 					"Biometrics disabled. App lock is now off.",

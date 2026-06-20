@@ -51,8 +51,7 @@ struct PairGridLayoutView: View {
 		) {
 			Button("Delete", role: .destructive) {
 				guard let pair = pendingDeletionPair else { return }
-				modelContext.delete(pair)
-				pendingDeletionPair = nil
+				delete(pair: pair)
 			}
 			Button("Cancel", role: .cancel) {
 				pendingDeletionPair = nil
@@ -90,6 +89,20 @@ struct PairGridLayoutView: View {
 			}
 		} else {
 			editingPair = pair
+		}
+	}
+
+	private func delete(pair: Pair) {
+		do {
+			modelContext.delete(pair)
+			try modelContext.save()
+			pendingDeletionPair = nil
+		} catch {
+			ToastManager.shared.show(
+				"Couldn't delete this item.",
+				type: .error,
+				duration: 2.2
+			)
 		}
 	}
 }

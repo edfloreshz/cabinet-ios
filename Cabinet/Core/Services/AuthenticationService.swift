@@ -9,11 +9,24 @@ import LocalAuthentication
 import os
 import SwiftUI
 
-class AuthenticationService {
-	static let logger = Logger(
+protocol AuthenticationServicing: AnyObject {
+	func biometricsAvailable() -> Bool
+	func biometryKind() -> AuthenticationService.BiometryKind
+	func authenticate(
+		reason: String,
+		completion: @escaping (Result<Void, AuthenticationService.AuthenticationError>) -> Void
+	)
+}
+
+final class AuthenticationService: AuthenticationServicing {
+	static let shared = AuthenticationService()
+
+	private static let logger = Logger(
 		subsystem: "dev.edfloreshz.Cabinet",
 		category: "Authentication"
 	)
+
+	private init() {}
 	
 	enum BiometryKind {
 		case faceID
@@ -57,13 +70,13 @@ class AuthenticationService {
 		}
 	}
 	
-	static func biometricsAvailable() -> Bool {
+	func biometricsAvailable() -> Bool {
 		let context = LAContext()
 		var error: NSError?
 		return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
 	}
 	
-	static func biometryKind() -> BiometryKind {
+	func biometryKind() -> BiometryKind {
 		let context = LAContext()
 		var error: NSError?
 		guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
@@ -85,7 +98,7 @@ class AuthenticationService {
 		}
 	}
 	
-	static func authenticate(
+	func authenticate(
 		reason: String = "We need to unlock your data.",
 		completion: @escaping (Result<Void, AuthenticationError>) -> Void
 	) {
@@ -95,7 +108,7 @@ class AuthenticationService {
 		guard
 			context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
 		else {
-			logger.error("Authentication not available")
+			Self.logger.error("Authentication not available")
 			DispatchQueue.main.async {
 				ToastManager.shared.show(
 					"Authentication not available",

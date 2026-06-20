@@ -57,6 +57,7 @@ struct DrawerFormView: View {
 			}
 		}
 		.formStyle(.grouped)
+		.presentationSizing(.fitted)
 		.navigationTitle("Drawer")
 			.navigationBarTitleDisplayMode(.inline)
 			.scrollDismissesKeyboard(.interactively)
@@ -69,7 +70,6 @@ struct DrawerFormView: View {
 				ToolbarItem(placement: .confirmationAction) {
 					Button("Save", systemImage: "checkmark") {
 						saveDrawer()
-						dismiss()
 					}
 					.tint(accent.color)
 					.buttonStyle(.glassProminent)
@@ -116,11 +116,24 @@ struct DrawerFormView: View {
 	}
 	
 	private func saveDrawer() {
-		drawer.name = formData.name
+		drawer.name = formData.name.trimmingCharacters(in: .whitespacesAndNewlines)
 		drawer.icon = formData.icon
 		drawer.purpose = formData.purpose
-		modelContext.insert(drawer)
-		try? modelContext.save()
+
+		do {
+			if drawer.modelContext == nil {
+				modelContext.insert(drawer)
+			}
+
+			try modelContext.save()
+			dismiss()
+		} catch {
+			ToastManager.shared.show(
+				"Couldn't save this drawer.",
+				type: .error,
+				duration: 2.2
+			)
+		}
 	}
 }
 

@@ -27,32 +27,50 @@ struct PairFormView: View {
 	
 	@FocusState private var focusedField: FormField?
 	
-	@State private var selectedDrawers: Set<UUID> = []
 	@State private var isPresented = false
 	@State private var showDiscardAlert = false
 	@State private var isAddDrawerPresented = false
 	@State var imageSelection: PhotosPickerItem?
-	@Query private var drawers: [Drawer]
+	@Query(sort: \Drawer.name) private var drawers: [Drawer]
 	
 	let mode: ViewMode
-	let pair: Pair
+	let pair: Pair?
+	let initialDrawers: [Drawer]
+	let initialIsFavorite: Bool
 	let onSave: () -> Void
 	
 	@State private var formData: PairFormData
 	
-	init(mode: ViewMode, pair: Pair, onSave: @escaping () -> Void) {
+	init(
+		mode: ViewMode,
+		pair: Pair? = nil,
+		initialDrawers: [Drawer] = [],
+		initialIsFavorite: Bool = false,
+		onSave: @escaping () -> Void
+	) {
 		self.mode = mode
 		self.pair = pair
+		self.initialDrawers = initialDrawers
+		self.initialIsFavorite = initialIsFavorite
 		self.onSave = onSave
-		self._formData = State(initialValue: PairFormData(from: pair))
+		self._formData = State(
+			initialValue: PairFormData(pair: pair, initialDrawers: initialDrawers)
+		)
 	}
 	
 	private var isDirty: Bool {
-		formData != PairFormData(from: pair)
+		formData != PairFormData(pair: pair, initialDrawers: initialDrawers)
 	}
 	
 	var body: some View {
 		Form {
+			if let secretLoadErrorMessage = formData.secretLoadErrorMessage {
+				Section {
+					Label(secretLoadErrorMessage, systemImage: "exclamationmark.triangle.fill")
+						.foregroundStyle(.orange)
+				}
+			}
+
 			Section(header: Text("Content")) {
 				HStack(spacing: 12) {
 					TextField("Title", text: $formData.key)
@@ -176,17 +194,17 @@ struct PairFormView: View {
 							Image(systemName: drawer.icon)
 							Text(drawer.name)
 							Spacer()
-							if selectedDrawers.contains(drawer.id) {
+							if formData.drawerIDs.contains(drawer.id) {
 								Image(systemName: "checkmark")
 									.foregroundColor(accent.color)
 							}
 						}
 						.contentShape(Rectangle())
 						.onTapGesture {
-							if selectedDrawers.contains(drawer.id) {
-								selectedDrawers.remove(drawer.id)
+							if formData.drawerIDs.contains(drawer.id) {
+								formData.drawerIDs.remove(drawer.id)
 							} else {
-								selectedDrawers.insert(drawer.id)
+								formData.drawerIDs.insert(drawer.id)
 							}
 						}
 					}
@@ -205,8 +223,6 @@ struct PairFormView: View {
 			ToolbarItem(placement: .confirmationAction) {
 				Button("Save", systemImage: "checkmark") {
 					savePair()
-					onSave()
-					dismiss()
 				}
 				.tint(accent.color)
 				.buttonStyle(.glassProminent)
@@ -274,8 +290,6 @@ struct PairFormView: View {
 			Task { await saveImage(from: newItem) }
 		}
 		.onAppear {
-			selectedDrawers = Set(pair.drawers)
-			
 			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
 				switch mode {
 				case .edit:
@@ -331,19 +345,45 @@ struct PairFormView: View {
 	}
 	
 	private func savePair() {
-		pair.key = formData.key
-		pair.value = formData.value
-		pair.notes = formData.notes
-		pair.icon = formData.icon
-		pair.isHidden = formData.isHidden
-		pair.drawers = Array(selectedDrawers)
-		pair.image = formData.image
-		
-		if mode == .new {
-			modelContext.insert(pair)
+		let trimmedKey = formData.key.trimmingCharacters(in: .whitespacesAndNewlines)
+		let selectedDrawers = drawers.filter { formData.drawerIDs.contains($0.id) }
+
+		do {
+			let targetPair: Pair
+
+			if let pair {
+				targetPair = pair
+				try targetPair.updateSecretValue(formData.value)
+				targetPair.key = trimmedKey
+				targetPair.icon = formData.icon.isEmpty ? nil : formData.icon
+				targetPair.isHidden = formData.isHidden
+				targetPair.notes = formData.notes
+				targetPair.drawers = selectedDrawers
+				targetPair.image = formData.image
+			} else {
+				targetPair = try Pair.create(
+					key: trimmedKey,
+					icon: formData.icon.isEmpty ? nil : formData.icon,
+					value: formData.value,
+					isFavorite: initialIsFavorite,
+					isHidden: formData.isHidden,
+					drawers: selectedDrawers,
+					notes: formData.notes,
+					image: formData.image
+				)
+				modelContext.insert(targetPair)
+			}
+
+			try modelContext.save()
+			onSave()
+			dismiss()
+		} catch {
+			ToastManager.shared.show(
+				"Couldn't save this item. \(error.localizedDescription)",
+				type: .error,
+				duration: 2.2
+			)
 		}
-		
-		try? modelContext.save()
 	}
 }
 
@@ -365,7 +405,7 @@ struct FormCircleButtonStyle: ButtonStyle {
 #Preview {
 	Color.clear.sheet(isPresented: .constant(true)) {
 		NavigationStack {
-			PairFormView(mode: .new, pair: Pair.sampleData[0], onSave: {})
+			PairFormView(mode: .new, initialDrawers: Drawer.sampleData, onSave: {})
 		}
 		.presentationDetents([.large])
 	}

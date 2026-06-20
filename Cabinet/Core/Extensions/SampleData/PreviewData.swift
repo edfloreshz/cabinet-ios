@@ -33,11 +33,13 @@ class PreviewData {
 				configurations: [modelConfiguration]
 			)
 
-			for drawer in Drawer.sampleData {
+			let drawers = Drawer.sampleData
+
+			for drawer in drawers {
 				context.insert(drawer)
 			}
 
-			for pair in Pair.sampleData {
+			for pair in Pair.sampleData(drawers: drawers) {
 				context.insert(pair)
 			}
 

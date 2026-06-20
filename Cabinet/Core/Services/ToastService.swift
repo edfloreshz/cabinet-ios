@@ -8,7 +8,7 @@
 import Observation
 import SwiftUI
 
-struct ToastService: Equatable {
+struct ToastMessage: Equatable {
 	let message: String
 	let type: ToastType
 	let duration: TimeInterval
@@ -47,20 +47,20 @@ struct ToastService: Equatable {
 
 @Observable
 @MainActor
-class ToastManager {
+final class ToastManager {
 	static let shared = ToastManager()
 
-	var toast: ToastService?
+var toast: ToastMessage?
 
 	private init() {}
 
 	func show(
 		_ message: String,
-		type: ToastService.ToastType = .info,
+		type: ToastMessage.ToastType = .info,
 		duration: TimeInterval = 1.2
 	) {
 		withAnimation(.spring(duration: 0.25)) {
-			toast = ToastService(message: message, type: type, duration: duration)
+			toast = ToastMessage(message: message, type: type, duration: duration)
 		}
 
 		Task {
@@ -81,7 +81,7 @@ class ToastManager {
 }
 
 struct ToastView: View {
-	let toast: ToastService
+	let toast: ToastMessage
 
 	var body: some View {
 		Label(toast.message, systemImage: toast.type.icon)

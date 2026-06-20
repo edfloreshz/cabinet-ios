@@ -15,7 +15,7 @@ struct ContentView: View {
 
 	@State private var viewModel = ContentViewModel()
 	
-	@Query private var pairs: [Pair]
+	@Query(sort: \Pair.key) private var pairs: [Pair]
 	
 	@Binding var selectedDestination: Destination?
 	
@@ -42,6 +42,7 @@ struct ContentView: View {
 						case .list:
 							PairListLayoutView(
 								pairs: displayedPairs,
+								isEditing: viewModel.isEditing,
 								selectedItems: $viewModel.selectedItems,
 								editingPair: $viewModel.editingPair
 							)
@@ -116,6 +117,7 @@ struct ContentView: View {
 		case .list:
 			PairListLayoutView(
 				pairs: displayedPairs,
+				isEditing: viewModel.isEditing,
 				selectedItems: $viewModel.selectedItems,
 				editingPair: $viewModel.editingPair
 			)
@@ -253,15 +255,15 @@ struct ContentView: View {
 	// MARK: - Sheets
 
 	private var addSheet: some View {
-		let pair = Pair(key: "", value: "", drawers: viewModel.selectedDrawers(for: selectedDestination))
-		if viewModel.selectedFilter == .favorites {
-			pair.isFavorite = true
-		}
-		
 		return NavigationStack {
-			PairFormView(mode: .new, pair: pair, onSave: {
-				viewModel.selectedFilter = .all
-			})
+			PairFormView(
+				mode: .new,
+				initialDrawers: viewModel.selectedDrawers(for: selectedDestination),
+				initialIsFavorite: viewModel.selectedFilter == .favorites,
+				onSave: {
+					viewModel.selectedFilter = .all
+				}
+			)
 		}
 		.presentationDetents([.large])
 		.interactiveDismissDisabled()
@@ -271,15 +273,25 @@ struct ContentView: View {
 	// MARK: - Actions
 	
 	private func deleteSelected() {
-		for id in viewModel.selectedItems {
-			if let item = pairs.first(where: { $0.id == id }) {
-				modelContext.delete(item)
+		do {
+			for id in viewModel.selectedItems {
+				if let item = pairs.first(where: { $0.id == id }) {
+					modelContext.delete(item)
+				}
 			}
-		}
-		
-		withAnimation {
-			viewModel.selectedItems.removeAll()
-			viewModel.isEditing = false
+
+			try modelContext.save()
+
+			withAnimation {
+				viewModel.selectedItems.removeAll()
+				viewModel.isEditing = false
+			}
+		} catch {
+			ToastManager.shared.show(
+				"Couldn't delete the selected items.",
+				type: .error,
+				duration: 2.2
+			)
 		}
 	}
 }

@@ -8,7 +8,8 @@
 import SwiftUI
 
 @Observable
-class SidebarViewModel {
+@MainActor
+final class SidebarViewModel {
 	var isEditing = false
 	var showingAdd = false
 	var showingSettings = false
@@ -30,9 +31,13 @@ class SidebarViewModel {
 		case .favorites:
 			return pairs.filter { $0.isFavorite }.count
 		case .recents:
-			let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+			guard let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()) else {
+				return 0
+			}
+
 			return pairs.filter {
-				$0.lastUsedDate != nil && $0.lastUsedDate! >= sevenDaysAgo
+				guard let lastUsedDate = $0.lastUsedDate else { return false }
+				return lastUsedDate >= sevenDaysAgo
 			}.count
 		}
 	}
